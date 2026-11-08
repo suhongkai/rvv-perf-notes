@@ -1,0 +1,59 @@
+{
+ "task": "ctx-32k-4b-chunk16",
+ "date": "2026-11-01",
+ "host": "10.65.21.125",
+ "build": {
+  "bin": "chunk16-build/bin",
+  "libggml_cpu_sha256": "4436a9f45bcc298b"
+ },
+ "model": {
+  "file": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+  "bytes": 2543899168,
+  "sha256_16": "36a685821380dd64"
+ },
+ "protocol": "llama-server -m <4B> -c 36864 -t 8 -ub 128 -b 2048 --host 127.0.0.1 --port 8097 -np 1；单次冷启动（pkill 前后清场）；prompt=06_素材库/src/ppl-corpus-zh.txt 经 /tokenize 二分校准到 32768 token（与 16K 同法）；/completion n_predict=1 取 timings.prompt_per_second；同一次冷启动内追加 n_predict=32、cache_prompt=True 复用 32768 token KV 前缀取 timings.predicted_per_second 作 decode_tps（300 s 上限，超时记 null）；单板串行，125 板",
+ "prompt_n": 32768,
+ "prompt_ms": 7110996.9,
+ "tps": 4.608,
+ "wall_s": 7143.1,
+ "decode_tps": 0.385,
+ "compare": {
+  "vs_16k_same_build": {
+   "base_tps": 6.48,
+   "tps": 4.608,
+   "delta_pct": -28.89,
+   "ratio": 0.7111
+  },
+  "vs_build_717a8ad8_32k": {
+   "old_tps": 3.723,
+   "tps": 4.608,
+   "delta_pct": 23.77,
+   "ratio": 1.2377
+  },
+  "decode_vs_8k": {
+   "base_tps": 0.935,
+   "decode_tps": 0.385,
+   "delta_pct": -58.78
+  }
+ },
+ "verdict": "chunk16 交付构建（lib 4436a9f4）+ 4B 交付模型（2,543,899,168 B）在 125 板同板单点 32K：提示 32768 token / 7110996.9 ms = 4.608 t/s（wall 7143.1 s；1 次冷启动，pkill 前后清场；/tokenize 校准 TOKENS 32768 CHARS 48241）；与同构建 16K（6.48）比 -28.9%，与旧构建 717a8ad8 的 32K（3.723）比 +23.8%；32 token decode 0.385 t/s（生成 80.4 s，KV 复用 cache_n=32764、prompt_n=4，已超 60 s 门槛但实测完成故照记，未记 null）；32K 档至此补齐；旧构建 717a8ad8 的 C38 单点不再被引用。",
+ "failures": [],
+ "raw": {
+  "load_s": 41.1,
+  "calib": "TOKENS 32768 CHARS 48241",
+  "t_start": "2026-11-01T23:06:07",
+  "t_main_end": "2026-11-02T01:05:59",
+  "t_end": "2026-11-02T01:07:32",
+  "mem": "VmHWM:\t 5956736 kB VmRSS:\t 5956736 kB MemAvailable_kB 3721760 7.07 9.47 9.87 1/457 2556407",
+  "cache_n": 0,
+  "decode": {
+   "cache_n": 32764,
+   "prompt_n": 4,
+   "prompt_ms": 7890.1,
+   "predicted_n": 32,
+   "predicted_ms": 80431.6,
+   "wall_s": 91.9,
+   "err": null
+  }
+ }
+}

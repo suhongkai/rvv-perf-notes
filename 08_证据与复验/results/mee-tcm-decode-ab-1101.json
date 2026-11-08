@@ -1,0 +1,598 @@
+{
+ "task": "TCM 可用性对 MEE decode 的影响",
+ "date": "2026-11-01",
+ "host": "10.65.21.129",
+ "build": {
+  "mee_lib16": "f20686b3b486a2de",
+  "our_lib16": "4436a9f45bcc298b"
+ },
+ "model": {
+  "path": "/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf",
+  "bytes": 1288281984,
+  "sha16": "c3f64bcb608353fd"
+ },
+ "protocol": {
+  "decode": "llama-bench -p 0 -n 128 -t 8 -ub 128 -r 3 -fa 0 -o json；每状态 3 次独立调用，调用序 (heap,fake)(fake,heap)(heap,fake) 配对交替；decode 取 3 次调用值的中位",
+  "prefill_t8": "llama-bench -p 512 -n 0 -t 8 -ub 128 -r 3 -fa 0（与 ladder 19.16/19.38 同口径）",
+  "prefill_t4": "llama-bench -p 512 -n 0 -t 4 -ub 128 -r 2 -fa 0（与历史 17.30/17.06 同口径）",
+  "our_engine": "同 decode 协议，每状态 2 次，调用序 (heap,fake)(fake,heap)",
+  "single_process": "同板串行单进程，每 cell 前 pkill -x llama-bench + sleep 1，跑后再次 pkill",
+  "hard_timeout_s": {
+   "mee_heap_dec1": 420,
+   "mee_fake_dec1": 420,
+   "mee_fake_dec2": 420,
+   "mee_heap_dec2": 420,
+   "mee_heap_dec3": 420,
+   "mee_fake_dec3": 420,
+   "mee_heap_pp_t8": 300,
+   "mee_fake_pp_t8": 300,
+   "mee_fake_pp_t4": 300,
+   "mee_heap_pp_t4": 300,
+   "our_heap_dec1": 300,
+   "our_fake_dec1": 300,
+   "our_fake_dec2": 300,
+   "our_heap_dec2": 300,
+   "our_heap_pp": 300,
+   "our_fake_pp": 300
+  },
+  "note_ub": "-ub 128 为 llama-bench 默认值，显式写出以对齐 41.9% 的 ladder 协议"
+ },
+ "how_tcm_substituted": "板端 129 无 /dev/tcm_sync_mem（/proc/misc 只有 '122 tcm'，即 spacemit,k1-x-tcm 片上 SRAM，且该 SRAM 不支持 AMO，顶替成它会让 MEE 100% SIGSEGV cause=7，故不能用它）。本实验用一块合法的 512 KB tmpfs 共享文件顶替该路径：`truncate -s 512K /dev/shm/tcm_sync_mem` → `chmod 666` → `echo bianbu | sudo -S -p '' ln -sf /dev/shm/tcm_sync_mem /dev/tcm_sync_mem`。MEE 的 spine_mem_pool_shared_mem 只要求 open(O_RDWR|O_SYNC) + mmap(MAP_SHARED,512KB)，无 ioctl，故 tmpfs 文件完全满足；open 成功后两条告警消失，barrier 走共享内存而非 new[]。【重要更正】`tcm is available, blk_size:..., is_fake_tcm: N` 这一行**不会**出现：该行由 ime_env.cpp:273 在 spine_mem_pool_tcm_init() 成功后才打印，而后者要先 dlopen('libspine_tcm.so')，17/17 板都没有这个库。所以顶替后 is_fake_tcm 并未变成 1，也不会变——现场可观测的判据只是“两条 fallback 告警消失”，本实验用 LD_PRELOAD 0.3 s 探测 + 每个 cell 的完整 stderr 双重确认。",
+ "tcm_line_expectation": {
+  "heap": [
+   "CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2",
+   "CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap"
+  ],
+  "fake": [],
+  "is_fake_tcm": "两态都不会出现（需 libspine_tcm.so，板端缺）"
+ },
+ "arms": [
+  {
+   "engine": "mee",
+   "tcm": "heap",
+   "prefill": 19.503,
+   "prefill_raw": [
+    19.503
+   ],
+   "prefill_t4_historical": 19.055,
+   "prefill_t4_raw": [
+    19.055
+   ],
+   "decode": 2.832,
+   "decode_raw": [
+    2.83,
+    2.832,
+    2.845
+   ],
+   "raw": [
+    2.83,
+    2.832,
+    2.845
+   ],
+   "decode_all_reps_median": 2.832,
+   "decode_all_reps": [
+    2.83,
+    2.832,
+    2.845
+   ],
+   "decode_per_run_reps": [
+    [
+     2.83,
+     2.83,
+     2.83
+    ],
+    [
+     2.834,
+     2.832,
+     2.83
+    ],
+    [
+     2.844,
+     2.847,
+     2.844
+    ]
+   ],
+   "runs": 3,
+   "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+   "tcm_lines": [
+    "CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2",
+    "CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap"
+   ],
+   "temp_c": [
+    "41000",
+    "43000",
+    "44000"
+   ],
+   "bench_rc": [
+    0,
+    0,
+    0
+   ],
+   "state_ls": "ls: 无法访问 '/dev/tcm_sync_mem': 没有那个文件或目录\nls: 无法访问 '/dev/shm/tcm_sync_mem': 没有那个文件或目录"
+  },
+  {
+   "engine": "mee",
+   "tcm": "fake",
+   "prefill": 19.447,
+   "prefill_raw": [
+    19.447
+   ],
+   "prefill_t4_historical": 19.166,
+   "prefill_t4_raw": [
+    19.166
+   ],
+   "decode": 2.839,
+   "decode_raw": [
+    2.831,
+    2.839,
+    2.844
+   ],
+   "raw": [
+    2.831,
+    2.839,
+    2.844
+   ],
+   "decode_all_reps_median": 2.839,
+   "decode_all_reps": [
+    2.831,
+    2.839,
+    2.844
+   ],
+   "decode_per_run_reps": [
+    [
+     2.832,
+     2.829,
+     2.831
+    ],
+    [
+     2.842,
+     2.837,
+     2.838
+    ],
+    [
+     2.844,
+     2.844,
+     2.845
+    ]
+   ],
+   "runs": 3,
+   "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+   "tcm_lines": [],
+   "temp_c": [
+    "43000",
+    "43000",
+    "42000"
+   ],
+   "bench_rc": [
+    0,
+    0,
+    0
+   ],
+   "state_ls": "-rw-rw-rw- 1 bianbu bianbu 524288 11月 1日 13:46 /dev/shm/tcm_sync_mem\nlrwxrwxrwx 1 root   root       21 11月 1日 13:46 /dev/tcm_sync_mem -> /dev/shm/tcm_sync_mem"
+  },
+  {
+   "engine": "our",
+   "tcm": "heap",
+   "prefill": 19.572,
+   "prefill_raw": [
+    19.572
+   ],
+   "prefill_t4_historical": null,
+   "prefill_t4_raw": [],
+   "decode": 4.082,
+   "decode_raw": [
+    4.088,
+    4.076
+   ],
+   "raw": [
+    4.088,
+    4.076
+   ],
+   "decode_all_reps_median": 4.082,
+   "decode_all_reps": [
+    4.088,
+    4.076
+   ],
+   "decode_per_run_reps": [
+    [
+     4.058,
+     4.098,
+     4.107
+    ],
+    [
+     4.058,
+     4.088,
+     4.082
+    ]
+   ],
+   "runs": 2,
+   "banner": "",
+   "tcm_lines": [],
+   "temp_c": [
+    "43000",
+    "48000"
+   ],
+   "bench_rc": [
+    0,
+    0
+   ],
+   "state_ls": "ls: 无法访问 '/dev/tcm_sync_mem': 没有那个文件或目录\nls: 无法访问 '/dev/shm/tcm_sync_mem': 没有那个文件或目录"
+  },
+  {
+   "engine": "our",
+   "tcm": "fake",
+   "prefill": 19.261,
+   "prefill_raw": [
+    19.261
+   ],
+   "prefill_t4_historical": null,
+   "prefill_t4_raw": [],
+   "decode": 4.107,
+   "decode_raw": [
+    4.113,
+    4.1
+   ],
+   "raw": [
+    4.113,
+    4.1
+   ],
+   "decode_all_reps_median": 4.107,
+   "decode_all_reps": [
+    4.113,
+    4.1
+   ],
+   "decode_per_run_reps": [
+    [
+     4.111,
+     4.119,
+     4.108
+    ],
+    [
+     4.129,
+     4.042,
+     4.129
+    ]
+   ],
+   "runs": 2,
+   "banner": "",
+   "tcm_lines": [],
+   "temp_c": [
+    "46000",
+    "45000"
+   ],
+   "bench_rc": [
+    0,
+    0
+   ],
+   "state_ls": "-rw-rw-rw- 1 bianbu bianbu 524288 11月 1日 14:07 /dev/shm/tcm_sync_mem\nlrwxrwxrwx 1 root   root       21 11月 1日 14:07 /dev/tcm_sync_mem -> /dev/shm/tcm_sync_mem"
+  }
+ ],
+ "delta_pct": {
+  "mee_decode_fake_vs_heap": 0.25,
+  "our_decode_fake_vs_heap": 0.61
+ },
+ "noise": {
+  "mee_heap": {
+   "min": 2.83,
+   "max": 2.845,
+   "range_pct": 0.53
+  },
+  "mee_fake": {
+   "min": 2.831,
+   "max": 2.844,
+   "range_pct": 0.46
+  },
+  "our_heap": {
+   "min": 4.076,
+   "max": 4.088,
+   "range_pct": 0.29
+  },
+  "our_fake": {
+   "min": 4.1,
+   "max": 4.113,
+   "range_pct": 0.32
+  }
+ },
+ "paired_deltas": {
+  "mee": [
+   {
+    "cells": [
+     "mee_heap_dec1",
+     "mee_fake_dec1"
+    ],
+    "order": [
+     "heap",
+     "fake"
+    ],
+    "heap": 2.83,
+    "fake": 2.831,
+    "delta_pct": 0.03
+   },
+   {
+    "cells": [
+     "mee_fake_dec2",
+     "mee_heap_dec2"
+    ],
+    "order": [
+     "fake",
+     "heap"
+    ],
+    "heap": 2.832,
+    "fake": 2.839,
+    "delta_pct": 0.25
+   },
+   {
+    "cells": [
+     "mee_heap_dec3",
+     "mee_fake_dec3"
+    ],
+    "order": [
+     "heap",
+     "fake"
+    ],
+    "heap": 2.845,
+    "fake": 2.844,
+    "delta_pct": -0.01
+   }
+  ],
+  "our": [
+   {
+    "cells": [
+     "our_heap_dec1",
+     "our_fake_dec1"
+    ],
+    "order": [
+     "heap",
+     "fake"
+    ],
+    "heap": 4.088,
+    "fake": 4.113,
+    "delta_pct": 0.61
+   },
+   {
+    "cells": [
+     "our_fake_dec2",
+     "our_heap_dec2"
+    ],
+    "order": [
+     "fake",
+     "heap"
+    ],
+    "heap": 4.076,
+    "fake": 4.1,
+    "delta_pct": 0.6
+   }
+  ]
+ },
+ "alignment_historical": {
+  "protocol": "-p 512 -n 0 -t 4 -ub 128 -r 2 -fa 0（与 TCM 勘察报告 C68 的 17.30/17.06 同口径）",
+  "on_129": {
+   "mee_heap": 19.055,
+   "mee_fake": 19.166
+  },
+  "on_118_historical": {
+   "mee_heap": 17.3,
+   "mee_fake": 17.06
+  },
+  "note": "绝对值对不上：129 同口径比 118 的历史值高约 10%（19.06/19.17 vs 17.30/17.06），属板间/批次差异（129 时钟已校准且空闲、PSI=0、温度 41—48 °C），故这条只能做**方向性对齐**：两板的差值都在 ±1.5% 以内且方向并不一致（118：TCM 可用 −1.39%；129：t8 −0.29%、t4 +0.58%），即“TCM 可用不带来 prefill 收益”这一结论可复现，但 17.06/17.30 不能当作 129 的绝对基线，也不能把 −1.4% 读成“确定变慢”。"
+ },
+ "map_proof": {
+  "mee_heap": {
+   "engine": "mee",
+   "tcm": "heap",
+   "ssh_rc": 0,
+   "pidmap": "",
+   "mapcnt": "88",
+   "stderr": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0\nCPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2\nCPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap",
+   "done": true,
+   "tcm_map_found": false
+  },
+  "mee_fake": {
+   "engine": "mee",
+   "tcm": "fake",
+   "ssh_rc": 0,
+   "pidmap": "3f9b6b9000-3f9b739000 rw-s 00000000 00:1b 47                             /dev/shm/tcm_sync_mem",
+   "mapcnt": "90",
+   "stderr": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+   "done": true,
+   "tcm_map_found": true
+  },
+  "our_heap": {
+   "engine": "our",
+   "tcm": "heap",
+   "ssh_rc": 0,
+   "pidmap": "",
+   "mapcnt": "56",
+   "stderr": "",
+   "done": true,
+   "tcm_map_found": false
+  },
+  "our_fake": {
+   "engine": "our",
+   "tcm": "fake",
+   "ssh_rc": 0,
+   "pidmap": "",
+   "mapcnt": "57",
+   "stderr": "",
+   "done": true,
+   "tcm_map_found": false
+  }
+ },
+ "map_proof_note": "直接证据（不靠日志推断）：在 fake 态抓 MEE 进程 /proc/<pid>/maps，能看到 `rw-s 00000000 00:1b … /dev/shm/tcm_sync_mem` 的 512 KB 映射（0x80000），heap 态没有该映射；同一探测套在我方构建上两态**都没有**该映射——说明我方的二进制根本不 open 这个路径（libggml-cpu 里 tcm_sync_mem 字符串命中数 0，MEE 为 1），因此第二组是“安慰剂对照”，它测出的差值就是本装置/本时段的噪声底。",
+ "mechanism": "这块共享内存只服务 barrier 数组：sizeof(spine_barrier_t)=192 B × 16 = 3 KB，全仓只有 ime_env.cpp:295 一个调用点；矩阵计算缓冲区走 HPAGE，与此无关。所以两态的差别仅限“3 KB 的 barrier 在 tmpfs 共享映射里还是在堆里”，每次 tile 边界同步一次——这与实测差值落在噪声内一致。",
+ "conclusion": {
+  "mee_decode_delta_pct": 0.25,
+  "our_decode_delta_pct": 0.61,
+  "is_419_still_valid": true,
+  "wording_advice": "TCM 可用/不可用对 MEE decode 无可测影响（+0.25%，小于同一 A/B 装置上安慰剂对照的漂移幅度 +0.61%）：+41.9% 站得住，建议在材料边界句中写明“已补 decode 级 A/B：MEE 在 TCM 可用/回退两态下 tg128 为 2.839/2.832 t/s（+0.25%），而同一 A/B 套在我方构建上（不走 TCM 路径）也漂 +0.61%，故该差值在噪声内，TCM 回退不影响结论”。",
+  "verdict": "TCM 可用性对 MEE 的 decode 无可测影响：两臂 3 次调用中位 2.832 vs 2.839 t/s（+0.25%），小于各自臂内极差（0.53%/0.46%），也小于安慰剂对照的 +0.61%；控制变量（我方 chunk16，不走 TCM）同向漂 +0.61% 证明这是噪声而非 TCM 效应。故 41.9%（3.987 vs 2.809，C65/113 板）不需要降级，可把本 A/B 作为防守材料。"
+ },
+ "cleanup": "已恢复原状：`sudo rm -f /dev/tcm_sync_mem` 删除符号链接、`rm -f /dev/shm/tcm_sync_mem` 删除 512 KB 顶替文件，复查两路径均“没有那个文件或目录”；`pgrep -x llama-bench` 无残留（pgrep_rc=1）；/dev/tcm（10:122）从未改动权限或内容；未在板上留任何临时文件（/tmp/_ab.out、/tmp/_ab.err、/tmp/_pr.out、/tmp/_pr.err 每个 cell 结束即删）。板端终态原始输出：ls: 无法访问 '/dev/tcm_sync_mem': 没有那个文件或目录 | ls: 无法访问 '/dev/shm/tcm_sync_mem': 没有那个文件或目录 | pgrep_rc=1 | ",
+ "failures": [],
+ "stage_cells": {
+  "mee_heap_dec1": {
+   "engine": "mee",
+   "tcm": "heap",
+   "kind": "decode",
+   "bench_rc": 0,
+   "secs": 148,
+   "val": [
+    2.830033
+   ]
+  },
+  "mee_fake_dec1": {
+   "engine": "mee",
+   "tcm": "fake",
+   "kind": "decode",
+   "bench_rc": 0,
+   "secs": 147,
+   "val": [
+    2.830774
+   ]
+  },
+  "mee_fake_dec2": {
+   "engine": "mee",
+   "tcm": "fake",
+   "kind": "decode",
+   "bench_rc": 0,
+   "secs": 147,
+   "val": [
+    2.83902
+   ]
+  },
+  "mee_heap_dec2": {
+   "engine": "mee",
+   "tcm": "heap",
+   "kind": "decode",
+   "bench_rc": 0,
+   "secs": 148,
+   "val": [
+    2.831937
+   ]
+  },
+  "mee_heap_dec3": {
+   "engine": "mee",
+   "tcm": "heap",
+   "kind": "decode",
+   "bench_rc": 0,
+   "secs": 147,
+   "val": [
+    2.844659
+   ]
+  },
+  "mee_fake_dec3": {
+   "engine": "mee",
+   "tcm": "fake",
+   "kind": "decode",
+   "bench_rc": 0,
+   "secs": 147,
+   "val": [
+    2.844471
+   ]
+  },
+  "mee_heap_pp_t8": {
+   "engine": "mee",
+   "tcm": "heap",
+   "kind": "prefill",
+   "bench_rc": 0,
+   "secs": 117,
+   "val": [
+    19.503223
+   ]
+  },
+  "mee_fake_pp_t8": {
+   "engine": "mee",
+   "tcm": "fake",
+   "kind": "prefill",
+   "bench_rc": 0,
+   "secs": 117,
+   "val": [
+    19.447152
+   ]
+  },
+  "mee_fake_pp_t4": {
+   "engine": "mee",
+   "tcm": "fake",
+   "kind": "prefill",
+   "bench_rc": 0,
+   "secs": 92,
+   "val": [
+    19.166141
+   ]
+  },
+  "mee_heap_pp_t4": {
+   "engine": "mee",
+   "tcm": "heap",
+   "kind": "prefill",
+   "bench_rc": 0,
+   "secs": 92,
+   "val": [
+    19.055156
+   ]
+  },
+  "our_heap_dec1": {
+   "engine": "our",
+   "tcm": "heap",
+   "kind": "decode",
+   "bench_rc": 0,
+   "secs": 108,
+   "val": [
+    4.087685
+   ]
+  },
+  "our_fake_dec1": {
+   "engine": "our",
+   "tcm": "fake",
+   "kind": "decode",
+   "bench_rc": 0,
+   "secs": 107,
+   "val": [
+    4.112752
+   ]
+  },
+  "our_fake_dec2": {
+   "engine": "our",
+   "tcm": "fake",
+   "kind": "decode",
+   "bench_rc": 0,
+   "secs": 108,
+   "val": [
+    4.100358
+   ]
+  },
+  "our_heap_dec2": {
+   "engine": "our",
+   "tcm": "heap",
+   "kind": "decode",
+   "bench_rc": 0,
+   "secs": 109,
+   "val": [
+    4.075815
+   ]
+  },
+  "our_heap_pp": {
+   "engine": "our",
+   "tcm": "heap",
+   "kind": "prefill",
+   "bench_rc": 0,
+   "secs": 119,
+   "val": [
+    19.571785
+   ]
+  },
+  "our_fake_pp": {
+   "engine": "our",
+   "tcm": "fake",
+   "kind": "prefill",
+   "bench_rc": 0,
+   "secs": 121,
+   "val": [
+    19.260738
+   ]
+  }
+ },
+ "host_check": {
+  "idle_procs": [],
+  "ts": "2026-11-01T13:43:57"
+ }
+}

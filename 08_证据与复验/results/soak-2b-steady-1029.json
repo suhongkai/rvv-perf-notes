@@ -1,0 +1,17 @@
+{
+ "task": "soak-steady-rss",
+ "source": "08_实验数据/soak-2b-1029-1329.json",
+ "note": "原始采样从进程启动(16MB)开始，含模型加载段；本文件剔除 <100MB 的加载段，只保留稳态。",
+ "host": "10.65.21.114",
+ "model": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+ "prefill_median": 21.182,
+ "decode_median": 3.901,
+ "steady_rss": {
+  "n": 137,
+  "min_mb": 1921.5,
+  "max_mb": 2008.1,
+  "last_mb": 1990.2,
+  "range_mb": 86.6,
+  "first_mb": 1921.5
+ }
+}

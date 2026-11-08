@@ -1,0 +1,892 @@
+{
+ "task": "4B selfmade 上官方 MEE vs chunk16（补 C21 的 4B 版）",
+ "date": "2026-11-01",
+ "host": "10.65.21.129",
+ "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+ "model_sha16": "36a685821380dd64",
+ "model_bytes": 2543899168,
+ "protocol": "llama-bench -p 512 -n 128 -t 8 -ub 128 -r 3 -fa 0 -o json；同板串行单进程，每格前 pkill -x llama-bench；两轮 ABBA（第二轮 MEE/chunk16 逆序）；各臂 LD_LIBRARY_PATH 指向自身 bin；单格硬超时 1500 s（任务书上限定 25 min）；模型 Qwen3.5-4B-Q4_0-selfmade.gguf（sha16 36a685821380dd64，2.54 GB），从 130 / 本地同 sha 副本推送到 129（129 原本只有 1.15 GB 残片）",
+ "complete": true,
+ "meta": {
+  "mee": {
+   "label": "官方工具链·旧 in-CPU MEE（厂商整包 legacy/bin）",
+   "dir": "/home/bianbu/labdeploy/legacy/bin",
+   "reps": 3,
+   "lib16": "f20686b3b486a2de",
+   "bin16": "97c8f8118569a776",
+   "timeout_s": 1500
+  },
+  "chunk16": {
+   "label": "我方 chunk16 交付（chunk16-fleet/bin）",
+   "dir": "/home/bianbu/chunk16-fleet/bin",
+   "reps": 3,
+   "lib16": "4436a9f45bcc298b",
+   "bin16": "92b787e9bf04009c",
+   "timeout_s": 1500
+  },
+  "host": "10.65.21.129",
+  "cores": "8",
+  "kernel": "6.6.63-cloud",
+  "temp_c_start": "39",
+  "model_sha256": "36a685821380dd641907fe35d7bbf70dff624d2d86f61ddb9104108d0931c09c",
+  "temp_c_end": "44"
+ },
+ "summary": {
+  "mee": {
+   "label": "官方工具链·旧 in-CPU MEE（厂商整包 legacy/bin）",
+   "dir": "/home/bianbu/labdeploy/legacy/bin",
+   "reps": 3,
+   "lib16": "f20686b3b486a2de",
+   "bin16": "97c8f8118569a776",
+   "prefill_med": 6.359,
+   "decode_med": 1.231,
+   "prefill_raw": [
+    6.41,
+    6.307
+   ],
+   "decode_raw": [
+    1.218,
+    1.243
+   ],
+   "prefill_med_all_reps": 6.329,
+   "decode_med_all_reps": 1.237,
+   "first_rep_only": {
+    "prefill": 6.479,
+    "decode": 1.221
+   },
+   "stderr_tail": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0\nCPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2\nCPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap",
+   "wall_s": [
+    679.4,
+    656.6
+   ],
+   "samples_per_round": [
+    {
+     "round": 1,
+     "prefill_ts": [
+      6.479,
+      6.454,
+      6.298
+     ],
+     "decode_ts": [
+      1.221,
+      1.231,
+      1.202
+     ]
+    },
+    {
+     "round": 2,
+     "prefill_ts": [
+      6.264,
+      6.321,
+      6.336
+     ],
+     "decode_ts": [
+      1.244,
+      1.242,
+      1.243
+     ]
+    }
+   ]
+  },
+  "chunk16": {
+   "label": "我方 chunk16 交付（chunk16-fleet/bin）",
+   "dir": "/home/bianbu/chunk16-fleet/bin",
+   "reps": 3,
+   "lib16": "4436a9f45bcc298b",
+   "bin16": "92b787e9bf04009c",
+   "prefill_med": 8.936,
+   "decode_med": 1.65,
+   "prefill_raw": [
+    8.861,
+    9.011
+   ],
+   "decode_raw": [
+    1.498,
+    1.801
+   ],
+   "prefill_med_all_reps": 8.551,
+   "decode_med_all_reps": 1.73,
+   "first_rep_only": {
+    "prefill": 9.831,
+    "decode": 1.705
+   },
+   "stderr_tail": "",
+   "wall_s": [
+    533.9,
+    471.3
+   ],
+   "samples_per_round": [
+    {
+     "round": 1,
+     "prefill_ts": [
+      9.831,
+      8.388,
+      8.365
+     ],
+     "decode_ts": [
+      1.705,
+      1.737,
+      1.052
+     ]
+    },
+    {
+     "round": 2,
+     "prefill_ts": [
+      9.93,
+      8.569,
+      8.533
+     ],
+     "decode_ts": [
+      1.861,
+      1.82,
+      1.722
+     ]
+    }
+   ]
+  },
+  "delta": {
+   "prefill_pct": 40.53,
+   "decode_pct": 34.04,
+   "prefill_ratio": 1.405,
+   "decode_ratio": 1.34
+  }
+ },
+ "mee": {
+  "label": "官方工具链·旧 in-CPU MEE（厂商整包 legacy/bin）",
+  "dir": "/home/bianbu/labdeploy/legacy/bin",
+  "reps": 3,
+  "lib16": "f20686b3b486a2de",
+  "bin16": "97c8f8118569a776",
+  "prefill_med": 6.359,
+  "decode_med": 1.231,
+  "prefill_raw": [
+   6.41,
+   6.307
+  ],
+  "decode_raw": [
+   1.218,
+   1.243
+  ],
+  "prefill_med_all_reps": 6.329,
+  "decode_med_all_reps": 1.237,
+  "first_rep_only": {
+   "prefill": 6.479,
+   "decode": 1.221
+  },
+  "stderr_tail": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0\nCPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2\nCPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap",
+  "wall_s": [
+   679.4,
+   656.6
+  ],
+  "samples_per_round": [
+   {
+    "round": 1,
+    "prefill_ts": [
+     6.479,
+     6.454,
+     6.298
+    ],
+    "decode_ts": [
+     1.221,
+     1.231,
+     1.202
+    ]
+   },
+   {
+    "round": 2,
+    "prefill_ts": [
+     6.264,
+     6.321,
+     6.336
+    ],
+    "decode_ts": [
+     1.244,
+     1.242,
+     1.243
+    ]
+   }
+  ]
+ },
+ "chunk16": {
+  "label": "我方 chunk16 交付（chunk16-fleet/bin）",
+  "dir": "/home/bianbu/chunk16-fleet/bin",
+  "reps": 3,
+  "lib16": "4436a9f45bcc298b",
+  "bin16": "92b787e9bf04009c",
+  "prefill_med": 8.936,
+  "decode_med": 1.65,
+  "prefill_raw": [
+   8.861,
+   9.011
+  ],
+  "decode_raw": [
+   1.498,
+   1.801
+  ],
+  "prefill_med_all_reps": 8.551,
+  "decode_med_all_reps": 1.73,
+  "first_rep_only": {
+   "prefill": 9.831,
+   "decode": 1.705
+  },
+  "stderr_tail": "",
+  "wall_s": [
+   533.9,
+   471.3
+  ],
+  "samples_per_round": [
+   {
+    "round": 1,
+    "prefill_ts": [
+     9.831,
+     8.388,
+     8.365
+    ],
+    "decode_ts": [
+     1.705,
+     1.737,
+     1.052
+    ]
+   },
+   {
+    "round": 2,
+    "prefill_ts": [
+     9.93,
+     8.569,
+     8.533
+    ],
+    "decode_ts": [
+     1.861,
+     1.82,
+     1.722
+    ]
+   }
+  ]
+ },
+ "delta_pct": {
+  "prefill": 40.53,
+  "decode": 34.04
+ },
+ "cells": [
+  {
+   "arm": "mee",
+   "round": 1,
+   "ok": true,
+   "attempt": 1,
+   "cap_s": 1500,
+   "wall_s": 679.4,
+   "ts": "2026-11-01T01:17:12+0800",
+   "lib16": "f20686b3b486a2de",
+   "prefill": 6.410076,
+   "decode": 1.218038,
+   "prefill_samples": [
+    6.47887,
+    6.4538,
+    6.29756
+   ],
+   "decode_samples": [
+    1.22093,
+    1.23122,
+    1.20196
+   ],
+   "prefill_sd": 0.098247,
+   "decode_sd": 0.014839,
+   "stderr_tail": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0\nCPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2\nCPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap",
+   "raw": [
+    {
+     "build_commit": "unknown",
+     "build_number": 0,
+     "cpu_info": "Spacemit(R) X60",
+     "gpu_info": "",
+     "backends": "CPU",
+     "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+     "model_type": "qwen35 4B Q4_0",
+     "model_size": 2532931584,
+     "model_n_params": 4205751296,
+     "n_batch": 2048,
+     "n_ubatch": 128,
+     "n_threads": 8,
+     "cpu_mask": "0x0",
+     "cpu_strict": false,
+     "poll": 50,
+     "type_k": "f16",
+     "type_v": "f16",
+     "n_gpu_layers": -1,
+     "n_cpu_moe": 0,
+     "split_mode": "layer",
+     "main_gpu": 0,
+     "no_kv_offload": false,
+     "flash_attn": 0,
+     "devices": "auto",
+     "tensor_split": "0.00",
+     "tensor_buft_overrides": "none",
+     "load_mode": "auto",
+     "lazy_mode": "auto",
+     "embeddings": false,
+     "no_op_offload": 0,
+     "no_host": false,
+     "repack": true,
+     "fit_target": 0,
+     "fit_min_ctx": 0,
+     "n_prompt": 512,
+     "n_gen": 0,
+     "n_depth": 0,
+     "test_time": "2025-09-26T13:11:58Z",
+     "avg_ns": 79886864260,
+     "stddev_ns": 3278344184,
+     "avg_ts": 6.410076,
+     "stddev_ts": 0.098247,
+     "samples_ns": [
+      79026136037,
+      79333089788,
+      81301366955
+     ],
+     "samples_ts": [
+      6.47887,
+      6.4538,
+      6.29756
+     ]
+    },
+    {
+     "build_commit": "unknown",
+     "build_number": 0,
+     "cpu_info": "Spacemit(R) X60",
+     "gpu_info": "",
+     "backends": "CPU",
+     "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+     "model_type": "qwen35 4B Q4_0",
+     "model_size": 2532931584,
+     "model_n_params": 4205751296,
+     "n_batch": 2048,
+     "n_ubatch": 128,
+     "n_threads": 8,
+     "cpu_mask": "0x0",
+     "cpu_strict": false,
+     "poll": 50,
+     "type_k": "f16",
+     "type_v": "f16",
+     "n_gpu_layers": -1,
+     "n_cpu_moe": 0,
+     "split_mode": "layer",
+     "main_gpu": 0,
+     "no_kv_offload": false,
+     "flash_attn": 0,
+     "devices": "auto",
+     "tensor_split": "0.00",
+     "tensor_buft_overrides": "none",
+     "load_mode": "auto",
+     "lazy_mode": "auto",
+     "embeddings": false,
+     "no_op_offload": 0,
+     "no_host": false,
+     "repack": true,
+     "fit_target": 0,
+     "fit_min_ctx": 0,
+     "n_prompt": 0,
+     "n_gen": 128,
+     "n_depth": 0,
+     "test_time": "2026-10-31T17:11:45Z",
+     "avg_ns": 105097510577,
+     "stddev_ns": 1284877424,
+     "avg_ts": 1.218038,
+     "stddev_ts": 0.014839,
+     "samples_ns": [
+      104837947175,
+      103962231049,
+      106492353509
+     ],
+     "samples_ts": [
+      1.22093,
+      1.23122,
+      1.20196
+     ]
+    }
+   ],
+   "telemetry": [
+    {
+     "t": 542,
+     "ps": "09:01 474 llama-bench",
+     "temp_c": "47"
+    },
+    {
+     "t": 605,
+     "ps": "10:05 476 llama-bench",
+     "temp_c": "50"
+    },
+    {
+     "t": 669,
+     "ps": "11:08 478 llama-bench",
+     "temp_c": "49"
+    }
+   ]
+  },
+  {
+   "arm": "chunk16",
+   "round": 1,
+   "ok": true,
+   "attempt": 1,
+   "cap_s": 1500,
+   "wall_s": 533.9,
+   "ts": "2026-11-01T01:26:07+0800",
+   "lib16": "4436a9f45bcc298b",
+   "prefill": 8.861325,
+   "decode": 1.49811,
+   "prefill_samples": [
+    9.83143,
+    8.38777,
+    8.36477
+   ],
+   "decode_samples": [
+    1.70456,
+    1.73728,
+    1.05249
+   ],
+   "prefill_sd": 0.840216,
+   "decode_sd": 0.386264,
+   "stderr_tail": "",
+   "raw": [
+    {
+     "build_commit": "unknown",
+     "build_number": 0,
+     "cpu_info": "Spacemit(R) X60",
+     "gpu_info": "",
+     "backends": "CPU",
+     "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+     "model_type": "qwen35 4B Q4_0",
+     "model_size": 2532931584,
+     "model_n_params": 4205751296,
+     "n_batch": 2048,
+     "n_ubatch": 128,
+     "n_threads": 8,
+     "cpu_mask": "0x0",
+     "cpu_strict": false,
+     "poll": 50,
+     "type_k": "f16",
+     "type_v": "f16",
+     "n_gpu_layers": -1,
+     "n_cpu_moe": 0,
+     "split_mode": "layer",
+     "main_gpu": 0,
+     "no_kv_offload": false,
+     "flash_attn": 0,
+     "devices": "auto",
+     "tensor_split": "0.00",
+     "tensor_buft_overrides": "none",
+     "load_mode": "auto",
+     "lazy_mode": "auto",
+     "embeddings": false,
+     "no_op_offload": 0,
+     "no_host": false,
+     "repack": true,
+     "fit_target": 0,
+     "fit_min_ctx": 0,
+     "n_prompt": 512,
+     "n_gen": 0,
+     "n_depth": 0,
+     "test_time": "2026-10-31T17:17:35Z",
+     "avg_ns": 58109394653,
+     "stddev_ns": 4250670382,
+     "avg_ts": 8.861325,
+     "stddev_ts": 0.840216,
+     "samples_ns": [
+      52077862858,
+      61041262446,
+      61209058655
+     ],
+     "samples_ts": [
+      9.83143,
+      8.38777,
+      8.36477
+     ]
+    },
+    {
+     "build_commit": "unknown",
+     "build_number": 0,
+     "cpu_info": "Spacemit(R) X60",
+     "gpu_info": "",
+     "backends": "CPU",
+     "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+     "model_type": "qwen35 4B Q4_0",
+     "model_size": 2532931584,
+     "model_n_params": 4205751296,
+     "n_batch": 2048,
+     "n_ubatch": 128,
+     "n_threads": 8,
+     "cpu_mask": "0x0",
+     "cpu_strict": false,
+     "poll": 50,
+     "type_k": "f16",
+     "type_v": "f16",
+     "n_gpu_layers": -1,
+     "n_cpu_moe": 0,
+     "split_mode": "layer",
+     "main_gpu": 0,
+     "no_kv_offload": false,
+     "flash_attn": 0,
+     "devices": "auto",
+     "tensor_split": "0.00",
+     "tensor_buft_overrides": "none",
+     "load_mode": "auto",
+     "lazy_mode": "auto",
+     "embeddings": false,
+     "no_op_offload": 0,
+     "no_host": false,
+     "repack": true,
+     "fit_target": 0,
+     "fit_min_ctx": 0,
+     "n_prompt": 0,
+     "n_gen": 128,
+     "n_depth": 0,
+     "test_time": "2026-10-31T17:21:22Z",
+     "avg_ns": 90129157542,
+     "stddev_ns": 2492252430,
+     "avg_ts": 1.49811,
+     "stddev_ts": 0.386264,
+     "samples_ns": [
+      75092583160,
+      73678565785,
+      121616323683
+     ],
+     "samples_ts": [
+      1.70456,
+      1.73728,
+      1.05249
+     ]
+    }
+   ],
+   "telemetry": [
+    {
+     "t": 367,
+     "ps": "06:06 615 llama-bench",
+     "temp_c": "50"
+    },
+    {
+     "t": 429,
+     "ps": "07:09 624 llama-bench",
+     "temp_c": "50"
+    },
+    {
+     "t": 482,
+     "ps": "08:01 615 llama-bench",
+     "temp_c": "51"
+    }
+   ]
+  },
+  {
+   "arm": "chunk16",
+   "round": 2,
+   "ok": true,
+   "attempt": 1,
+   "cap_s": 1500,
+   "wall_s": 471.3,
+   "ts": "2026-11-01T01:33:59+0800",
+   "lib16": "4436a9f45bcc298b",
+   "prefill": 9.010659,
+   "decode": 1.800935,
+   "prefill_samples": [
+    9.92994,
+    8.56945,
+    8.53258
+   ],
+   "decode_samples": [
+    1.86073,
+    1.82032,
+    1.72176
+   ],
+   "prefill_sd": 0.796336,
+   "decode_sd": 0.071481,
+   "stderr_tail": "",
+   "raw": [
+    {
+     "build_commit": "unknown",
+     "build_number": 0,
+     "cpu_info": "Spacemit(R) X60",
+     "gpu_info": "",
+     "backends": "CPU",
+     "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+     "model_type": "qwen35 4B Q4_0",
+     "model_size": 2532931584,
+     "model_n_params": 4205751296,
+     "n_batch": 2048,
+     "n_ubatch": 128,
+     "n_threads": 8,
+     "cpu_mask": "0x0",
+     "cpu_strict": false,
+     "poll": 50,
+     "type_k": "f16",
+     "type_v": "f16",
+     "n_gpu_layers": -1,
+     "n_cpu_moe": 0,
+     "split_mode": "layer",
+     "main_gpu": 0,
+     "no_kv_offload": false,
+     "flash_attn": 0,
+     "devices": "auto",
+     "tensor_split": "0.00",
+     "tensor_buft_overrides": "none",
+     "load_mode": "auto",
+     "lazy_mode": "auto",
+     "embeddings": false,
+     "no_op_offload": 0,
+     "no_host": false,
+     "repack": true,
+     "fit_target": 0,
+     "fit_min_ctx": 0,
+     "n_prompt": 512,
+     "n_gen": 0,
+     "n_depth": 0,
+     "test_time": "2026-10-31T17:26:29Z",
+     "avg_ns": 57104538402,
+     "stddev_ns": 2148525064,
+     "avg_ts": 9.010659,
+     "stddev_ts": 0.796336,
+     "samples_ns": [
+      51561225775,
+      59747090862,
+      60005298570
+     ],
+     "samples_ts": [
+      9.92994,
+      8.56945,
+      8.53258
+     ]
+    },
+    {
+     "build_commit": "unknown",
+     "build_number": 0,
+     "cpu_info": "Spacemit(R) X60",
+     "gpu_info": "",
+     "backends": "CPU",
+     "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+     "model_type": "qwen35 4B Q4_0",
+     "model_size": 2532931584,
+     "model_n_params": 4205751296,
+     "n_batch": 2048,
+     "n_ubatch": 128,
+     "n_threads": 8,
+     "cpu_mask": "0x0",
+     "cpu_strict": false,
+     "poll": 50,
+     "type_k": "f16",
+     "type_v": "f16",
+     "n_gpu_layers": -1,
+     "n_cpu_moe": 0,
+     "split_mode": "layer",
+     "main_gpu": 0,
+     "no_kv_offload": false,
+     "flash_attn": 0,
+     "devices": "auto",
+     "tensor_split": "0.00",
+     "tensor_buft_overrides": "none",
+     "load_mode": "auto",
+     "lazy_mode": "auto",
+     "embeddings": false,
+     "no_op_offload": 0,
+     "no_host": false,
+     "repack": true,
+     "fit_target": 0,
+     "fit_min_ctx": 0,
+     "n_prompt": 0,
+     "n_gen": 128,
+     "n_depth": 0,
+     "test_time": "2026-10-31T17:30:12Z",
+     "avg_ns": 71150058422,
+     "stddev_ns": 4177287211,
+     "avg_ts": 1.800935,
+     "stddev_ts": 0.071481,
+     "samples_ns": [
+      68790320241,
+      70317445700,
+      74342409327
+     ],
+     "samples_ts": [
+      1.86073,
+      1.82032,
+      1.72176
+     ]
+    }
+   ],
+   "telemetry": [
+    {
+     "t": 304,
+     "ps": "05:03 619 llama-bench",
+     "temp_c": "51"
+    },
+    {
+     "t": 367,
+     "ps": "06:06 636 llama-bench",
+     "temp_c": "50"
+    },
+    {
+     "t": 430,
+     "ps": "07:09 646 llama-bench",
+     "temp_c": "52"
+    }
+   ]
+  },
+  {
+   "arm": "mee",
+   "round": 2,
+   "ok": true,
+   "attempt": 1,
+   "cap_s": 1500,
+   "wall_s": 656.6,
+   "ts": "2026-11-01T01:44:57+0800",
+   "lib16": "f20686b3b486a2de",
+   "prefill": 6.307265,
+   "decode": 1.243301,
+   "prefill_samples": [
+    6.2643,
+    6.32132,
+    6.33618
+   ],
+   "decode_samples": [
+    1.24428,
+    1.24219,
+    1.24343
+   ],
+   "prefill_sd": 0.037945,
+   "decode_sd": 0.001052,
+   "stderr_tail": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0\nCPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2\nCPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap",
+   "raw": [
+    {
+     "build_commit": "unknown",
+     "build_number": 0,
+     "cpu_info": "Spacemit(R) X60",
+     "gpu_info": "",
+     "backends": "CPU",
+     "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+     "model_type": "qwen35 4B Q4_0",
+     "model_size": 2532931584,
+     "model_n_params": 4205751296,
+     "n_batch": 2048,
+     "n_ubatch": 128,
+     "n_threads": 8,
+     "cpu_mask": "0x0",
+     "cpu_strict": false,
+     "poll": 50,
+     "type_k": "f16",
+     "type_v": "f16",
+     "n_gpu_layers": -1,
+     "n_cpu_moe": 0,
+     "split_mode": "layer",
+     "main_gpu": 0,
+     "no_kv_offload": false,
+     "flash_attn": 0,
+     "devices": "auto",
+     "tensor_split": "0.00",
+     "tensor_buft_overrides": "none",
+     "load_mode": "auto",
+     "lazy_mode": "auto",
+     "embeddings": false,
+     "no_op_offload": 0,
+     "no_host": false,
+     "repack": true,
+     "fit_target": 0,
+     "fit_min_ctx": 0,
+     "n_prompt": 512,
+     "n_gen": 0,
+     "n_depth": 0,
+     "test_time": "2026-10-31T17:34:13Z",
+     "avg_ns": 81178201664,
+     "stddev_ns": 489787926,
+     "avg_ts": 6.307265,
+     "stddev_ts": 0.037945,
+     "samples_ns": [
+      81733026998,
+      80995756622,
+      80805821372
+     ],
+     "samples_ts": [
+      6.2643,
+      6.32132,
+      6.33618
+     ]
+    },
+    {
+     "build_commit": "unknown",
+     "build_number": 0,
+     "cpu_info": "Spacemit(R) X60",
+     "gpu_info": "",
+     "backends": "CPU",
+     "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+     "model_type": "qwen35 4B Q4_0",
+     "model_size": 2532931584,
+     "model_n_params": 4205751296,
+     "n_batch": 2048,
+     "n_ubatch": 128,
+     "n_threads": 8,
+     "cpu_mask": "0x0",
+     "cpu_strict": false,
+     "poll": 50,
+     "type_k": "f16",
+     "type_v": "f16",
+     "n_gpu_layers": -1,
+     "n_cpu_moe": 0,
+     "split_mode": "layer",
+     "main_gpu": 0,
+     "no_kv_offload": false,
+     "flash_attn": 0,
+     "devices": "auto",
+     "tensor_split": "0.00",
+     "tensor_buft_overrides": "none",
+     "load_mode": "auto",
+     "lazy_mode": "auto",
+     "embeddings": false,
+     "no_op_offload": 0,
+     "no_host": false,
+     "repack": true,
+     "fit_target": 0,
+     "fit_min_ctx": 0,
+     "n_prompt": 0,
+     "n_gen": 128,
+     "n_depth": 0,
+     "test_time": "2026-10-31T17:39:38Z",
+     "avg_ns": 102951801827,
+     "stddev_ns": 87120893,
+     "avg_ts": 1.243301,
+     "stddev_ts": 0.001052,
+     "samples_ns": [
+      102870429216,
+      103043712382,
+      102941263883
+     ],
+     "samples_ts": [
+      1.24428,
+      1.24219,
+      1.24343
+     ]
+    }
+   ],
+   "telemetry": [
+    {
+     "t": 541,
+     "ps": "09:00 487 llama-bench",
+     "temp_c": "49"
+    },
+    {
+     "t": 551,
+     "ps": "09:11 487 llama-bench",
+     "temp_c": "50"
+    },
+    {
+     "t": 604,
+     "ps": "10:03 488 llama-bench",
+     "temp_c": "49"
+    }
+   ]
+  }
+ ],
+ "failures": [],
+ "env_notes": [
+  "129 上没有 build/spacemit-llama/build-vm-legacy（旧 in-CPU MEE 的首选构建），也没有 chunk16-build；MEE 臂改用任务书给的备选：厂商整包 ~/labdeploy/legacy/bin（libggml-cpu sha16 f20686b3b486a2de，与 C21/C66 的 MEE 同源同 lib），启动打印 use_ime1: 1。",
+  "129 上原本没有 Qwen3.5-4B-Q4_0-selfmade.gguf，只有 9-23 留下的 1.15 GB .part 残片；模型由本地 models/ 经 SFTP 推送（sha256 36a68582…，与 130 上同名文件同 sha），校验通过后才改名。",
+  "素材服务器 10.63.3.2:8899 开工时不可达，chunk16 构建改由本地 06_素材库/bin/llama-bin-chunk16-4436a9f4.tar.gz 分发，lib16 校验为 4436a9f45bcc298b。",
+  "MEE 会打印 /dev/tcm_sync_mem 告警：板级已知现象（17/17 板一致，实测不影响性能），原文照录在 stderr_tail，未修。"
+ ],
+ "anomaly_notes": [
+  "chunk16 两轮 prefill 都呈\"首 rep ≈9.83/9.93、第 2—3 rep ≈8.4—8.6\"的稳定模式（两轮几乎复现），故 round 中位 8.936；**首 rep 与 C41 的 9.969 一致**（C41 是 128 单板）。MEE 臂无此模式（6.479/6.454/6.298），故该现象只出现在 chunk16 构建上，已如实记录、未做任何调参。",
+  "chunk16 第 1 轮 decode 第 3 个 rep 为 1.052 t/s（其余 1.70—1.86）。该轮与本地聚合脚本对 2.5 GB 模型做 sha256 的时间重叠（每 2 分钟一次、占满 1 核并读 SD），已发现并修掉；第 2 轮 decode 采样干净（1.861/1.820/1.722）。两轮中位取 1.650，若只看第 2 轮为 1.820。"
+ ],
+ "note": "结论：在我们交付的 selfmade 4B 上，官方 MEE 掉了队——chunk16 预填 8.936 vs MEE 6.359 t/s（**+40.53%**），decode 1.65 vs 1.231（**+34.04%**）。与 2B 同口径方向一致（2B：MEE 13.81 vs 我们 22.08，+60%，C21）。对照 C66（官方 Q4_1 上 MEE 7.639 / 我们 7.717，几乎同档）：同一块 MEE 换个配方掉到 6.36，说明\"配方换掉后 MEE 掉队\"在 4B 上同样成立。"
+}

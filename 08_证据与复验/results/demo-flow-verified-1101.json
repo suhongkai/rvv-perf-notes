@@ -1,0 +1,55 @@
+{
+ "task": "演示 demo 全流程实测（含思考模式关闭）",
+ "date": "2026-11-01",
+ "host": "10.65.21.111",
+ "build": {
+  "bin": "~/chunk16-build/bin",
+  "lib16": "4436a9f45bcc298b"
+ },
+ "model": {
+  "file": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+  "bytes": 1202487136
+ },
+ "protocol": "llama-server -c 8192 -t 7 --threads-batch 8 -ub 128 -b 2048 -np 4 --slots；所有请求 chat_template_kwargs.enable_thinking=false",
+ "cells": [
+  {
+   "tag": "1-冷启动",
+   "wall_s": 29.88,
+   "prompt_n": 185,
+   "prompt_ms": 7490.416,
+   "predicted_n": 95,
+   "pps": 4.22,
+   "finish": "stop",
+   "content": "① 故障判断：出口压力持续下降且振动上升，结合历史工单，疑似机械密封泄漏导致压力损失，轴承温度 87.3℃ 略超阈值 85℃，存在过热风险。\n② 处置建议：立即停机检查，确认泄漏点；更换机械密封；检查轴承磨损情况；监测振动与温度。\n③ 需要复查参数：出口压力、振动值、轴承温度。"
+  },
+  {
+   "tag": "2-追问（同上下文）",
+   "wall_s": 27.48,
+   "prompt_n": 130,
+   "prompt_ms": 5646.147,
+   "predicted_n": 94,
+   "pps": 4.29,
+   "finish": "stop",
+   "content": "风险等级：高。无备用泵且压力持续下降，存在泵体干转或完全停机的严重风险，必须立即停机。\n\n监护措施：\n1. 立即启动备用泵（若已备妥）或安排外部供液，严禁设备空转。\n2. 全程双人监护，密切监测出口压力及振动变化。\n3. 准备紧急泄压及更换密封件工具，随时准备紧急停机。"
+  }
+ ],
+ "concurrency": {
+  "wall_s": 15.61,
+  "total_gen_tokens": 48,
+  "aggregate_tps": 3.07
+ },
+ "thinking_mode_finding": {
+  "default_no_flag": {
+   "content": "",
+   "finish_reason": "length",
+   "predicted_n": 300,
+   "reasoning_content": "Thinking Process: ..."
+  },
+  "with_disable": {
+   "content": "立即降负荷，检查轴承密封，排查振动异常。",
+   "finish_reason": "stop",
+   "predicted_n": 13
+  }
+ },
+ "verdict": ""
+}

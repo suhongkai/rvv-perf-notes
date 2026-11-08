@@ -1,0 +1,460 @@
+{
+ "task": "ttft",
+ "phase": "ttft-c16-2b-r2",
+ "date": "2026-10-30",
+ "generated": "2026-10-30T00:39:07",
+ "model": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+ "lengths": "128,512,1024",
+ "reps": 3,
+ "config": {
+  "threads": 8,
+  "ctx": 4096,
+  "srv_suffix": "chunk16",
+  "boards": 1,
+  "boards_ok": 1
+ },
+ "aggregate_by_length": {
+  "128": {
+   "cold_ttft_ms": {
+    "n": 1,
+    "median": 5028.1,
+    "mean": 5028.1,
+    "min": 5028.1,
+    "max": 5028.1,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     5028.1
+    ]
+   },
+   "cache_ttft_ms": {
+    "n": 1,
+    "median": 445.9,
+    "mean": 445.9,
+    "min": 445.9,
+    "max": 445.9,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     445.9
+    ]
+   },
+   "cold_prompt_n": {
+    "n": 1,
+    "median": 128,
+    "mean": 128.0,
+    "min": 128,
+    "max": 128,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     128
+    ]
+   },
+   "cache_prompt_n": {
+    "n": 1,
+    "median": 4,
+    "mean": 4.0,
+    "min": 4,
+    "max": 4,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     4
+    ]
+   },
+   "speedup": {
+    "n": 1,
+    "median": 11.28,
+    "mean": 11.28,
+    "min": 11.28,
+    "max": 11.28,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     11.28
+    ]
+   }
+  },
+  "512": {
+   "cold_ttft_ms": {
+    "n": 1,
+    "median": 19594.0,
+    "mean": 19594.0,
+    "min": 19594.0,
+    "max": 19594.0,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     19594.0
+    ]
+   },
+   "cache_ttft_ms": {
+    "n": 1,
+    "median": 397.6,
+    "mean": 397.6,
+    "min": 397.6,
+    "max": 397.6,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     397.6
+    ]
+   },
+   "cold_prompt_n": {
+    "n": 1,
+    "median": 512,
+    "mean": 512.0,
+    "min": 512,
+    "max": 512,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     512
+    ]
+   },
+   "cache_prompt_n": {
+    "n": 1,
+    "median": 4,
+    "mean": 4.0,
+    "min": 4,
+    "max": 4,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     4
+    ]
+   },
+   "speedup": {
+    "n": 1,
+    "median": 49.28,
+    "mean": 49.28,
+    "min": 49.28,
+    "max": 49.28,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     49.28
+    ]
+   }
+  },
+  "1024": {
+   "cold_ttft_ms": {
+    "n": 1,
+    "median": 40231.1,
+    "mean": 40231.1,
+    "min": 40231.1,
+    "max": 40231.1,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     40231.1
+    ]
+   },
+   "cache_ttft_ms": {
+    "n": 1,
+    "median": 506.1,
+    "mean": 506.1,
+    "min": 506.1,
+    "max": 506.1,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     506.1
+    ]
+   },
+   "cold_prompt_n": {
+    "n": 1,
+    "median": 1024,
+    "mean": 1024.0,
+    "min": 1024,
+    "max": 1024,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     1024
+    ]
+   },
+   "cache_prompt_n": {
+    "n": 1,
+    "median": 4,
+    "mean": 4.0,
+    "min": 4,
+    "max": 4,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     4
+    ]
+   },
+   "speedup": {
+    "n": 1,
+    "median": 79.49,
+    "mean": 79.49,
+    "min": 79.49,
+    "max": 79.49,
+    "q1": null,
+    "q3": null,
+    "iqr": null,
+    "raw": [
+     79.49
+    ]
+   }
+  }
+ },
+ "per_board": [
+  {
+   "host": "10.65.21.114",
+   "ok": true,
+   "tag": "ttft-c16-2b-r2",
+   "model": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+   "ctx": 4096,
+   "threads": 8,
+   "reps": 3,
+   "cells": [
+    {
+     "len_target": 128,
+     "prompt_n_cold": 128,
+     "prompt_n_cache": 4,
+     "cold_ttft_ms": 5028.1,
+     "cold_prompt_ms": 5021.3,
+     "cache_ttft_ms": 445.9,
+     "cache_prompt_ms": 438.2,
+     "cold_raw": [
+      {
+       "tag": "cold-128-0",
+       "cache_prompt": false,
+       "ttft_ms": 5028.1,
+       "total_ms": 5029.5,
+       "prompt_n": 128,
+       "prompt_ms": 5021.3,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cold-128-1",
+       "cache_prompt": false,
+       "ttft_ms": 5023.3,
+       "total_ms": 5024.3,
+       "prompt_n": 128,
+       "prompt_ms": 4945.2,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cold-128-2",
+       "cache_prompt": false,
+       "ttft_ms": 5617.2,
+       "total_ms": 5618.6,
+       "prompt_n": 128,
+       "prompt_ms": 5539.8,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      }
+     ],
+     "cache_raw": [
+      {
+       "tag": "cache-128-0",
+       "cache_prompt": true,
+       "ttft_ms": 445.9,
+       "total_ms": 446.9,
+       "prompt_n": 4,
+       "prompt_ms": 438.2,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cache-128-1",
+       "cache_prompt": true,
+       "ttft_ms": 468.4,
+       "total_ms": 469.6,
+       "prompt_n": 4,
+       "prompt_ms": 461.3,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cache-128-2",
+       "cache_prompt": true,
+       "ttft_ms": 372.5,
+       "total_ms": 373.9,
+       "prompt_n": 4,
+       "prompt_ms": 365.9,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      }
+     ],
+     "speedup": 11.28
+    },
+    {
+     "len_target": 512,
+     "prompt_n_cold": 512,
+     "prompt_n_cache": 4,
+     "cold_ttft_ms": 19594.0,
+     "cold_prompt_ms": 19512.8,
+     "cache_ttft_ms": 397.6,
+     "cache_prompt_ms": 383.8,
+     "cold_raw": [
+      {
+       "tag": "cold-512-0",
+       "cache_prompt": false,
+       "ttft_ms": 19402.8,
+       "total_ms": 19404.0,
+       "prompt_n": 512,
+       "prompt_ms": 19302.9,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cold-512-1",
+       "cache_prompt": false,
+       "ttft_ms": 19824.1,
+       "total_ms": 19825.0,
+       "prompt_n": 512,
+       "prompt_ms": 19714.1,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cold-512-2",
+       "cache_prompt": false,
+       "ttft_ms": 19594.0,
+       "total_ms": 19595.5,
+       "prompt_n": 512,
+       "prompt_ms": 19512.8,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      }
+     ],
+     "cache_raw": [
+      {
+       "tag": "cache-512-0",
+       "cache_prompt": true,
+       "ttft_ms": 397.6,
+       "total_ms": 398.8,
+       "prompt_n": 4,
+       "prompt_ms": 383.8,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cache-512-1",
+       "cache_prompt": true,
+       "ttft_ms": 615.5,
+       "total_ms": 616.8,
+       "prompt_n": 4,
+       "prompt_ms": 602.5,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cache-512-2",
+       "cache_prompt": true,
+       "ttft_ms": 386.9,
+       "total_ms": 388.1,
+       "prompt_n": 4,
+       "prompt_ms": 373.0,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      }
+     ],
+     "speedup": 49.28
+    },
+    {
+     "len_target": 1024,
+     "prompt_n_cold": 1024,
+     "prompt_n_cache": 4,
+     "cold_ttft_ms": 40231.1,
+     "cold_prompt_ms": 40069.4,
+     "cache_ttft_ms": 506.1,
+     "cache_prompt_ms": 484.6,
+     "cold_raw": [
+      {
+       "tag": "cold-1024-0",
+       "cache_prompt": false,
+       "ttft_ms": 40408.9,
+       "total_ms": 40410.6,
+       "prompt_n": 1024,
+       "prompt_ms": 40316.5,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cold-1024-1",
+       "cache_prompt": false,
+       "ttft_ms": 40231.1,
+       "total_ms": 40232.6,
+       "prompt_n": 1024,
+       "prompt_ms": 40069.4,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cold-1024-2",
+       "cache_prompt": false,
+       "ttft_ms": 39755.9,
+       "total_ms": 39757.2,
+       "prompt_n": 1024,
+       "prompt_ms": 39633.0,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      }
+     ],
+     "cache_raw": [
+      {
+       "tag": "cache-1024-0",
+       "cache_prompt": true,
+       "ttft_ms": 516.1,
+       "total_ms": 517.6,
+       "prompt_n": 4,
+       "prompt_ms": 494.2,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cache-1024-1",
+       "cache_prompt": true,
+       "ttft_ms": 506.1,
+       "total_ms": 507.5,
+       "prompt_n": 4,
+       "prompt_ms": 484.6,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      },
+      {
+       "tag": "cache-1024-2",
+       "cache_prompt": true,
+       "ttft_ms": 411.6,
+       "total_ms": 413.2,
+       "prompt_n": 4,
+       "prompt_ms": 387.8,
+       "predicted_n": 1,
+       "predicted_ms": 0.0
+      }
+     ],
+     "speedup": 79.49
+    }
+   ],
+   "notes": "",
+   "srv": "/home/bianbu/labdeploy/build/spacemit-llama/build/binchunk16/llama-server",
+   "load_s": 16.2,
+   "wall_s": 222.5
+  }
+ ],
+ "wall_s": 222.5,
+ "notes": ""
+}

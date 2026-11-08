@@ -1,0 +1,800 @@
+{
+ "task": "-t8 慢于 -t7 的归因 + 两簇等价性",
+ "date": "2026-11-01",
+ "host": "10.65.21.119",
+ "topology": {
+  "clusters": "0-3 | 4-7",
+  "l1d": "32K",
+  "l2": "512K/簇",
+  "ime_on": "cpu0-3",
+  "evidence": {
+   "online": "0-7",
+   "cache": "cpu0 L1d=32K L2=512K\ncpu4 L1d=32K L2=512K",
+   "l2_shared_cpu_list": "cpu0 index2_shared_cpu_list=0-3\ncpu4 index2_shared_cpu_list=4-7",
+   "isa_ime": "cpu0_ime=1\ncpu4_ime=0",
+   "governor_freq": "cpu0 gov=performance cur=1600000\ncpu4 gov=performance cur=1600000",
+   "thp": "always [madvise] never",
+   "numa_nodes": "1（node0，无跨节点内存；numactl 未安装）",
+   "thermal_during_run_c": {
+    "top": 38,
+    "cluster0": 39,
+    "cluster1": 39
+   }
+  }
+ },
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "dir": "/home/bianbu/c16/bin",
+  "bench_sha16": "92b787e9bf04009c"
+ },
+ "model": {
+  "path": "/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf",
+  "bytes": 1202487136,
+  "sha16": "27a683603a6ae716",
+  "tensor_bytes_reported": 1191525632
+ },
+ "protocol": "llama-bench -p 512 -n 128 -r 3 -fa 0 -ub 128 -o json；taskset -c <cpus> 控亲和（不绑臂不加 taskset）；两轮回文 A→H、H→A；每臂前 pkill -x llama-bench + sleep 1；decode_samples 为板端 samples_ts（每轮 3 个）",
+ "arms": [
+  {
+   "tag": "A",
+   "threads": 7,
+   "cpus": "unpinned",
+   "note": "t7 不绑（基线）",
+   "prefill": 24.24,
+   "decode": 4.294,
+   "decode_samples": [
+    4.285,
+    4.326,
+    4.303,
+    4.403,
+    4.279,
+    4.263
+   ],
+   "decode_by_round": [
+    {
+     "round": 1,
+     "prefill": 24.387,
+     "decode": 4.305,
+     "decode_samples": [
+      4.285,
+      4.326,
+      4.303
+     ],
+     "wall_s": 187.0
+    },
+    {
+     "round": 2,
+     "prefill": 24.12,
+     "decode": 4.315,
+     "decode_samples": [
+      4.403,
+      4.279,
+      4.263
+     ],
+     "wall_s": 187.6
+    }
+   ],
+   "decode_iqr": [
+    4.28,
+    4.32
+   ],
+   "decode_min": 4.263,
+   "decode_max": 4.403,
+   "decode_spread_pct": 3.26,
+   "prefill_samples": [
+    24.241,
+    24.42,
+    24.501,
+    24.01,
+    24.239,
+    24.111
+   ],
+   "wall_s": 187.3,
+   "decode_per_thread": 0.613,
+   "implied_bw_gbs": 5.12,
+   "implied_bw_pct_peak": 62.6
+  },
+  {
+   "tag": "B",
+   "threads": 7,
+   "cpus": "0-6",
+   "note": "t7 绑 0-6，留 cpu7 给主/采样线程",
+   "prefill": 24.383,
+   "decode": 4.276,
+   "decode_samples": [
+    4.256,
+    4.265,
+    4.278,
+    4.277,
+    4.275,
+    4.29
+   ],
+   "decode_by_round": [
+    {
+     "round": 1,
+     "prefill": 24.322,
+     "decode": 4.266,
+     "decode_samples": [
+      4.256,
+      4.265,
+      4.278
+     ],
+     "wall_s": 188.1
+    },
+    {
+     "round": 2,
+     "prefill": 24.378,
+     "decode": 4.281,
+     "decode_samples": [
+      4.277,
+      4.275,
+      4.29
+     ],
+     "wall_s": 187.2
+    }
+   ],
+   "decode_iqr": [
+    4.268,
+    4.278
+   ],
+   "decode_min": 4.256,
+   "decode_max": 4.29,
+   "decode_spread_pct": 0.8,
+   "prefill_samples": [
+    24.186,
+    24.396,
+    24.384,
+    24.264,
+    24.381,
+    24.489
+   ],
+   "wall_s": 187.65,
+   "decode_per_thread": 0.611,
+   "implied_bw_gbs": 5.09,
+   "implied_bw_pct_peak": 62.4
+  },
+  {
+   "tag": "C",
+   "threads": 8,
+   "cpus": "unpinned",
+   "note": "t8 不绑（复现异常）",
+   "prefill": 25.514,
+   "decode": 3.937,
+   "decode_samples": [
+    4.123,
+    4.148,
+    4.105,
+    3.769,
+    3.768,
+    3.762
+   ],
+   "decode_by_round": [
+    {
+     "round": 1,
+     "prefill": 26.136,
+     "decode": 4.126,
+     "decode_samples": [
+      4.123,
+      4.148,
+      4.105
+     ],
+     "wall_s": 184.8
+    },
+    {
+     "round": 2,
+     "prefill": 25.063,
+     "decode": 3.767,
+     "decode_samples": [
+      3.769,
+      3.768,
+      3.762
+     ],
+     "wall_s": 197.4
+    }
+   ],
+   "decode_iqr": [
+    3.768,
+    4.119
+   ],
+   "decode_min": 3.762,
+   "decode_max": 4.148,
+   "decode_spread_pct": 9.8,
+   "prefill_samples": [
+    26.363,
+    26.128,
+    25.917,
+    25.101,
+    24.976,
+    25.111
+   ],
+   "wall_s": 191.1,
+   "decode_per_thread": 0.492,
+   "implied_bw_gbs": 4.69,
+   "implied_bw_pct_peak": 57.4
+  },
+  {
+   "tag": "D",
+   "threads": 8,
+   "cpus": "0-7",
+   "note": "t8 显式全占",
+   "prefill": 25.491,
+   "decode": 3.938,
+   "decode_samples": [
+    4.085,
+    4.09,
+    4.168,
+    3.721,
+    3.791,
+    3.748
+   ],
+   "decode_by_round": [
+    {
+     "round": 1,
+     "prefill": 25.989,
+     "decode": 4.114,
+     "decode_samples": [
+      4.085,
+      4.09,
+      4.168
+     ],
+     "wall_s": 185.8
+    },
+    {
+     "round": 2,
+     "prefill": 25.033,
+     "decode": 3.753,
+     "decode_samples": [
+      3.721,
+      3.791,
+      3.748
+     ],
+     "wall_s": 197.4
+    }
+   ],
+   "decode_iqr": [
+    3.759,
+    4.089
+   ],
+   "decode_min": 3.721,
+   "decode_max": 4.168,
+   "decode_spread_pct": 11.35,
+   "prefill_samples": [
+    26.017,
+    25.776,
+    26.172,
+    24.959,
+    24.935,
+    25.206
+   ],
+   "wall_s": 191.6,
+   "decode_per_thread": 0.492,
+   "implied_bw_gbs": 4.69,
+   "implied_bw_pct_peak": 57.4
+  },
+  {
+   "tag": "E",
+   "threads": 4,
+   "cpus": "0-3",
+   "note": "t4 cluster0（含 IME）",
+   "prefill": 15.457,
+   "decode": 3.366,
+   "decode_samples": [
+    3.368,
+    3.363,
+    3.365,
+    3.368,
+    3.364,
+    3.367
+   ],
+   "decode_by_round": [
+    {
+     "round": 1,
+     "prefill": 15.452,
+     "decode": 3.365,
+     "decode_samples": [
+      3.368,
+      3.363,
+      3.365
+     ],
+     "wall_s": 260.3
+    },
+    {
+     "round": 2,
+     "prefill": 15.446,
+     "decode": 3.367,
+     "decode_samples": [
+      3.368,
+      3.364,
+      3.367
+     ],
+     "wall_s": 260.2
+    }
+   ],
+   "decode_iqr": [
+    3.364,
+    3.368
+   ],
+   "decode_min": 3.363,
+   "decode_max": 3.368,
+   "decode_spread_pct": 0.15,
+   "prefill_samples": [
+    15.456,
+    15.461,
+    15.44,
+    15.457,
+    15.461,
+    15.419
+   ],
+   "wall_s": 260.25,
+   "decode_per_thread": 0.842,
+   "implied_bw_gbs": 4.01,
+   "implied_bw_pct_peak": 49.1
+  },
+  {
+   "tag": "F",
+   "threads": 4,
+   "cpus": "4-7",
+   "note": "t4 cluster1（无 IME）",
+   "prefill": 15.143,
+   "decode": 3.328,
+   "decode_samples": [
+    3.324,
+    3.325,
+    3.325,
+    3.33,
+    3.332,
+    3.331
+   ],
+   "decode_by_round": [
+    {
+     "round": 1,
+     "prefill": 15.153,
+     "decode": 3.325,
+     "decode_samples": [
+      3.324,
+      3.325,
+      3.325
+     ],
+     "wall_s": 264.3
+    },
+    {
+     "round": 2,
+     "prefill": 15.128,
+     "decode": 3.331,
+     "decode_samples": [
+      3.33,
+      3.332,
+      3.331
+     ],
+     "wall_s": 264.3
+    }
+   ],
+   "decode_iqr": [
+    3.325,
+    3.331
+   ],
+   "decode_min": 3.324,
+   "decode_max": 3.332,
+   "decode_spread_pct": 0.24,
+   "prefill_samples": [
+    15.151,
+    15.155,
+    15.151,
+    15.136,
+    15.131,
+    15.116
+   ],
+   "wall_s": 264.3,
+   "decode_per_thread": 0.832,
+   "implied_bw_gbs": 3.97,
+   "implied_bw_pct_peak": 48.5
+  },
+  {
+   "tag": "G",
+   "threads": 3,
+   "cpus": "0-2",
+   "note": "t3 cluster0 三核",
+   "prefill": 11.324,
+   "decode": 2.944,
+   "decode_samples": [
+    2.979,
+    2.976,
+    2.976,
+    2.91,
+    2.912,
+    2.912
+   ],
+   "decode_by_round": [
+    {
+     "round": 1,
+     "prefill": 11.323,
+     "decode": 2.977,
+     "decode_samples": [
+      2.979,
+      2.976,
+      2.976
+     ],
+     "wall_s": 323.5
+    },
+    {
+     "round": 2,
+     "prefill": 11.322,
+     "decode": 2.911,
+     "decode_samples": [
+      2.91,
+      2.912,
+      2.912
+     ],
+     "wall_s": 326.5
+    }
+   ],
+   "decode_iqr": [
+    2.912,
+    2.976
+   ],
+   "decode_min": 2.91,
+   "decode_max": 2.979,
+   "decode_spread_pct": 2.34,
+   "prefill_samples": [
+    11.319,
+    11.325,
+    11.323,
+    11.336,
+    11.278,
+    11.353
+   ],
+   "wall_s": 325.0,
+   "decode_per_thread": 0.981,
+   "implied_bw_gbs": 3.51,
+   "implied_bw_pct_peak": 42.9
+  },
+  {
+   "tag": "H",
+   "threads": 6,
+   "cpus": "0-5",
+   "note": "t6 cluster0 全簇",
+   "prefill": 21.876,
+   "decode": 4.288,
+   "decode_samples": [
+    4.287,
+    4.271,
+    4.289,
+    4.314,
+    4.275,
+    4.291
+   ],
+   "decode_by_round": [
+    {
+     "round": 1,
+     "prefill": 21.922,
+     "decode": 4.282,
+     "decode_samples": [
+      4.287,
+      4.271,
+      4.289
+     ],
+     "wall_s": 196.6
+    },
+    {
+     "round": 2,
+     "prefill": 21.816,
+     "decode": 4.293,
+     "decode_samples": [
+      4.314,
+      4.275,
+      4.291
+     ],
+     "wall_s": 196.9
+    }
+   ],
+   "decode_iqr": [
+    4.278,
+    4.29
+   ],
+   "decode_min": 4.271,
+   "decode_max": 4.314,
+   "decode_spread_pct": 1.0,
+   "prefill_samples": [
+    21.94,
+    21.913,
+    21.914,
+    21.775,
+    21.835,
+    21.838
+   ],
+   "wall_s": 196.75,
+   "decode_per_thread": 0.715,
+   "implied_bw_gbs": 5.11,
+   "implied_bw_pct_peak": 62.5
+  }
+ ],
+ "t8_repeats_p512": [
+  {
+   "tag": "C",
+   "threads": 8,
+   "cpus": "unpinned",
+   "decode": 3.907,
+   "decode_runs": [
+    4.089,
+    3.754
+   ],
+   "decode_samples": [
+    4.047,
+    4.094,
+    4.127,
+    3.744,
+    3.768,
+    3.75
+   ],
+   "decode_min": 3.754,
+   "decode_max": 4.089,
+   "wall_s": [
+    185.8,
+    197.2
+   ]
+  },
+  {
+   "tag": "D",
+   "threads": 8,
+   "cpus": "0-7",
+   "decode": 3.791,
+   "decode_runs": [
+    3.932,
+    3.787
+   ],
+   "decode_samples": [
+    3.756,
+    3.944,
+    4.096,
+    3.779,
+    3.777,
+    3.803
+   ],
+   "decode_min": 3.787,
+   "decode_max": 3.932,
+   "wall_s": [
+    190.5,
+    197.1
+   ]
+  }
+ ],
+ "t8_instability": {
+  "claim": "同一构建/同一模型/同一口径下，t8 存在两个稳定态（臂内 3 个 sample 极差 <0.4%，但轮间整臂平移 ~9%）；t7 在全部 8 次采样里只有 3.3% 极差。",
+  "fast_mode_t_s": 4.126,
+  "slow_mode_t_s": 3.753,
+  "all_t8_runs_t_s": [
+   4.126,
+   4.114,
+   3.753,
+   3.767,
+   4.089,
+   3.932,
+   3.754,
+   3.787
+  ],
+  "round_pairing": "r1 C/D = 4.126/4.114（相差 0.3%）；r2 = 3.767/3.753（相差 0.4%）→ 状态持续 >=9 min",
+  "excluded": [
+   "CPU 亲和/簇归属：C 与 D 每轮内几乎相等（+0.03%），绑死 0-7 与不绑一样",
+   "主线程专核：B(0-6) 与 A 差 -0.42%",
+   "频率：8 核 scaling_cur_freq 全 1600000，governor=performance（跑前跑后各查一次）",
+   "温度：top 38 ℃ / cluster0 39 ℃ / cluster1 39 ℃，无 thermal throttling",
+   "NUMA：单节点 node0，无跨节点内存",
+   "外部业务进程：板内空闲率 96.55%（20 s 采样），只有桌面会话与 kworker"
+  ],
+  "not_excluded": "为什么 8 个 worker 会落进慢态（内存布局/同步路径）本轮没定位，只确认它不可由亲和解释"
+ },
+ "depth0_controls": {
+  "A0": {
+   "threads": 7,
+   "cpus": "unpinned",
+   "decode": 4.26,
+   "decode_runs": [
+    4.298,
+    4.246
+   ],
+   "decode_samples": [
+    4.368,
+    4.287,
+    4.238,
+    4.22,
+    4.261,
+    4.258
+   ],
+   "decode_spread_pct": 3.47,
+   "wall_s": [
+    102.8,
+    103.8
+   ]
+  },
+  "B0": {
+   "threads": 7,
+   "cpus": "0-6",
+   "decode": 4.228,
+   "decode_runs": [
+    4.094,
+    4.254
+   ],
+   "decode_samples": [
+    4.216,
+    3.971,
+    4.094,
+    4.239,
+    4.274,
+    4.247
+   ],
+   "decode_spread_pct": 7.17,
+   "wall_s": [
+    107.3,
+    103.7
+   ]
+  },
+  "C0": {
+   "threads": 8,
+   "cpus": "unpinned",
+   "decode": 4.111,
+   "decode_runs": [
+    4.089,
+    4.122
+   ],
+   "decode_samples": [
+    4.062,
+    4.095,
+    4.111,
+    4.125,
+    4.111,
+    4.131
+   ],
+   "decode_spread_pct": 1.68,
+   "wall_s": [
+    107.3,
+    106.6
+   ]
+  },
+  "D0": {
+   "threads": 8,
+   "cpus": "0-7",
+   "decode": 4.121,
+   "decode_runs": [
+    4.1,
+    4.117
+   ],
+   "decode_samples": [
+    4.119,
+    4.024,
+    4.156,
+    4.123,
+    4.097,
+    4.129
+   ],
+   "decode_spread_pct": 3.2,
+   "wall_s": [
+    107.1,
+    106.7
+   ]
+  }
+ },
+ "comparisons": {
+  "t8_vs_t7_pct": -8.31,
+  "t8_vs_t7_abs": -0.357,
+  "t8_vs_t7_pct_by_round": [
+   -4.16,
+   -12.7
+  ],
+  "t8_vs_t7_pct_pooled_all8runs": -10.13,
+  "t8_pooled_median": 3.859,
+  "t8_pooled_range": [
+   3.753,
+   4.126
+  ],
+  "t8_pooled_range_pct": [
+   -12.6,
+   -3.91
+  ],
+  "t8_pinned_vs_unpinned_pct": 0.03,
+  "pinned7_vs_unpinned_pct": -0.42,
+  "cluster0_t4": 3.366,
+  "cluster1_t4": 3.328,
+  "cluster_delta_pct": -1.13,
+  "cluster_delta_abs": -0.038,
+  "cluster_delta_pct_prefill": -2.03,
+  "t7_vs_t4_single_cluster_pct": 27.57,
+  "t8_vs_2x_cluster0_t4_pct": -41.52,
+  "t6_single_cluster_vs_t7_pct": -0.14,
+  "t6_single_cluster_vs_t8_pct": 8.92,
+  "t6_vs_t4_same_cluster_pct": 27.39,
+  "t3_vs_t4_same_cluster_pct": -12.54,
+  "prefill_t8_vs_t7_pct": 5.26,
+  "prefill_t8_pinned_vs_unpinned_pct": -0.09,
+  "prefill_t6_single_cluster_vs_t7_pct": -9.75,
+  "depth0_t8_vs_t7_pct": -3.5,
+  "depth0_pinned7_vs_unpinned_pct": -0.75,
+  "depth0_t8_pinned_vs_unpinned_pct": 0.24,
+  "depth_effect_t8_pct": -4.23,
+  "depth_effect_t7_pct": 0.8
+ },
+ "historical_claim": {
+  "source": "08_实验数据/归档/2026-10-29/未分类/chunk16-delivery-deliv2b-decode-1029-2113.json（同板 114、同构建 4436a9f4、同模型、p=0、r=4：t7=4.369 / t8=3.801 → −13.0%）",
+  "note": "历史 −13% 是同板 114、p=0 口径的**单次**观测；本板 p=0 复刻为 4.111 vs 4.26（-3.5%），p=512 为 3.937 vs 4.294（-8.31%），t8 自身在 3.753–4.126 间漂移。"
+ },
+ "decision_rules": {
+  "anomaly_reproduced": "t8 中位比 t7 低 >= 3%",
+  "H1": "主线程让出专核（B vs A）>= 5%",
+  "H2": "cluster1 与 cluster0 差 > 2%",
+  "H3": "单簇 4→6 线程不再增长（L2 容量撞墙）",
+  "verdict_gate": {
+   "cluster_equiv": true,
+   "h1_cost_pct_max": 0.75,
+   "single_cluster_still_scaling": true,
+   "anomaly": true
+  }
+ },
+ "background": {
+  "idle_pct_20s_no_bench": 96.55,
+  "other_users": "tty1 桌面会话（labwc/lxqt-panel/lwrespawn），无业务进程",
+  "llama_procs_after": "",
+  "llama_procs_after_phase2": ""
+ },
+ "order": [
+  [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E",
+   "F",
+   "G",
+   "H"
+  ],
+  [
+   "H",
+   "G",
+   "F",
+   "E",
+   "D",
+   "C",
+   "B",
+   "A"
+  ]
+ ],
+ "preflight": {
+  "busy_before": "",
+  "date": "2026-11-01T11:47:20+08:00\n 11:47:20 up 57 days, 11:24,  4 users,  load average: 5.03, 3.92, 2.97",
+  "online": "0-7",
+  "cache": "cpu0 L1d=32K L2=512K\ncpu4 L1d=32K L2=512K",
+  "l2_shared": "cpu0 index2_shared_cpu_list=0-3\ncpu4 index2_shared_cpu_list=4-7",
+  "ime": "cpu0_ime=1\ncpu4_ime=0",
+  "freq": "cpu0 gov=performance cur=1600000\ncpu4 gov=performance cur=1600000",
+  "thp": "always [madvise] never",
+  "model": "1202487136\n27a683603a6ae716",
+  "taskset": "/usr/bin/taskset\ntaskset，来自 util-linux 2.39.3",
+  "affinity_nproj": "0-6=7 0-7=8 0-3=4 4-7=4 0-2=3 0-5=6",
+  "busy_after": ""
+ },
+ "errors": [],
+ "run_span": {
+  "main_started": "2026-11-01T11:47:20+0800",
+  "main_finished": "2026-11-01T12:48:19+0800",
+  "phase2_started": "2026-11-01T12:49:09+0800",
+  "phase2_finished": "2026-11-01T13:16:20+0800"
+ },
+ "conclusion": {
+  "t8_vs_t7_pct": -8.31,
+  "pinned7_vs_unpinned_pct": -0.42,
+  "cluster0_t4": 3.366,
+  "cluster1_t4": 3.328,
+  "cluster_delta_pct": -1.13,
+  "which_hypothesis": "都不是",
+  "explanation": "两簇等价（cluster0 t4 3.366 vs cluster1 t4 3.328，-1.13%，无 IME 的簇在 prefill 也只差 -2.03%），主线程让出专核只值 -0.42%（p=512）/ -0.75%（p=0），而 t8 绑与不绑一样（3.937/3.938，0.03%）——既不是 H1 也不是簇/L2 问题；decode 在 6 线程就到顶（t6 单簇 4.288 ≈ t7 4.294 ≈ 5.1 GB/s），第 8 个 worker 只是同步开销，且 t8 有 4.126/3.753 两个稳态（-3.91%/-12.6%），历史 −12% 抓的是慢态那一次。",
+  "t8_vs_t7_pct_pooled": -10.13,
+  "t8_range_t_s": [
+   3.753,
+   4.126
+  ],
+  "t8_range_pct": [
+   -12.6,
+   -3.91
+  ],
+  "t6_single_cluster": 4.288,
+  "recommendation": "decode 用 -t 6 或 -t 7（4.288/4.294 t/s，且 t7 在全部 8 次采样里稳定）；-t 8 不要用：中位 3.859，最差 3.753，相对 t7 让掉 10.13%"
+ }
+}

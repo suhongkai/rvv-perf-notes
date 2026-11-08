@@ -1,0 +1,52 @@
+{
+ "task": "ctx-curve-4b-chunk16",
+ "date": "2026-11-01",
+ "host": "10.65.21.125",
+ "build": {
+  "bin": "chunk16-build/bin",
+  "libggml_cpu_sha256": "4436a9f45bcc298b"
+ },
+ "model": {
+  "file": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+  "bytes": 2543899168,
+  "sha256_16": "36a685821380dd64"
+ },
+ "protocol": "llama-server -c 36864 -t 8 -ub 128 -b 2048 --host 127.0.0.1 --port 8097 -np 1；每档 1 次冷启动（pkill 前后清场）；/tokenize 二分把提示校准到目标 token 数；/completion n_predict=1 取 timings.prompt_per_second；8K 档 n_predict=32 取 timings.predicted_per_second 作 decode_tps；单板串行，125 板",
+ "points": [
+  {
+   "len": 4096,
+   "prompt_n": 4096,
+   "prompt_ms": 440933.1,
+   "tps": 9.289,
+   "decode_tps": null
+  },
+  {
+   "len": 8192,
+   "prompt_n": 8192,
+   "prompt_ms": 1009735.4,
+   "tps": 8.113,
+   "decode_tps": 0.935
+  },
+  {
+   "len": 16384,
+   "prompt_n": 16384,
+   "prompt_ms": 2528330.5,
+   "tps": 6.48,
+   "decode_tps": null
+  }
+ ],
+ "decay": {
+  "4k_to_8k": -12.66,
+  "4k_to_16k": -30.24,
+  "4k_to_32k": null
+ },
+ "verdict": "chunk16 交付构建（lib 4436a9f4）+ 4B 交付模型（2,543,899,168 B）在 125 板同板单遍：4K 9.289、8K 8.113、16K 6.480 t/s；4K→8K/16K/32K 衰减 -12.7%/-30.2%/—；相对旧构建 C38 同档 +49.1%/+47.2%/+39.3%。已测三档不再依赖旧构建 717a8ad8；32K 档未在时间盒内完成，按任务书交前三档。",
+ "failures": [
+  {
+   "len": 32768,
+   "n_predict": 1,
+   "err": "not completed within time box",
+   "detail": "32K 于 23:02:36 冷启动后按任务书终止（交前三档）：严格下限 32768 token / (23:03→00:15 约 4270 s) = 7.67 t/s，已高于 16K 实测 6.480 t/s，而预填吞吐随长度单调下降，故 32K 在剩余时间盒内不可能完成；按旧构建 16K→32K 比 0.800 外推约 5.18 t/s，需 ≈6320 s（105 min），剩余约 70 min。"
+  }
+ ]
+}

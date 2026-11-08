@@ -1,0 +1,67 @@
+{
+ "task": "long-context dual curve (baseline vs optimized)",
+ "lens_tokens": [
+  960,
+  1984,
+  4032,
+  8128,
+  10176
+ ],
+ "method": "同板 llama-server 单遍，/tokenize 标定；baseline=stock 构建（无我方补丁），optimized=chunk16 交付构建",
+ "2b": {
+  "host": "114",
+  "baseline": [
+   17.553,
+   17.42,
+   16.573,
+   13.84,
+   12.457
+  ],
+  "optimized": [
+   24.965,
+   23.844,
+   20.884,
+   17.785,
+   16.11
+  ],
+  "D_base_pct": 29.03,
+  "D_opt_pct": 35.47,
+  "deltaD_pp": -6.44,
+  "gain_pct": [
+   42.2,
+   36.9,
+   26.0,
+   28.5,
+   29.3
+  ]
+ },
+ "4b": {
+  "host_baseline": "113",
+  "host_optimized": "130",
+  "baseline": [
+   6.688,
+   6.559,
+   6.068,
+   5.719,
+   5.401
+  ],
+  "optimized": [
+   10.26,
+   9.724,
+   9.0,
+   8.009,
+   7.405
+  ],
+  "D_base_pct": 19.24,
+  "D_opt_pct": 27.83,
+  "deltaD_pp": -8.58,
+  "gain_pct": [
+   53.4,
+   48.3,
+   48.3,
+   40.0,
+   37.1
+  ],
+  "note": "4B 双曲线跨板（stock 113 / optimized 130），板间差异约 2—4%"
+ }
+}

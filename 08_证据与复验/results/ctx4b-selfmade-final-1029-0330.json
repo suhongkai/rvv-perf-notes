@@ -1,0 +1,107 @@
+{
+ "task": "ctx-server",
+ "tag": "ctx4b-selfmade-final",
+ "method": "llama-server 单遍，/tokenize 裁剪提示，/completion n_predict=1；取 timings.prompt_per_second",
+ "build": {
+  "bin": "build-final",
+  "libggml_cpu_sha256": "717a8ad8..."
+ },
+ "corpus": "06_素材库/src/ppl-corpus-zh.txt（重复拼接）",
+ "wall_s": 8877.1,
+ "summary": {
+  "4b@4096": {
+   "n": 1,
+   "median": 6.232,
+   "min": 6.232,
+   "max": 6.232
+  },
+  "4b@8192": {
+   "n": 1,
+   "median": 5.513,
+   "min": 5.513,
+   "max": 5.513
+  },
+  "4b@16384": {
+   "n": 1,
+   "median": 4.651,
+   "min": 4.651,
+   "max": 4.651
+  },
+  "4b@32768": {
+   "n": 1,
+   "median": 3.723,
+   "min": 3.723,
+   "max": 3.723
+  }
+ },
+ "runs": [
+  {
+   "host": "10.65.21.121",
+   "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "model_key": "4b",
+   "ctx": 4096,
+   "ok": true,
+   "t_start": "2026-10-29T01:02:56",
+   "load_s": 38.6,
+   "calib": "TOKENS 3990",
+   "prompt_n": 3990,
+   "prompt_ms": 640293.627,
+   "prompt_tps": 6.231516029129555,
+   "predicted_ms": 0.001,
+   "wall_s": 661.8,
+   "mem": "VmHWM:\t 4862656 kB VmRSS:\t 4862656 kB MemAvailable_kB 4815244",
+   "t_end": "2026-10-29T01:14:38"
+  },
+  {
+   "host": "10.65.21.122",
+   "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "model_key": "4b",
+   "ctx": 8192,
+   "ok": true,
+   "t_start": "2026-10-29T01:02:56",
+   "load_s": 38.5,
+   "calib": "TOKENS 8092",
+   "prompt_n": 8092,
+   "prompt_ms": 1467754.946,
+   "prompt_tps": 5.513181898690056,
+   "predicted_ms": 0.001,
+   "wall_s": 1502.6,
+   "mem": "VmHWM:\t 4577004 kB VmRSS:\t 4577004 kB MemAvailable_kB 4682024",
+   "t_end": "2026-10-29T01:28:38"
+  },
+  {
+   "host": "10.65.21.126",
+   "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "model_key": "4b",
+   "ctx": 16384,
+   "ok": true,
+   "t_start": "2026-10-29T01:02:56",
+   "load_s": 49.8,
+   "calib": "TOKENS 16298",
+   "prompt_n": 16298,
+   "prompt_ms": 3504269.339,
+   "prompt_tps": 4.650898211109223,
+   "predicted_ms": 0.001,
+   "wall_s": 3543.6,
+   "mem": "VmHWM:\t 5268312 kB VmRSS:\t 5268312 kB MemAvailable_kB 4404252",
+   "t_end": "2026-10-29T02:02:51"
+  },
+  {
+   "host": "10.65.21.130",
+   "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "model_key": "4b",
+   "ctx": 32768,
+   "ok": true,
+   "t_start": "2026-10-29T01:02:56",
+   "load_s": 43.5,
+   "calib": "TOKENS 32663",
+   "prompt_n": 32663,
+   "prompt_ms": 8772471.246,
+   "prompt_tps": 3.723352187092481,
+   "predicted_ms": 0.001,
+   "wall_s": 8830.9,
+   "mem": "VmHWM:\t 5636500 kB VmRSS:\t 5636500 kB MemAvailable_kB 3845044",
+   "t_end": "2026-10-29T03:30:53"
+  }
+ ]
+}

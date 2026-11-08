@@ -1,0 +1,331 @@
+{
+ "task": "8GB 板 4 客户端并发（chunk16 重测）",
+ "date": "2026-11-01",
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "dir": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin",
+  "srv_argv_np4": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 4096 -t 7 -tb 8 -np 4 --host 127.0.0.1 --port 8096",
+  "srv_argv_np1": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 4096 -t 7 -tb 8 -np 1 --host 127.0.0.1 --port 8097"
+ },
+ "host": "10.65.21.122",
+ "model": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+ "model_sha16": "27a683603a6ae716",
+ "memtotal_kb": 8023032,
+ "protocol": "llama-server -np 4 -c 4096，4 路并发/串行各 3 次，每路 128 token greedy（prompt 64 token，cache_prompt=false，t7/tb8）；聚合=总生成 token/组墙钟；并发组墙钟=最慢请求，串行组墙钟=4 请求之和；RSS 板端 0.25 s 采样",
+ "np4_concurrent": {
+  "agg_tps": [
+   5.396,
+   5.372,
+   5.441
+  ],
+  "agg_median": 5.396,
+  "per_client": 1.52,
+  "rss_mb": 2277.0,
+  "rss_mb_per_rep": [
+   2230.7,
+   2277.0,
+   2277.0
+  ],
+  "reps": [
+   {
+    "rep": 0,
+    "ok_n": 4,
+    "wall_s": 94.89,
+    "total_tokens": 512,
+    "agg_tps": 5.396,
+    "tg_med_ts": 1.52,
+    "decode_capacity_tps": 6.08,
+    "max_vmrss_kb": 2284188,
+    "max_vmhwm_kb": 2284188,
+    "min_memavail_kb": 6058656,
+    "soc_temp_c": 52.0,
+    "srv_alive": true
+   },
+   {
+    "rep": 1,
+    "ok_n": 4,
+    "wall_s": 95.31,
+    "total_tokens": 512,
+    "agg_tps": 5.372,
+    "tg_med_ts": 1.499,
+    "decode_capacity_tps": 5.996,
+    "max_vmrss_kb": 2331676,
+    "max_vmhwm_kb": 2331676,
+    "min_memavail_kb": 6010388,
+    "soc_temp_c": 53.0,
+    "srv_alive": true
+   },
+   {
+    "rep": 2,
+    "ok_n": 4,
+    "wall_s": 94.09,
+    "total_tokens": 512,
+    "agg_tps": 5.441,
+    "tg_med_ts": 1.538,
+    "decode_capacity_tps": 6.152,
+    "max_vmrss_kb": 2331676,
+    "max_vmhwm_kb": 2331676,
+    "min_memavail_kb": 6013632,
+    "soc_temp_c": 53.0,
+    "srv_alive": true
+   }
+  ]
+ },
+ "np1_serial4": {
+  "agg_tps": [
+   3.877,
+   3.943,
+   3.477
+  ],
+  "agg_median": 3.877,
+  "per_client": 4.247,
+  "rss_mb": 2131.4,
+  "rss_mb_per_rep": [
+   2131.2,
+   2131.4,
+   2131.4
+  ],
+  "reps": [
+   {
+    "rep": 0,
+    "ok_n": 4,
+    "wall_s": 132.06,
+    "total_tokens": 512,
+    "agg_tps": 3.877,
+    "tg_med_ts": 4.247,
+    "decode_capacity_tps": 4.247,
+    "max_vmrss_kb": 2182324,
+    "max_vmhwm_kb": 2182324,
+    "min_memavail_kb": 6152404,
+    "soc_temp_c": 50.0,
+    "srv_alive": true
+   },
+   {
+    "rep": 1,
+    "ok_n": 4,
+    "wall_s": 129.84,
+    "total_tokens": 512,
+    "agg_tps": 3.943,
+    "tg_med_ts": 4.361,
+    "decode_capacity_tps": 4.361,
+    "max_vmrss_kb": 2182580,
+    "max_vmhwm_kb": 2182580,
+    "min_memavail_kb": 6158660,
+    "soc_temp_c": 52.0,
+    "srv_alive": true
+   },
+   {
+    "rep": 2,
+    "ok_n": 4,
+    "wall_s": 147.24,
+    "total_tokens": 512,
+    "agg_tps": 3.477,
+    "tg_med_ts": 4.196,
+    "decode_capacity_tps": 4.196,
+    "max_vmrss_kb": 2182580,
+    "max_vmhwm_kb": 2182580,
+    "min_memavail_kb": 6114232,
+    "soc_temp_c": 55.0,
+    "srv_alive": true
+   }
+  ]
+ },
+ "delta_pct": 39.2,
+ "single_stream_decode_tps": 4.247,
+ "per_stream_retention_pct": 35.8,
+ "scale_eff_pct": 31.8,
+ "definitions": {
+  "agg_tps": "组内总生成 token / 组墙钟（真并发取最慢请求墙钟，串行取 4 请求墙钟之和）",
+  "per_client": "每路 decode 速率 t/s 的中位（server timings predicted_n/predicted_ms）",
+  "single_stream_decode_tps": "np1 串行时每路 decode 速率中位（= 单流基准）",
+  "per_stream_retention_pct": "per_client / single_stream_decode_tps × 100：并发时单流保留率",
+  "scale_eff_pct": "agg_median / (4 × single_stream_decode_tps) × 100：相对理想 4× 的扩展效率",
+  "delta_pct": "(np4 聚合中位 / np1 串行聚合中位 - 1) × 100"
+ },
+ "note": "真并发 - 假并发；同板同构建同模型，A→B 顺序（A 先跑）；RSS 为 VmRSS 峰值。本臂每路 128 token，聚合里预填占比小，故绝对聚合高于 C19（C19 每路 48 token）。与 C19 可直接比的是下面 legacy48_c19_protocol 臂（argv 与 C19 相同，只换构建）",
+ "c19_reference": {
+  "source": "08_实验数据/concurrency-8gb-1028-2229.json → summary",
+  "build": "spacemit-llama/build/bin-concat（旧构建，lib 98a9357e）",
+  "sample": "3 板（114/115/120）× 3 次 = 9，取中位",
+  "protocol": "npred=48/prompt=64/-c 8192/t7/tb8",
+  "np4_concurrent": {
+   "agg_median": 3.956,
+   "agg_raw": [
+    3.89,
+    3.9,
+    3.9,
+    3.954,
+    3.956,
+    4.02,
+    4.026,
+    4.076,
+    4.096
+   ],
+   "tg_med": 1.348,
+   "rss_mb": 2323.9
+  },
+  "np1_serial4": {
+   "agg_median": 3.286,
+   "agg_raw": [
+    3.255,
+    3.262,
+    3.27,
+    3.278,
+    3.286,
+    3.295,
+    3.332,
+    3.342,
+    3.373
+   ],
+   "tg_med": 4.207,
+   "rss_mb": 2138.4
+  },
+  "delta_pct": 20.4
+ },
+ "notes_detail": {
+  "clock": "板载时钟在测量期间被 NTP 从 2026-09-13 校正到 2026-11-01，raw 日志行首是板端时间；所有耗时用 perf_counter（monotonic），不受影响；整轮 wall_s 字段因此作废，未采用",
+  "outlier": "128-token 臂 np1_serial4 rep2 的 agg=3.477（另两次 3.877/3.943）偏低，该次墙钟 147 s vs 130/132 s；已按协议取 3 次中位，原始值全部保留在 reps 里",
+  "rss": "VmRSS 峰值（板端 0.25 s 采样）；np4 2277 MB / np1 2131 MB，8GB 板无 OOM、无 major fault"
+ },
+ "raw": {
+  "conc_out": "04_升级开发/_scratch/2026-11-01/raw/conc.out",
+  "serial_out": "04_升级开发/_scratch/2026-11-01/raw/serial.out"
+ },
+ "legacy48_c19_protocol": {
+  "why": "与 C19 同 argv（npred=48、prompt 64、-c 8192、t7/tb8），只把构建换成 chunk16 → 构建对构建可比",
+  "np4_concurrent": {
+   "agg_tps": [
+    4.269,
+    4.356,
+    4.307
+   ],
+   "agg_median": 4.307,
+   "per_client": 1.441,
+   "rss_mb": 2324.4,
+   "rss_mb_per_rep": [
+    2274.3,
+    2324.4,
+    2324.4
+   ],
+   "reps": [
+    {
+     "rep": 0,
+     "ok_n": 4,
+     "wall_s": 44.98,
+     "total_tokens": 192,
+     "agg_tps": 4.269,
+     "tg_med_ts": 1.434,
+     "decode_capacity_tps": 5.736,
+     "max_vmrss_kb": 2328860,
+     "max_vmhwm_kb": 2328860,
+     "min_memavail_kb": 6000832,
+     "soc_temp_c": 52.0,
+     "srv_alive": true
+    },
+    {
+     "rep": 1,
+     "ok_n": 4,
+     "wall_s": 44.08,
+     "total_tokens": 192,
+     "agg_tps": 4.356,
+     "tg_med_ts": 1.445,
+     "decode_capacity_tps": 5.78,
+     "max_vmrss_kb": 2380188,
+     "max_vmhwm_kb": 2380188,
+     "min_memavail_kb": 5959400,
+     "soc_temp_c": 52.0,
+     "srv_alive": true
+    },
+    {
+     "rep": 2,
+     "ok_n": 4,
+     "wall_s": 44.58,
+     "total_tokens": 192,
+     "agg_tps": 4.307,
+     "tg_med_ts": 1.441,
+     "decode_capacity_tps": 5.764,
+     "max_vmrss_kb": 2380188,
+     "max_vmhwm_kb": 2380188,
+     "min_memavail_kb": 5965012,
+     "soc_temp_c": 53.0,
+     "srv_alive": true
+    }
+   ]
+  },
+  "np1_serial4": {
+   "agg_tps": [
+    3.462,
+    3.472,
+    3.484
+   ],
+   "agg_median": 3.472,
+   "per_client": 4.332,
+   "rss_mb": 2138.5,
+   "rss_mb_per_rep": [
+    2138.5,
+    2138.5,
+    2138.5
+   ],
+   "reps": [
+    {
+     "rep": 0,
+     "ok_n": 4,
+     "wall_s": 55.46,
+     "total_tokens": 192,
+     "agg_tps": 3.462,
+     "tg_med_ts": 4.426,
+     "decode_capacity_tps": 4.426,
+     "max_vmrss_kb": 2189804,
+     "max_vmhwm_kb": 2189804,
+     "min_memavail_kb": 6146704,
+     "soc_temp_c": 53.0,
+     "srv_alive": true
+    },
+    {
+     "rep": 1,
+     "ok_n": 4,
+     "wall_s": 55.3,
+     "total_tokens": 192,
+     "agg_tps": 3.472,
+     "tg_med_ts": 4.329,
+     "decode_capacity_tps": 4.329,
+     "max_vmrss_kb": 2189804,
+     "max_vmhwm_kb": 2189804,
+     "min_memavail_kb": 6161148,
+     "soc_temp_c": 55.0,
+     "srv_alive": true
+    },
+    {
+     "rep": 2,
+     "ok_n": 4,
+     "wall_s": 55.1,
+     "total_tokens": 192,
+     "agg_tps": 3.484,
+     "tg_med_ts": 4.332,
+     "decode_capacity_tps": 4.332,
+     "max_vmrss_kb": 2189804,
+     "max_vmhwm_kb": 2189804,
+     "min_memavail_kb": 6160292,
+     "soc_temp_c": 54.0,
+     "srv_alive": true
+    }
+   ]
+  },
+  "delta_pct": 24.0,
+  "single_stream_decode_tps": 4.332,
+  "per_stream_retention_pct": 33.3,
+  "scale_eff_pct": 24.9,
+  "vs_c19": {
+   "np4_agg_c19": 3.956,
+   "np4_agg_c16": 4.307,
+   "np4_delta_pct": 8.9,
+   "np1_serial_agg_c19": 3.286,
+   "np1_serial_agg_c16": 3.472,
+   "np1_delta_pct": 5.7
+  },
+  "raw": {
+   "conc48_out": "04_升级开发/_scratch/2026-11-01/raw/conc48.out",
+   "serial48_out": "04_升级开发/_scratch/2026-11-01/raw/serial48.out"
+  }
+ }
+}

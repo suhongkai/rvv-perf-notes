@@ -1,0 +1,1133 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>02_技术报告</title><style>
+@page { size: A4; margin: 17mm 16mm 18mm 16mm; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Microsoft YaHei","Segoe UI",sans-serif;
+       font-size: 10.2pt; line-height: 1.72; color: #1a1d23; }
+h1 { font-size: 21pt; line-height: 1.3; margin: 0 0 8pt; }
+h2 { font-size: 15pt; margin: 20pt 0 8pt; padding-bottom: 4pt;
+     border-bottom: 1.5px solid #dbe2ef; page-break-after: avoid; break-after: avoid-page; }
+h3 { font-size: 12pt; margin: 14pt 0 6pt; color: #1e3a8a; page-break-after: avoid; break-after: avoid-page; }
+table, pre { break-before: avoid-page; }
+p { margin: 5pt 0; text-align: justify; orphans: 3; widows: 3; }
+strong { color: #0f172a; }
+code { font-family: "Cascadia Mono","Consolas",monospace; font-size: 8.6pt;
+       background: #f2f5fa; padding: .5pt 3pt; border-radius: 3px; color: #0b3d91; }
+pre { background: #f6f8fa; border: 1px solid #e3e8f0; border-radius: 5px;
+      padding: 7pt 9pt; overflow-wrap: anywhere; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: 8.2pt; color: #1a1d23; }
+blockquote { margin: 7pt 0; padding: 5pt 10pt; border-left: 3px solid #9db4e8;
+             background: #f7f9fe; color: #26303f; }
+blockquote p { margin: 3pt 0; }
+table { width: 100%; border-collapse: collapse; margin: 8pt 0; font-size: 8.9pt; }
+th, td { border: 1px solid #d5dce8; padding: 3.5pt 5pt; vertical-align: top; }
+th { background: #eef2f9; font-weight: 700; }
+tr:nth-child(even) td { background: #fbfcfe; }
+tr { page-break-inside: avoid; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 14pt 0; }
+img { display: block; width: 92%; height: auto; margin: 10pt auto 4pt; }
+ul, ol { margin: 5pt 0 5pt 16pt; padding: 0; }
+li { margin: 2.5pt 0; }
+</style></head><body><h1>基于 K1 AI CPU 的 Qwen3.5-2B/4B 本地部署与性能优化</h1>
+<p><strong>技术报告</strong></p>
+<p>赛道：CIE 全国 RISC-V 高水平创新及应用大赛（第二届）· 进迭时空赛道<br>
+赛题：赛题二 —— 基于 K1 AI CPU 的大模型部署落地<br>
+日期：2026-11-08</p>
+<hr>
+<h2>摘要</h2>
+<p>本文研究 Qwen3.5-2B 与 Qwen3.5-4B 在 SpacemiT K1（8×X60，8 GB LPDDR4X）上的本地推理性能优化。K1 具备 256-bit RVV 与 2 TOPS 矩阵引擎，但缺少 <code>vmadot</code> 点积指令，且矩阵引擎仅覆盖 4 个核心，难以直接支撑大语言模型的高效推理。本文从量化方案、内核实现、线程调度与长上下文管理四个层面进行改造，全部工作基于官方 <code>spacemit-com/llama.cpp</code> 分支，不引入新的推理框架。</p>
+<p>在相同模型、相同板卡、ABBA 两轮的对照下，交付构建的预填吞吐达到 2B 25.29 t/s（8 板中位）与 4B 9.84 t/s（3 板中位），相对官方 Q4_1 格式基线为 5.04× 与 5.02×（部署口径；同模型同板四臂为 3.86× 与 3.94×）；生成吞吐达到 2B 3.91 t/s（t8@512）与 4B 2.01 t/s（t7 零深度）。与厂商矩阵引擎（MEE）同板对比，预填处于同一水平（+1.15% / +1.02%），生成领先 41.9% / 45.8%。首 token 时延在 128/512/1024 token 提示下分别为 2B 5.05/19.49/40.15 s、4B 12.81/49.47/99.56 s，相对 stock 构建降低 28.9%—42.6%。长上下文方面，2B 与 4B 在 4K—32K 范围内保持单调衰减，32K 预填分别为 8.40 与 4.61 t/s；同一文档换问题时，从第二个问题起仅需重算约 512 token，时延 26.6—27.3 s，且输出与冷启动逐字节一致。</p>
+<p>本文同时给出完整的负结果与适用边界，所有对外数字均绑定证据文件与 SHA256（97 条 claim、307 条归档实验），可通过仓库内脚本独立复验。</p>
+<p><strong>关键词</strong>：RISC-V；K1；大语言模型推理；量化；RVV；llama.cpp；长上下文</p>
+<hr>
+<h2>1 引言</h2>
+<h3>1.1 研究背景</h3>
+<p>面向工业现场的离线智能值守要求在断网、数据不出厂的条件下完成设备报警处置、巡检报告生成与长文档问答。此类场景对硬件成本敏感，通常以千元级边缘设备为部署目标。SpacemiT K1 是当前少数具备 8 核 RISC-V、256-bit RVV 与 2 TOPS 矩阵引擎的国产 SoC，其算力足以支撑 2B—4B 量级模型的推理，但软件栈的成熟度与算子覆盖仍不充分。</p>
+<h3>1.2 问题定义</h3>
+<p>在 K1 上部署 Qwen3.5 面临三个具体约束：</p>
+<ol>
+<li><strong>缺少 <code>vmadot</code></strong>。RVV 的向量点积需拆分为乘加序列，生成阶段的主要算子 GEMV 难以获得理想吞吐。</li>
+<li><strong>矩阵引擎覆盖有限</strong>。<code>ime</code> 指令仅在 cpu0—cpu3 可用，且只支持 <code>i8i4</code>/<code>i8i8</code> 数据格式；社区常用的 Q4_0、Q4_K_M 等格式无法直接利用。</li>
+<li><strong>内存带宽受限</strong>。实测可持续带宽约 8.17 GB/s，生成阶段每 token 需完整读取权重，2B 模型 1.20 GB、4B 模型 2.54 GB，物理上限决定了生成速度的量级。</li>
+</ol>
+<p>上述约束意味着预填与生成需要采用不同的优化路径：预填受算力约束，生成受带宽约束。</p>
+<h3>1.3 主要贡献</h3>
+<p>本文的贡献包括：</p>
+<ol>
+<li>一套面向 K1 的量化与内核方案：自量化 Q4_0 配方（共享词嵌入保留 Q6_K）、RVV 16×1 repack、CONCAT 转置快速路径、GQA 折叠与 chunk16 分块，共 7 个补丁、1876 行新增代码。</li>
+<li>一套可复现的测量方法：同板 ABBA、多板中位与四分位距、冷启动与缓存命分离、证据文件与 SHA256 绑定。</li>
+<li>对四个层面的逐层归因：同板四臂对照（stock / 官方新后端 / 官方 MEE / 交付构建）、2×2 分解与 stock A/B，明确每一项增益的来源。</li>
+<li>一套完整的长上下文数据：1K—10K 官方口径曲线、4K—32K 同板曲线、KV 槽位复用与同文档换问题的无损复用。</li>
+</ol>
+<h3>1.4 报告结构</h3>
+<p>第 2 节介绍平台与背景；第 3 节描述方法；第 4 节给出实验设置；第 5 节报告结果；第 6 节讨论机理与边界；第 7 节分析有效性威胁；第 8 节总结。附录给出复现步骤与证据索引。</p>
+<hr>
+<h2>2 平台与背景</h2>
+<h3>2.1 硬件与软件栈</h3>
+<p>实验平台为 MUSE Pi Pro（SpacemiT K1），主要参数见表 1。</p>
+<p><strong>表 1 实验平台参数</strong></p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>参数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SoC</td>
+<td>SpacemiT K1，8 × X60 @ 1.6 GHz</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>8 GB LPDDR4X-2400</td>
+</tr>
+<tr>
+<td>向量扩展</td>
+<td>RVV 256-bit，无 <code>vmadot</code></td>
+</tr>
+<tr>
+<td>矩阵引擎</td>
+<td>2 TOPS，<code>ime</code> 仅 cpu0—cpu3</td>
+</tr>
+<tr>
+<td>实测带宽</td>
+<td>8.17 GB/s</td>
+</tr>
+<tr>
+<td>操作系统</td>
+<td>Bianbu Linux（riscv64）</td>
+</tr>
+<tr>
+<td>推理框架</td>
+<td><code>spacemit-com/llama.cpp</code> fork</td>
+</tr>
+<tr>
+<td>编译工具链</td>
+<td>GCC 14.2</td>
+</tr>
+</tbody>
+</table>
+<h3>2.2 llama.cpp 与量化格式</h3>
+<p>llama.cpp 以 GGUF 格式承载量化权重，常用格式包括 Q4_0、Q4_1、Q4_K_M、Q5_K、Q6_K 与 Q3_K。不同格式的块结构与反量化路径不同：Q4_0 以 32 个权重为一块，附带一个 fp16 缩放因子；Q4_1 额外携带最小值；K-quant 系列采用更复杂的超块结构。K1 的 RVV 实现默认按块反量化后逐元素计算，权重布局与 256-bit 向量寄存器不匹配，是预填吞吐偏低的主要原因之一。</p>
+<h3>2.3 厂商 MEE 后端</h3>
+<p>厂商提供的 MEE（Matrix Extension Engine）后端通过 <code>libggml-cpu.so</code> 调用 <code>ime</code> 指令，在 4 个核心上完成矩阵乘。其预填性能显著优于社区默认实现，但生成阶段以 GEMV 为主，矩阵引擎无法发挥作用。本文将其作为对照臂之一，用于区分“格式/内核贡献”与“矩阵引擎贡献”。</p>
+<h3>2.4 指标定义</h3>
+<ul>
+<li><strong>预填吞吐</strong>：<code>pp512</code> 的 token/s，即处理 512 token 提示的速度；</li>
+<li><strong>生成吞吐</strong>：<code>tg128</code> 的 token/s，即自回归生成 128 token 的速度；</li>
+<li><strong>首 token 时延</strong>：从请求发出到首个 token 返回的端到端时间，包含预填；</li>
+<li><strong>缓存命中</strong>：同一提示第二次请求时的首 token 时延；</li>
+<li><strong>中位与 IQR</strong>：多板/多轮结果取中位数，四分位距用于衡量离散度。</li>
+</ul>
+<hr>
+<h2>3 方法</h2>
+<h3>3.1 总体设计</h3>
+<p>整体流程如下（部署链细节见附录 A）：官方 safetensors 权重经 <code>convert_hf_to_gguf.py</code> 转为 f16 GGUF，再经 <code>llama-quantize</code> 量化为 Q4_0（共享词嵌入保留 Q6_K），最后由带补丁的 llama.cpp 在板端加载。四个优化层面分别为量化方案、内核实现、线程调度与长上下文管理。</p>
+<h3>3.2 量化方案</h3>
+<p>官方发布的 Q4_1 权重并非单一格式：2B 模型包含 186 个 Q4_1 张量、1 个 Q6_K 词嵌入与 133 个 F32 张量，输出头所在的词嵌入占参数约 27%，走非 repack 路径。本文的交付配方为：</p>
+<ul>
+<li>主体采用 Q4_0，使全部线性层落入 repack 快路径；</li>
+<li>输入/输出共享的 <code>token_embd</code> 保留 Q6_K，避免输出头精度损失；</li>
+<li>量化命令固定 <code>--output-tensor-type Q6_K --token-embedding-type Q6_K</code>。</li>
+</ul>
+<p>质量代价以困惑度（PPL）衡量：小语料下 2B 相对第三方混合配方高 4.44%，4B 高 3.53%；扩语料复核为 4.06% 与 5.56%；跨域语料 2B 为 −1.36%（未测出退化），4B 为 +7.89%（未达显著）。</p>
+<h3>3.3 内核改造</h3>
+<h4>3.3.1 Q4_1 repack</h4>
+<p>原始 Q4_1 的块布局为 32 权重一块，反量化后需跨步读取。本文将其重排为 16×1 的向量友好布局，使一次 256-bit 向量乘加可处理 16 个权重，并将缩放因子与最小值预取到连续内存。该补丁新增 374 行，在官方 Q4_1 格式上实现 2B 3.70×、4B 3.65× 的预填提升（旧构建口径）。</p>
+<h4>3.3.2 CONCAT 转置快速路径</h4>
+<p>注意力输出与残差相加时需要转置或拼接，默认实现逐元素拷贝。本文为连续内存的 CONCAT 场景增加快速路径，消除中间缓冲区，预填提升约 17%，新增 29 行。</p>
+<h4>3.3.3 GQA 折叠</h4>
+<p>Qwen3.5 采用分组查询注意力。本文将同一 KV 头的多个查询头的输出折叠后统一计算，减少重复读取。该优化在生成深度 0 上约 +1.2%，在 8K 深度上的历史单板数据为 +6.3%；在上游 master 复测中边际为 +0.45%/−0.74%，未达显著，故不计入主要归因。该补丁新增 154 行。</p>
+<h4>3.3.4 chunk16 分块</h4>
+<p><code>GGML_CPU_CHUNK_MULT</code> 控制批内计算的块大小。默认值 4 使每次 GEMV 只复用少量权重；将其提升至 16 后，一次权重读取可服务 16 个 token 的计算，预填提升 20.8%（2B）与 36.7%（4B），且输出文本逐字节不变、PPL 变化为 0。该补丁新增 15 行。</p>
+<h4>3.3.5 K-quant repack</h4>
+<p>为回馈上游社区，本文将 repack 思路扩展到 Q5_K、Q6_K 与 Q3_K，新增 549、300、455 行。三套实现在上游 master 0.7.0 上内核逻辑零改动（12 个函数、1017 行逐字节一致），Q4_K_M 格式预填从 6.893 提升至 13.686 t/s（+98.5%），生成 +32.5%。</p>
+<h3>3.4 线程调度与并发</h3>
+<p>预填与生成对线程数的需求不同：预填为计算密集型，使用 8 个线程；生成为带宽密集型，线程过多会加剧缓存争用，故退至 7 个线程，同时保持批处理线程数为 8（<code>-t 7 --threads-batch 8</code>）。在 8 GB 板上以 <code>-np 4</code> 开启四路并发，使一次权重读取服务四个请求；2B 的四路聚合吞吐相对串行提升 24.0%（4.307 vs 3.472 t/s），4B 在短输出臂上提升 31.5%、长输出臂上提升 14.6%。</p>
+<h3>3.5 长上下文与 KV 复用</h3>
+<p>长上下文处理包含三项机制：</p>
+<ol>
+<li><strong>分块预填</strong>：以 <code>-ub 128</code>、<code>-b 2048</code> 控制批大小，避免长序列一次性占用过多内存；</li>
+<li><strong>KV 槽位存盘/恢复</strong>：将 6077 token 提示的 KV 状态落盘（135.6 MB），恢复耗时 240.7 ms，同一提示再次请求时预填从 276.2 s 降至 0.698 s；</li>
+<li><strong>上下文 checkpoint 复用</strong>：同一文档换问题时，服务端从最近的 checkpoint 恢复状态并重算约 512 token，时延 26.6—27.3 s，输出与冷启动逐字节一致；若将文档单独预热一次使 checkpoint 精确落在文档末尾，时延可降至 4—5 s，但该路径与“一次喂入”的数值路径不同，输出会在第 32 个 token 分叉，故不作为主口径。</li>
+</ol>
+<hr>
+<h2>4 实验设置</h2>
+<h3>4.1 硬件与软件</h3>
+<p>所有实验在 K1 开发板上完成，构建为 chunk16 交付版（<code>lib16=4436a9f4</code>），模型为自量化 Q4_0（2B 1,202,487,136 B，4B 2,543,899,168 B）。每块板在实验前校验库文件 SHA 与模型字节数。</p>
+<h3>4.2 模型与数据</h3>
+<ul>
+<li>模型：Qwen3.5-2B、Qwen3.5-4B（官方权重，自量化）；</li>
+<li>长上下文语料：中文技术文档与工业文本，按目标 token 数二分校准；</li>
+<li>质量评估：小语料/扩语料困惑度、跨域困惑度、20 题工业固定测试集（关键词判分，≥0.8 记通过）。</li>
+</ul>
+<h3>4.3 测量协议</h3>
+<ul>
+<li><strong>同板 ABBA</strong>：同一块板上按 A/B/B/A 顺序测量，抵消热漂移；</li>
+<li><strong>冷启动</strong>：每次测量前重启服务，确保 KV 为空；</li>
+<li><strong>多板统计</strong>：多块板各取中位，再取板间中位与四分位距；</li>
+<li><strong>首 token</strong>：<code>llama-server</code> 端到端计时，prompt 按 token 精确校准，两臂 prompt 逐字节相同。</li>
+</ul>
+<h3>4.4 指标与统计</h3>
+<p>吞吐类指标取多轮中位；离散度用极差或 IQR 表示；比值类指标在同一协议内计算，不跨协议相减。所有结果文件登记 SHA256，见附录 B。</p>
+<hr>
+<h2>5 结果</h2>
+<h3>5.1 预填性能</h3>
+<p>2B 交付构建的预填吞吐为 25.29 t/s（8 板中位，IQR 25.12—25.55，最小 24.83、最大 25.92）；4B 为 9.84 t/s（3 板中位，原始 9.838/10.007/9.756）。<strong>这里的两个倍数必须分开读</strong>：(i) <strong>部署口径</strong>——上表数字相对官方 Q4_1 基线（2B 5.02、4B 1.96 t/s）为 <strong>5.04×</strong> 与 <strong>5.02×</strong>，它混合了模型格式、内核与分块三件事，不能直接当作&quot;内核优化倍数&quot;；(ii) <strong>同模型同板四臂</strong>（C65/C66，消除格式因素）——2B 19.38 vs 5.02 = <strong>3.86×</strong>、4B 7.717 vs 1.958 = <strong>3.94×</strong>，这一组才回答&quot;我们的构建比官方同格式快多少&quot;。图 1 给出 2B 预填的四段分解：第三方基线 12.17 → 内核 14.60（+19.9%）→ 自量化 20.71（+41.9%）→ chunk16 25.10（+20.8%），累计 +106.2%。</p>
+<p><img src="figs/fig5_waterfall.png" alt="图 1 2B 预填吞吐的逐层分解"></p>
+<h3>5.2 生成性能</h3>
+<p>2B 生成吞吐为 3.91 t/s（t8@512，8 板中位）与 4.37 t/s（t7 零深度，114 单板）；4B 为 2.01 t/s（t7 零深度，单板 128）与 1.97 t/s（4 板中位）。生成受内存带宽约束：4B 在 1.97 t/s 时已消耗约 5.0 GB/s，接近实测上限，故相对 stock 构建仅提升 3.0%；2B 权重 1.20 GB，生成阶段仍有余量，相对 stock 提升约 42%。图 2 给出 2B 生成随深度的保留率：深度 0 为 4.303 t/s，8K 为 3.663 t/s，保留 85.1%。</p>
+<p><img src="figs/fig4_decode_depth.png" alt="图 2 2B 生成吞吐随上下文深度的变化"></p>
+<h3>5.3 首 token 时延</h3>
+<p>表 2 给出首 token 时延及相对 stock 构建的降幅。</p>
+<p><strong>表 2 首 token 时延（冷启动，4 板中位）</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">提示长度</th>
+<th style="text-align:right">2B stock</th>
+<th style="text-align:right">2B chunk16</th>
+<th style="text-align:right">降幅</th>
+<th style="text-align:right">4B stock</th>
+<th style="text-align:right">4B chunk16</th>
+<th style="text-align:right">降幅</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">128</td>
+<td style="text-align:right">7.10 s</td>
+<td style="text-align:right">5.05 s</td>
+<td style="text-align:right">−28.9%</td>
+<td style="text-align:right">18.48 s</td>
+<td style="text-align:right">12.81 s</td>
+<td style="text-align:right">−30.7%</td>
+</tr>
+<tr>
+<td style="text-align:right">512</td>
+<td style="text-align:right">33.38 s</td>
+<td style="text-align:right">19.49 s</td>
+<td style="text-align:right">−41.6%</td>
+<td style="text-align:right">85.97 s</td>
+<td style="text-align:right">49.47 s</td>
+<td style="text-align:right">−42.5%</td>
+</tr>
+<tr>
+<td style="text-align:right">1024</td>
+<td style="text-align:right">67.02 s</td>
+<td style="text-align:right">40.15 s</td>
+<td style="text-align:right">−40.1%</td>
+<td style="text-align:right">173.57 s</td>
+<td style="text-align:right">99.56 s</td>
+<td style="text-align:right">−42.6%</td>
+</tr>
+</tbody>
+</table>
+<p>图 3 给出两模型在三种提示长度下的时延曲线，误差棒为 4 块板的极差。</p>
+<blockquote>
+<p>说明：附录 C 的 C30 记录的是 2026-10-29 单次 summary 值（5.30 / 20.68 / 42.11 s），<br>
+本表取 4 板中位（5.05 / 19.49 / 40.15 s）；两者差 2%—5%，来自板间差异，同一构建同一口径。<br>
+包内 <code>05_模型与测试集/prompts/</code> 提供了三份定长 prompt，可复算绝对值（本包实测 5.02 / 19.9 / 40.6 s）。</p>
+</blockquote>
+<p><img src="figs/fig2_ttft.png" alt="图 3 首 token 时延随提示长度的变化（对数纵轴）"></p>
+<h3>5.4 长上下文</h3>
+<p>图 4 给出 1K—32K 范围内的预填吞吐。1K—10K 为官方递增口径（2B 25.37→16.34，衰减 −35.6%；4B 10.26→7.41，衰减 −27.8%）；4K—32K 为同板补充测量（2B 20.70/17.35/12.82/8.40，4B 9.29/8.11/6.48/4.61）。两段在 8K 处交叉校验：2B 17.35 与 17.81 相差 2.6%，4B 8.11 与 8.01 相差 1.3%。</p>
+<p><img src="figs/fig3_ctx.png" alt="图 4 预填吞吐随上下文长度的变化"></p>
+<p>与同板 stock 构建相比，交付构建的绝对吞吐更高，但相对衰减更陡：2B 的 ΔD 为 −6.44 个百分点，4B 为 −8.58 个百分点。本文不声称改善衰减斜率，仅保证曲线单调、可预测、无悬崖。</p>
+<h3>5.5 并发</h3>
+<p>2B 四路并发（48-token 臂）聚合吞吐 4.307 t/s，串行 3.472 t/s，提升 24.0%；4B 短输出臂 2.027 vs 1.541 t/s（+31.5%），长输出臂 1.241 vs 1.083 t/s（+14.6%）。4B 长输出臂的聚合吞吐低于短输出臂，原因是 512-token 预填在四路并发时争用 8 个核心，预填时间无法被摊薄。</p>
+<h3>5.6 质量</h3>
+<p>质量评估结果见表 3。</p>
+<p><strong>表 3 质量指标</strong></p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th style="text-align:right">2B</th>
+<th style="text-align:right">4B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PPL（小语料，相对第三方）</td>
+<td style="text-align:right">+4.44%</td>
+<td style="text-align:right">+3.53%</td>
+</tr>
+<tr>
+<td>PPL（扩语料，相对第三方）</td>
+<td style="text-align:right">+4.06%</td>
+<td style="text-align:right">+5.56%</td>
+</tr>
+<tr>
+<td>PPL（跨域，相对第三方）</td>
+<td style="text-align:right">−1.36%</td>
+<td style="text-align:right">+7.89%</td>
+</tr>
+<tr>
+<td>固定测试集覆盖</td>
+<td style="text-align:right">0.75</td>
+<td style="text-align:right">0.875</td>
+</tr>
+<tr>
+<td>固定测试集通过（≥0.8）</td>
+<td style="text-align:right">45%</td>
+<td style="text-align:right">70%</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>上表为 2026-10-29 的测量。<strong>2026-11-08 用本包判分脚本在交付构建上复算</strong>（20 题 × 1 轮）：<br>
+2B 覆盖 <strong>0.683</strong>、通过 <strong>35%</strong>；4B 覆盖 <strong>0.921</strong>、通过 <strong>80%</strong>。差异来自构建迭代导致的 greedy 输出变化<br>
+（关键词判分对措辞敏感）；已用同一二进制改 <code>GGML_CPU_CHUNK_MULT</code>（4 vs 16）对照验证<strong>分块补丁不是原因</strong>。<br>
+两套口径都已公开，评委以复算值为准。</p>
+</blockquote>
+<p><strong>多轮推理</strong>（对应评分细则&quot;支持固定测试集的多轮推理&quot;）。除 20 题固定测试集外，另做一组<strong>带完整对话历史</strong>的四轮追问：同一线程逐轮追加 assistant 历史，<code>temperature=0</code>，<code>-fa 0</code>，单次会话 366.8 s。</p>
+<p><strong>表 3b 四轮追问（2B 交付构建，带历史）</strong></p>
+<table>
+<thead>
+<tr>
+<th>轮</th>
+<th>提问</th>
+<th>模型表现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>模温 92℃、超上限 85℃ 已 10 分钟，给处置步骤</td>
+<td>给出停机 → 降温 → 检查 → 记录的完整流程</td>
+</tr>
+<tr>
+<td>2</td>
+<td>&quot;刚才第 3 步由谁执行、向谁汇报？&quot;</td>
+<td><strong>正确回指第 3 步</strong>，答&quot;注塑机操作手 / 班组长&quot;</td>
+</tr>
+<tr>
+<td>3</td>
+<td>&quot;如果 10 分钟后还是没降下来呢？&quot;</td>
+<td>承接前述步骤（急停→冷却→复位）给出升级处置</td>
+</tr>
+<tr>
+<td>4</td>
+<td>&quot;把上面整套流程压缩成三句话&quot;</td>
+<td>输出恰好三条，可直接转述给班组长</td>
+</tr>
+</tbody>
+</table>
+<p>四轮均命中预期关键词（停机/降温/检查、班组、设备、降温），说明<strong>上下文保持有效、多轮指令可跟随</strong>。<br>
+完整转录见 <code>08_证据与复验/results/multiturn-2026-11-08.json</code>。</p>
+<h3>5.7 归因分析</h3>
+<p>表 4 与图 5 给出同板四臂对照。官方新后端在 2B 与 4B 上均不加速（相对 stock −0.5% / +0.4%）；官方 MEE 将预填提升至 19.16 / 7.64 t/s；交付构建的预填与 MEE 处于同一水平（+1.15% / +1.02%），生成则领先 41.9% / 45.8%。</p>
+<p><strong>表 4 同板四臂结果（官方 Q4_1，t8，ABBA 两轮）</strong></p>
+<table>
+<thead>
+<tr>
+<th>臂</th>
+<th style="text-align:right">2B 预填</th>
+<th style="text-align:right">2B 生成</th>
+<th style="text-align:right">4B 预填</th>
+<th style="text-align:right">4B 生成</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>stock</td>
+<td style="text-align:right">5.05</td>
+<td style="text-align:right">2.80</td>
+<td style="text-align:right">1.95</td>
+<td style="text-align:right">1.25</td>
+</tr>
+<tr>
+<td>官方新后端</td>
+<td style="text-align:right">5.02</td>
+<td style="text-align:right">2.86</td>
+<td style="text-align:right">1.96</td>
+<td style="text-align:right">1.18</td>
+</tr>
+<tr>
+<td>官方 MEE</td>
+<td style="text-align:right">19.16</td>
+<td style="text-align:right">2.81</td>
+<td style="text-align:right">7.64</td>
+<td style="text-align:right">1.17</td>
+</tr>
+<tr>
+<td>交付构建（chunk16）</td>
+<td><strong>19.38</strong></td>
+<td><strong>3.99</strong></td>
+<td><strong>7.72</strong></td>
+<td><strong>1.71</strong></td>
+</tr>
+</tbody>
+</table>
+<p><img src="figs/fig1_four_arm.png" alt="图 5 同板四臂对照：预填与生成"></p>
+<p>结合 2×2 分解与 stock A/B，可将预填增益归因如下：内核（repack + CONCAT）贡献约 20%，量化配方贡献约 42%，chunk16 分块贡献约 21%；三者叠加使 2B 预填从 12.17 提升至 25.10 t/s。生成侧的主要贡献来自 repack 对 GEMV 的加速，但受带宽限制，4B 上的收益显著小于 2B。</p>
+<hr>
+<h3>5.8 稳定性与内存</h3>
+<p>2B 交付构建在 7 块板上连续运行 100 分钟：预填中位 24.69 t/s、漂移 +0.04%，生成中位 3.96 t/s，稳态 RSS 1990—2008 MB（板间极差 17.7—18.2 MB），swap 全程为 0，温度峰值 58 ℃，无 OOM。4B 在 114 板连续运行 38 分钟：RSS 4489—4517 MB（极差 27.6 MB），无 OOM。8 GB 板在 4B 四路并发下峰值 RSS 5432 MB，MemAvailable 最低约 3.98 GB。</p>
+<hr>
+<h2>6 讨论</h2>
+<h3>6.1 算力与带宽的分界</h3>
+<p>预填阶段以矩阵乘为主，计算密度高，repack 通过改善权重布局提升向量利用率，因而收益显著；生成阶段每 token 仅做一次 GEMV，计算量小、权重读取量大，性能由带宽决定。以 4B 为例，1.97 t/s × 2.54 GB ≈ 5.0 GB/s，已接近 8.17 GB/s 的实测上限，此时继续优化计算路径收益有限。这一分界解释了为何同一套补丁在 2B 与 4B 上的生成收益相差一个数量级。</p>
+<h3>6.2 与厂商后端的关系</h3>
+<p>MEE 在预填上具有硬件优势，但其覆盖范围限于 4 个核心与特定数据格式，且生成阶段无法利用矩阵引擎。本文的方案在预填上与 MEE 持平，在生成上领先约四成，二者并非替代关系：对以预填为主的场景（长文档摘要、批量分析），MEE 是可选项；对以生成交互为主的场景，repack 路线更合适。</p>
+<h3>6.3 边界</h3>
+<p>本文的结果受以下边界约束：</p>
+<ol>
+<li><strong>长上下文衰减未改善</strong>：4K→32K 的相对衰减为 −59.4%（2B）与 −50.4%（4B），斜率仍由注意力机制的 O(L²) 主导<br>
+（2026-11-07 提交前复核：该组为 <code>-fa auto</code> 口径；显式 <code>-fa 0</code> 同板复测 2B 32K = <strong>10.78 t/s</strong>、衰减 <strong>−52%</strong>，<br>
+另一块板上显式 <code>-fa 1</code> = 8.64 t/s 与原表量级一致——原表偏保守、非高估；<strong>4B 无同板对照，维持 <code>-fa auto</code></strong>）；</li>
+<li><strong>4B 生成提升有限</strong>：相对 stock 仅 +3.0%，受带宽限制；</li>
+<li><strong>32K 为压力数据</strong>：4B 32K 单次预填需 7111 s（约 119 分钟），不作为时延承诺；</li>
+<li><strong>质量存在约 4%—5.6% 的代价</strong>：自量化配方相对第三方混合配方的 PPL 略高，属速度与质量的取舍。</li>
+</ol>
+<hr>
+<h2>7 有效性威胁</h2>
+<p><strong>内部效度</strong>。多板测量中存在板间差异（首 token 板间极差 2.2%—7.0%），本文以板内中位再取板间中位的方式降低其影响；热漂移通过 ABBA 顺序与冷启动协议控制。部分早期数据来自旧构建（717a8ad8），文中均明确标注，不与当前构建混用。</p>
+<p><strong>外部效度</strong>。全部实验在 K1 8 GB 平台完成，结论向其他 RISC-V 平台的迁移性取决于 RVV 宽度、缓存层次与内存带宽，尚未验证。模型范围限于 Qwen3.5-2B/4B，其他架构（如 MoE、混合注意力）的行为可能不同。</p>
+<p><strong>构念效度</strong>。吞吐与首 token 时延是端到端指标，受服务端实现、批处理策略与提示内容影响；本文固定协议并在同一协议内比较，但不保证与其他文献的数字可直接对比。质量以 PPL 与关键词测试集衡量，未覆盖人工评分与长文本生成质量。</p>
+<hr>
+<h2>8 结论</h2>
+<p>本文在 K1 平台上完成了 Qwen3.5-2B/4B 的部署与优化。通过自量化配方、RVV repack、CONCAT、GQA 与 chunk16 分块，预填吞吐达到 25.29 / 9.84 t/s，相对官方格式基线 5.04× / 5.02×（四臂口径 3.86× / 3.94×）；生成吞吐为 3.91 / 2.01 t/s；首 token 时延相对 stock 构建降低 28.9%—42.6%；长上下文在 32K 内保持单调；同一文档换问题的复用时延为 26.6—27.3 s 且输出无损。全部数字绑定证据文件与 SHA256，可通过仓库脚本复验。</p>
+<p>后续工作包括：在更多 RISC-V 平台上验证结论的迁移性；探索 KV 量化与分页注意力在 K1 上的可行实现；将同文档复用从单文档扩展到多文档缓存管理。</p>
+<hr>
+<h2>附录 A 复现步骤</h2>
+<pre><code class="language-bash"># 以下命令均在提交包 03_部署与复现/ 目录下执行
+# 1. 编译（板上，GCC 14.2，约 35 分钟）
+tar xzf ../07_源码与二进制/llama-src-final-717a8ad8.tar.gz &amp;&amp; cd spacemit-llama
+bash ../scripts/build.sh . build
+
+# 2. 量化（从官方原始权重）
+python convert_hf_to_gguf.py Qwen3.5-2B/ --outtype f16 --no-mtp --outfile 2b-f16.gguf
+./build/bin/llama-quantize --output-tensor-type Q6_K --token-embedding-type Q6_K \
+    2b-f16.gguf Qwen3.5-2B-Q4_0-selfmade.gguf Q4_0 8
+
+# 3. 部署与验证（模型按 05_模型与测试集 §2 从网盘下载后放到 05_模型与测试集/models/）
+bash scripts/deploy.sh &lt;板IP&gt; Qwen3.5-2B-Q4_0-selfmade.gguf
+bash scripts/verify.sh Qwen3.5-2B-Q4_0-selfmade.gguf
+</code></pre>
+<h2>附录 B 证据索引</h2>
+<table>
+<thead>
+<tr>
+<th>内容</th>
+<th>文件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>事实登记表（97 条 claim）</td>
+<td><code>08_证据与复验/claims.json</code></td>
+</tr>
+<tr>
+<td>原始实验台账（307 条）</td>
+<td>团队工作仓库 <code>08_实验数据/归档/INDEX.json</code>（不在本包）</td>
+</tr>
+<tr>
+<td>权威性能表（2026-10-28 快照，仅追溯）</td>
+<td><code>90_内部材料/权威性能表_2026-10-28.md</code></td>
+</tr>
+<tr>
+<td>勘误记录（E1—E15）</td>
+<td><code>90_内部材料/勘误表_2026-10-28.md</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>附录 C 负结果清单</h2>
+<p><strong>表 5 已评估但未采用的方案</strong></p>
+<table>
+<thead>
+<tr>
+<th>方向</th>
+<th>实测结果</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>n-gram 投机</td>
+<td>短提示 <code>drafts=0</code> 不触发；长提示 +10%—20%（<code>-fa 0</code>）</td>
+<td>按需可选，不默认开启</td>
+</tr>
+<tr>
+<td>MTP 投机</td>
+<td>64K 前缀中无汉字 token，无法裁出可用 draft</td>
+<td>不可行</td>
+</tr>
+<tr>
+<td>0.8B draft 模型</td>
+<td>−35.9%</td>
+<td>负收益</td>
+</tr>
+<tr>
+<td>KV cache q8_0</td>
+<td>8K 预填 −30.3%</td>
+<td>负收益</td>
+</tr>
+<tr>
+<td>FlashAttention</td>
+<td>8K 预填 −20.45%</td>
+<td>负收益</td>
+</tr>
+<tr>
+<td>GQA 折叠</td>
+<td>上游 master 边际 +0.45% / −0.74%</td>
+<td>不显著，不计入</td>
+</tr>
+<tr>
+<td>TCM 共享内存</td>
+<td>固件无驱动，堆回退 −1.4%</td>
+<td>不可用</td>
+</tr>
+<tr>
+<td>透明大页（THP）</td>
+<td>无收益</td>
+<td>未采用</td>
+</tr>
+<tr>
+<td>M=8 内核变体</td>
+<td>无显著收益</td>
+<td>未采用</td>
+</tr>
+</tbody>
+</table>
+<h2>附录 D 分板数据</h2>
+<p>首 token 的 4 板极差（板内 3 次冷启动取中位，再取板间极差）：</p>
+<p><strong>表 6 首 token 板间极差</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">提示长度</th>
+<th>2B stock</th>
+<th>2B chunk16</th>
+<th>4B stock</th>
+<th>4B chunk16</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">128</td>
+<td>6.92—7.17 s</td>
+<td>5.02—5.37 s</td>
+<td>18.30—18.81 s</td>
+<td>12.29—12.89 s</td>
+</tr>
+<tr>
+<td style="text-align:right">512</td>
+<td>32.94—34.32 s</td>
+<td>19.25—19.66 s</td>
+<td>85.27—86.05 s</td>
+<td>49.04—49.53 s</td>
+</tr>
+<tr>
+<td style="text-align:right">1024</td>
+<td>66.76—68.27 s</td>
+<td>39.98—40.32 s</td>
+<td>172.86—174.33 s</td>
+<td>99.09—100.85 s</td>
+</tr>
+</tbody>
+</table>
+<p>分板原始值与逐格中位见证据文件 <code>ttft-stock-ab-4boards-1101.json</code> 与 <code>ttft-4b-stock-ab-4boards-1101.json</code>。</p>
+<hr>
+<h2>附录 E claim 索引</h2>
+<p>下表为 <code>08_证据与复验/claims.json</code> 的逐条摘要（97 条），完整字段（SHA256、取值表达式、构建标签、取代关系）见该文件。</p>
+<p><strong>表 7 claim 索引</strong></p>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>内容摘要</th>
+<th>登记值</th>
+<th>证据文件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C01</td>
+<td>官方 Q4_1 格式的 prefill，在 t4 下由基线 2.7…</td>
+<td>{'model': '官方-Q4_1-2B', 'cfg': 'pp128+tg128 t4', 'metric': 'prefill', 'a': 2.795, 'b': 11.326, 'ratio': 4.053}</td>
+<td><code>authoritative-ab-1028-1812.json</code></td>
+</tr>
+<tr>
+<td>C02</td>
+<td>官方 Q4_1 格式的 prefill，在 t8 下由基线 5.0…</td>
+<td>{'model': '官方-Q4_1-2B', 'cfg': 'pp512+tg128 t8', 'metric': 'prefill', 'a': 5.024, 'b': 18.608, 'ratio': 3.704}（历史）</td>
+<td><code>authoritative-ab-1028-1812.json</code></td>
+</tr>
+<tr>
+<td>C03</td>
+<td>Q4_0 格式的 prefill，CONCAT 修复使 12.51…</td>
+<td>{'model': '2B-Q4_0', 'cfg': 'pp512+tg128 t8', 'metric': 'prefill', 'a': 12.509, 'b': 14.671, 'ratio': 1.173}</td>
+<td><code>authoritative-ab-1028-1812.json</code></td>
+</tr>
+<tr>
+<td>C04</td>
+<td>2B requant 重算使 prefill 14.76 → 20…</td>
+<td>14.755 / 20.6145</td>
+<td><code>verify-requant-1028-1948.json</code></td>
+</tr>
+<tr>
+<td>C05</td>
+<td>4B requant 重算使 prefill 5.11 → 7.4…</td>
+<td>5.11449 / 7.45049</td>
+<td><code>verify-requant4b-1028-2103.json</code></td>
+</tr>
+<tr>
+<td>C06</td>
+<td>2B 长上下文 30 分钟 soak：RSS 均值 2287.08…</td>
+<td>2287.08</td>
+<td><code>memsoak-20261028-1720.json</code></td>
+</tr>
+<tr>
+<td>C07</td>
+<td>4B 长上下文 30 分钟 soak：RSS 均值 5114.30…</td>
+<td>5114.3</td>
+<td><code>memsoak-20261028-1720.json</code></td>
+</tr>
+<tr>
+<td>C08</td>
+<td>2B 4K 上下文预填 13.221 t/s（新构建，比旧曲线 +…</td>
+<td>13.221</td>
+<td><code>ctxcurve-v2-1028-2103.json</code></td>
+</tr>
+<tr>
+<td>C09</td>
+<td>2B 32K 上下文预填 6.854 t/s（8× 衰减 −48.…</td>
+<td>6.854</td>
+<td><code>ctxcurve-v2-1028-2103.json</code></td>
+</tr>
+<tr>
+<td>C10</td>
+<td>4B-Q4_0 在 10 块板上预填中位 5.148 t/s（IQ…</td>
+<td>5.148（历史）</td>
+<td><code>fleet4b-1028-1941.json</code></td>
+</tr>
+<tr>
+<td>C11</td>
+<td>4B 生成 t7 中位 1.750 t/s vs t8 1.553…</td>
+<td>1.75 / 1.553</td>
+<td><code>fleet4b-1028-1941.json</code></td>
+</tr>
+<tr>
+<td>C13</td>
+<td>我方从官方 f16 量化的 selfmade 文件 prefill…</td>
+<td>20.53 / 14.49</td>
+<td><code>threeway-model-1028-2247.json</code></td>
+</tr>
+<tr>
+<td>C14</td>
+<td>selfmade 模型 SHA256 前 16 位 27a6836…</td>
+<td>27a683603a6ae7165bb2e393b4f57bbdec24aaf5e11ee1c58c7d01ea23bb19df</td>
+<td><code>threeway-model-1028-2247.json</code></td>
+</tr>
+<tr>
+<td>C12</td>
+<td>固定测试集 2B 平均覆盖 0.817（20 题 × 3 轮，gr…</td>
+<td>0.817</td>
+<td><code>testset-2B-1028-2009.json</code></td>
+</tr>
+<tr>
+<td>C15</td>
+<td>2B 交付模型 decode 3.74 t/s，第三方 Q4_0 …</td>
+<td>3.74 / 3.46</td>
+<td><code>threeway-model-1028-2247.json</code></td>
+</tr>
+<tr>
+<td>C16</td>
+<td>官方 Q4_1 的 decode 在 t4 下由 1.92 提升到…</td>
+<td>1.92 / 3.471</td>
+<td><code>authoritative-ab-1028-1812.json</code></td>
+</tr>
+<tr>
+<td>C17</td>
+<td>官方 Q4_1 的 decode 在 t8 下由 2.97 提升到…</td>
+<td>2.968 / 3.668</td>
+<td><code>authoritative-ab-1028-1812.json</code></td>
+</tr>
+<tr>
+<td>C18</td>
+<td>关掉 repack 内核后 requant 增益从 +46.6% …</td>
+<td>6.5 / 46.6</td>
+<td><code>repack-ablation-1028.json</code></td>
+</tr>
+<tr>
+<td>C19</td>
+<td>8GB 板 4 客户端并发：-np 4 聚合 3.956 t/s，…</td>
+<td>3.956 / 3.286（历史）</td>
+<td><code>concurrency-8gb-1028-2229.json</code></td>
+</tr>
+<tr>
+<td>C20</td>
+<td>官方 Q4_1 模型 t8：我方 pp512 18.09 t/s，…</td>
+<td>18.086 / 19.35</td>
+<td><code>ime1-formal-1029.json</code></td>
+</tr>
+<tr>
+<td>C21</td>
+<td>交付模型 selfmade 上 t8：我方 pp512 22.08…</td>
+<td>22.076 / 13.808</td>
+<td><code>ime1-formal-1029.json</code></td>
+</tr>
+<tr>
+<td>C23</td>
+<td>2B 交付模型预填：4K 16.169 / 8K 13.726 /…</td>
+<td>16.169 / 13.726 / 10.734</td>
+<td><code>ctx2b-selfmade-final-1029-0040.json</code></td>
+</tr>
+<tr>
+<td>C26</td>
+<td>2B PPL：交付模型 38.5085 vs 第三方 unslot…</td>
+<td>38.5085 / 36.8719</td>
+<td><code>ppl-pair-outhead-1029-0118.json</code></td>
+</tr>
+<tr>
+<td>C27</td>
+<td>4B PPL：交付模型 20.9262 vs 第三方 unslot…</td>
+<td>20.9262 / 20.2131</td>
+<td><code>ppl-pair-outhead-1029-0118.json</code></td>
+</tr>
+<tr>
+<td>C28</td>
+<td>第三方 Q4_0 文件上，交付构建把 prefill 从 12.1…</td>
+<td>12.174 / 14.601</td>
+<td><code>ab2x2-unsloth-1029-0111.json</code></td>
+</tr>
+<tr>
+<td>C29</td>
+<td>同构建下换成我方 selfmade，prefill 从 14.60…</td>
+<td>17.251 / 20.72</td>
+<td><code>ab2x2-selfmade-1029-0118.json</code></td>
+</tr>
+<tr>
+<td>C30</td>
+<td>2B 冷启动首 token（chunk16 交付构建 4436a9…</td>
+<td>5.3 / 20.68 / 42.11</td>
+<td><code>chunk16-delivery-summary-1029.json</code></td>
+</tr>
+<tr>
+<td>C58</td>
+<td>chunk16 分块倍率并入交付（lib 4436a9f4）：2B…</td>
+<td>20.79 / 36.73</td>
+<td><code>chunk16-delivery-summary-1029.json</code></td>
+</tr>
+<tr>
+<td>C59</td>
+<td>长上下文双曲线（同板 114，两臂 lib SHA 存证 eb79…</td>
+<td>-6.44 / -8.58 / 29.03 / 35.47</td>
+<td><code>ctx-dual-curve-dd-v2-1030.json</code></td>
+</tr>
+<tr>
+<td>C60</td>
+<td>首 token 对照（2B，单板各 1 台 × 3 次重复；sto…</td>
+<td>5028.1 / 19594.0 / 40231.1</td>
+<td><code>ttft-ttft-c16-2b-r2-1030-0039.json</code></td>
+</tr>
+<tr>
+<td>C61</td>
+<td>4B 交付模型 3 板复核（chunk16）：pp512 中位 9…</td>
+<td>9.838</td>
+<td><code>devil-fixes-1030.json</code></td>
+</tr>
+<tr>
+<td>C62</td>
+<td>官方 Q4_1 在 chunk16 交付构建上：2B 19.49 …</td>
+<td>19.49 / 7.74652</td>
+<td><code>devil-fixes-1030.json</code></td>
+</tr>
+<tr>
+<td>C63</td>
+<td>扩语料 PPL 复核（约 10,240 token）：selfma…</td>
+<td>4.06 / 5.56</td>
+<td><code>ppl-bigcorpus-delta-1030.json</code></td>
+</tr>
+<tr>
+<td>C64</td>
+<td>同板三臂（旧构建+MEE 对照；官方 Q4_1、t8、113 板、…</td>
+<td>5.051 / 19.163 / 19.384 / 3.987 / 2.809（历史）</td>
+<td><code>ladder-five-chunk16-1031.json</code></td>
+</tr>
+<tr>
+<td>C65</td>
+<td>同板四臂（官方 Q4_1、t8、113 板、ABBA 两轮；spa…</td>
+<td>5.051 / 5.024 / 19.163 / 19.384 / 2.809 / 3.987 / 41.94</td>
+<td><code>ladder-four-arm-final-1031.json</code></td>
+</tr>
+<tr>
+<td>C31</td>
+<td>K1 内存带宽 8 线程实测中位 8.17 GB/s（最大 8.2…</td>
+<td>8.17</td>
+<td><code>measured.json</code></td>
+</tr>
+<tr>
+<td>C32</td>
+<td>chunk16 交付构建 + 交付模型（2B）：8 板中位 pp5…</td>
+<td>25.642 / 3.913</td>
+<td><code>fleet-2b-chunk16-1029-2217.json</code></td>
+</tr>
+<tr>
+<td>C33</td>
+<td>4B 官方 Q4_1：t8 预填 1.971 → 7.193 t/…</td>
+<td>1.971 / 7.193 / 1.216 / 1.718（历史）</td>
+<td><code>ab-4b-q41-1029-0155.json</code></td>
+</tr>
+<tr>
+<td>C34</td>
+<td>4B 官方 Q4_1：t4 预填 1.073 → 4.387 t/…</td>
+<td>1.073 / 4.387</td>
+<td><code>ab-4b-q41-1029-0155.json</code></td>
+</tr>
+<tr>
+<td>C35</td>
+<td>2B 交付模型 32K 预填 7.459 t/s（32663 to…</td>
+<td>7.459</td>
+<td><code>ctx2b-32k-fix-1029-0151.json</code></td>
+</tr>
+<tr>
+<td>C36</td>
+<td>4B 交付模型（单板 125，2 reps）：预填 7.46 t/…</td>
+<td>7.46 / 1.717 / 1.926（历史）</td>
+<td><code>fleet-4b-final-1029-0228.json</code></td>
+</tr>
+<tr>
+<td>C37</td>
+<td>固定测试集 4B：平均覆盖 0.875、通过率 0.70（20 题…</td>
+<td>0.875 / 0.7</td>
+<td><code>testset-4b-selfmade-1029-0230.json</code></td>
+</tr>
+<tr>
+<td>C38</td>
+<td>4B 交付模型预填：4K 6.232 / 8K 5.513 / 1…</td>
+<td>6.232 / 5.513 / 4.651 / 3.723</td>
+<td><code>ctx4b-selfmade-final-1029-0330.json</code></td>
+</tr>
+<tr>
+<td>C39</td>
+<td>固定测试集 2B 交付模型：平均覆盖 0.75、通过率 0.45（…</td>
+<td>0.75 / 0.45</td>
+<td><code>testset-2b-selfmade-1029-0337.json</code></td>
+</tr>
+<tr>
+<td>C40</td>
+<td>4B 冷启动首 token（chunk16 交付构建，单板 130…</td>
+<td>12.9 / 49.98 / 100.84（历史）</td>
+<td><code>chunk16-delivery-summary-1029.json</code></td>
+</tr>
+<tr>
+<td>C57</td>
+<td>Q4_1 的 m' 改 fp32 后 PPL 反而从 +0.277…</td>
+<td>0.2768 / 0.4472</td>
+<td><code>master-port-x-1029.json</code></td>
+</tr>
+<tr>
+<td>C55</td>
+<td>外围三补丁移植 master 0.7.0：官方 Q4_1 预填 5…</td>
+<td>3.565 / 18.67</td>
+<td><code>master-port-x-1029.json</code></td>
+</tr>
+<tr>
+<td>C56</td>
+<td>外围三补丁的 PPL 代价：官方 Q4_1 34.9703→35.…</td>
+<td>34.9703 / 35.0671 / 0.2768</td>
+<td><code>master-port-x-1029.json</code></td>
+</tr>
+<tr>
+<td>C53</td>
+<td>K-quant 三补丁移植到上游 master 0.7.0：内核逻…</td>
+<td>98.5 / 32.5</td>
+<td><code>master-port-y-1029-1603.json</code></td>
+</tr>
+<tr>
+<td>C54</td>
+<td>Q3_K 移植到 master：Q3_K_M 预填 +64.5%（…</td>
+<td>64.5 / -5.7</td>
+<td><code>master-port-y-1029-1603.json</code></td>
+</tr>
+<tr>
+<td>C52</td>
+<td>KV 存盘/恢复：8K 提示冷预填 576.2 s → 保存 41…</td>
+<td>576207.2 / 412.6 / 186.5 / 907.7 / 634.8（历史）</td>
+<td><code>slotpersist_raw.json</code></td>
+</tr>
+<tr>
+<td>C51</td>
+<td>同板四臂（官方 Q4_1，t8 预填）：社区默认 4.994 / …</td>
+<td>4.994 / 4.999 / 19.383 / 18.134（历史）</td>
+<td><code>ladder-four-clean-1029-1413.json</code></td>
+</tr>
+<tr>
+<td>C50</td>
+<td>交付 4B 模型 soak：RSS 暖机后平台 4.49—4.52…</td>
+<td>4516.2 / 4488.8 / 3675.8（历史）</td>
+<td><code>soak-4b-steady-1029.json</code></td>
+</tr>
+<tr>
+<td>C49</td>
+<td>4B 冷启动首 token：256 token 33.50 s、4…</td>
+<td>33.5 / 59.61</td>
+<td><code>ttft-4b-short-1029-1352.json</code></td>
+</tr>
+<tr>
+<td>C48</td>
+<td>交付 4B 模型 31 分钟 soak（12 轮 pp512+tg…</td>
+<td>7.33087 / 1.69523</td>
+<td><code>soak-4b-1029-1349.json</code></td>
+</tr>
+<tr>
+<td>C47</td>
+<td>交付 2B 模型 30 分钟 soak（24 轮 pp512+tg…</td>
+<td>21.182 / 3.901 / 86.6 / 1921.5 / 2008.1（历史）</td>
+<td><code>soak-2b-steady-1029.json</code></td>
+</tr>
+<tr>
+<td>C45</td>
+<td>2B 长上下文 1K→10K（chunk16 交付构建，123 板…</td>
+<td>25.365 / 23.217 / 20.874 / 17.814 / 16.343</td>
+<td><code>chunk16-delivery-summary-1029.json</code></td>
+</tr>
+<tr>
+<td>C46</td>
+<td>4B 长上下文 1K→10K（chunk16 交付构建，130 板…</td>
+<td>10.26 / 9.724 / 9 / 8.009 / 7.405</td>
+<td><code>chunk16-delivery-summary-1029.json</code></td>
+</tr>
+<tr>
+<td>C44</td>
+<td>上游 master 0.7.0 默认构建（社区版本基线）与 for…</td>
+<td>5.027 / 17.148</td>
+<td><code>master-baseline-1029-1219.json</code></td>
+</tr>
+<tr>
+<td>C43</td>
+<td>Q3_K 16×1 repack（叠加在 Q5_K 补丁之上）：Q…</td>
+<td>9.52373 / 14.3133 / 3.59716 / 3.39326</td>
+<td><code>q3k-bench-1029.json</code></td>
+</tr>
+<tr>
+<td>C42</td>
+<td>Q2_K 标定（单板 2 reps，build-final）：预填…</td>
+<td>14.026 / 4.012 / 4.141</td>
+<td><code>q2k-calib-1029-0942.json</code></td>
+</tr>
+<tr>
+<td>C41</td>
+<td>chunk16 交付构建 + 交付模型（4B）：pp512 9.9…</td>
+<td>9.969 / 1.769 / 2.006</td>
+<td><code>chunk16-delivery-summary-1029.json</code></td>
+</tr>
+<tr>
+<td>C66</td>
+<td>4B 同板四臂（官方 Q4_1、t8、113 板、ABBA 两轮）…</td>
+<td>1.951 / 1.958 / 7.639 / 7.717 / 1.02 / 45.81</td>
+<td><code>ladder-4b-four-arm-1031.json</code></td>
+</tr>
+<tr>
+<td>C67</td>
+<td>GQA 折叠在 master 0.7.0 上的边际（qcg 减 q…</td>
+<td>0.45 / -0.74</td>
+<td><code>master-port-x-1029.json</code></td>
+</tr>
+<tr>
+<td>C68</td>
+<td>厂商 MEE 的 /dev/tcm_sync_mem 在 17/1…</td>
+<td>0 / 17 / 17.06 / 17.3 / -1.39</td>
+<td><code>tcm-probe-1101.json</code></td>
+</tr>
+<tr>
+<td>C69</td>
+<td>4B 冷启动首 token 升级为 3 板（125/126/128…</td>
+<td>12.454 / 49.897 / 101.354</td>
+<td><code>ttft-4b-3boards-1101.json</code></td>
+</tr>
+<tr>
+<td>C70</td>
+<td>8GB 板 4 客户端并发（chunk16，122 板，各 3 次…</td>
+<td>4.307 / 3.472 / 24 / 8.9 / 5.396 / 3.877 / 39.2</td>
+<td><code>concurrency-8gb-chunk16-1101.json</code></td>
+</tr>
+<tr>
+<td>C71</td>
+<td>KV 槽位存盘/恢复（chunk16，124 板，6077 tok…</td>
+<td>276.2 / 698.2 / 395.6 / 6.81</td>
+<td><code>kv-persist-chunk16-1101.json</code></td>
+</tr>
+<tr>
+<td>C81</td>
+<td>核数对等性（官方 Q4_1、同板 ABBA、n=4/格，2026-…</td>
+<td>19.295 / 19.35 / 11.222 / 18.086（历史）</td>
+<td><code>ime1-formal-1029.json</code></td>
+</tr>
+<tr>
+<td>C92</td>
+<td>MEE 的 TCM 回退不影响 decode，+41.9% 站得住…</td>
+<td>2.832 / 2.839</td>
+<td><code>mee-tcm-decode-ab-1101.json</code></td>
+</tr>
+<tr>
+<td>C91</td>
+<td>KV 量化的旧归因要改，但负结果是真的（混合注意力下重估 + 旧协…</td>
+<td>96 / 7.7246 / 3.7569</td>
+<td><code>kv-quant-retest-1101.json</code></td>
+</tr>
+<tr>
+<td>C87</td>
+<td>n-gram 投机不是负收益，旧的 −24.2% 是参数落错格：构…</td>
+<td>2.651 / 4.048 / True</td>
+<td><code>ngram-spec-retest-1101.json</code></td>
+</tr>
+<tr>
+<td>C88</td>
+<td>--poll（自旋等待）不解释 -t8 变慢：t8 在 poll=…</td>
+<td>4.426 / 3.808 / 3.797</td>
+<td><code>poll-spin-contention-1101.json</code></td>
+</tr>
+<tr>
+<td>C89</td>
+<td>-t8 慢于 -t7 的三个假设全被否（8 臂 × 2 轮回文）：…</td>
+<td>4.294 / 3.937 / 3.328</td>
+<td><code>thread-cluster-attribution-1101.json</code></td>
+</tr>
+<tr>
+<td>C90</td>
+<td>n-gram 提速可复现，但输出不是逐字节无损（独立复核，另一块板…</td>
+<td>4.14 / 4.843 / 16.98</td>
+<td><code>ngram-spec-replicate2-1101.json</code></td>
+</tr>
+<tr>
+<td>C86</td>
+<td>decode 随深度的保留率（chunk16 交付构建、2B、t7…</td>
+<td>4.303 / 4.286 / 4.04 / 3.663 / 85.1</td>
+<td><code>ctx-decode-depth-1101.json</code></td>
+</tr>
+<tr>
+<td>C85</td>
+<td>核数对等性（用 taskset 把「可用 CPU 数」与「线程数」…</td>
+<td>10.452 / 17.325 / 11.095 / 19.099</td>
+<td><code>fairness-4core-8core-1101.json</code></td>
+</tr>
+<tr>
+<td>C82</td>
+<td>K1 两簇硬件不同：/proc/cpuinfo 的 ISA 里只有…</td>
+<td>False / 19.544</td>
+<td><code>mee-ime2-probe-1101.json</code></td>
+</tr>
+<tr>
+<td>C84</td>
+<td>FlashAttention 在 8K 长上下文下仍是负收益（全项…</td>
+<td>3.276 / 2.606 / -20.45</td>
+<td><code>fa-8k-1101.json</code></td>
+</tr>
+<tr>
+<td>C83</td>
+<td>大页（THP）假设被否：decode 只跑到带宽的 64%，怀疑是…</td>
+<td>-11.09 / -2.9 / True</td>
+<td><code>thp-probe2-1101.json</code></td>
+</tr>
+<tr>
+<td>C80</td>
+<td>4B 交付模型（2,543,899,168 B）+ chunk16…</td>
+<td>9.913 / 1.658 / 27.6 / 54</td>
+<td><code>soak-4b-chunk16-1board-1101.json</code></td>
+</tr>
+<tr>
+<td>C79</td>
+<td>2B 冷启动首 token 3 板复核（125/128/118，c…</td>
+<td>5.154 / 20.272 / 41.61</td>
+<td><code>ttft-2b-3boards-1101.json</code></td>
+</tr>
+<tr>
+<td>C78</td>
+<td>输出头 Q6_K→Q4_0 的取舍（chunk16，逐张量隔离）：…</td>
+<td>7.645 / 2.015 / 3.164 / 1.167 / -131.1</td>
+<td><code>outhead-q4-vs-q6-1101.json</code></td>
+</tr>
+<tr>
+<td>C77</td>
+<td>GGML_CPU_CHUNK_MULT 全扫（4/8/12/16/…</td>
+<td>26.2903 / 0 / 10.4191 / 1.93 / True</td>
+<td><code>chunk-mult-sweep-1101.json</code></td>
+</tr>
+<tr>
+<td>C75</td>
+<td>4B 在我们的 selfmade 配方上：官方 MEE 6.359…</td>
+<td>6.359 / 8.936 / 40.53 / 34.04</td>
+<td><code>mee-4b-selfmade-1101.json</code></td>
+</tr>
+<tr>
+<td>C76</td>
+<td>unsloth 第三方 4B（Qwen3.5-4B-Q4_0.gg…</td>
+<td>0.871 / 13 / 0.875 / 14 / -0.4</td>
+<td><code>testset-4b-unsloth-1101.json</code></td>
+</tr>
+<tr>
+<td>C73</td>
+<td>2B 交付构建（chunk16 + 交付模型）7 板 × 100 …</td>
+<td>24.694 / 0.04 / 3.962 / 18.2 / 58</td>
+<td><code>soak-chunk16-7boards-1101.json</code></td>
+</tr>
+<tr>
+<td>C74</td>
+<td>2B 预填 8 板复测（逐板验证 lib sha16 与模型字节，…</td>
+<td>25.294 / 24.831 / 25.915 / 8 / True</td>
+<td><code>fleet-2b-chunk16-attested-1101.json</code></td>
+</tr>
+<tr>
+<td>C72</td>
+<td>跨域 PPL（英文技术文档 + C++ 源码 + 合成工业告警日志…</td>
+<td>-1.36 / 7.89 / 9 / 8.4403 / 9.4666</td>
+<td><code>ppl-crossdomain-1101.json</code></td>
+</tr>
+<tr>
+<td>C93</td>
+<td>2B 首 token 的 stock vs chunk16 A/B…</td>
+<td>7096.6 / 5047.3 / 33384.3 / 19489.2 / 67022.1 / 40151.4</td>
+<td><code>ttft-stock-ab-4boards-1101.json</code></td>
+</tr>
+<tr>
+<td>C94</td>
+<td>同一文档、换问题（不预热；2B/chunk16；6077 toke…</td>
+<td>10.2 / 27082.8 / 275832.8 / 512</td>
+<td><code>长前缀复用-复现-1101.json</code></td>
+</tr>
+<tr>
+<td>C95</td>
+<td>4B 首 token 的 stock vs chunk16 A/B…</td>
+<td>18484.1 / 12809.2 / 85968.8 / 49471.3 / 173570.9 / 99563.1</td>
+<td><code>ttft-4b-stock-ab-4boards-1101.json</code></td>
+</tr>
+<tr>
+<td>C96</td>
+<td>2B 长上下文 chunk16 同板曲线（116）：4K/8K/1…</td>
+<td>20.7 / 17.352 / 12.822 / 8.4</td>
+<td><code>ctx-curve-2b-chunk16-1101.json</code></td>
+</tr>
+<tr>
+<td>C97</td>
+<td>4B 长上下文 chunk16 同板曲线（125）：4K/8K/1…</td>
+<td>9.289 / 8.113 / 6.48</td>
+<td><code>ctx-curve-4b-chunk16-1101.json</code></td>
+</tr>
+<tr>
+<td>C98</td>
+<td>4B 32K chunk16 单点（125）：32768 toke…</td>
+<td>32768 / 7110996.9 / 4.608</td>
+<td><code>ctx-32k-4b-chunk16-1101.json</code></td>
+</tr>
+<tr>
+<td>C99</td>
+<td>4B 四路并发（118，8 GB，chunk16）：48-toke…</td>
+<td>2.027 / 31.5 / 14.6</td>
+<td><code>concurrency-4b-chunk16-1101.json</code></td>
+</tr>
+<tr>
+<td>C100</td>
+<td>4B 零深度 decode 的 stock vs chunk16（…</td>
+<td>1.913 / 1.97 / 3.03</td>
+<td><code>ttft-4b-stock-ab-4boards-1101.json</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>本文所有数字以 <code>claims.json</code> 的当前值为准；历史值与当前值不混用。</em></p>
+</body></html>

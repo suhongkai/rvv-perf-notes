@@ -1,0 +1,15 @@
+{
+ "task": "soak-steady-rss",
+ "source": "08_实验数据/soak-4b-rss-1029-1413.json",
+ "note": "剔除启动段(<200MB)；RSS 在暖机后进入平台区，用 >=95% 峰值的点定义平台。",
+ "host": "10.65.21.114",
+ "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+ "prefill_median": 7.396,
+ "decode_median": 1.677,
+ "peak_mb": 4516.2,
+ "plateau_mb_min": 4488.8,
+ "plateau_mb_max": 4516.2,
+ "plateau_n": 120,
+ "headroom_mb_8gb": 3675.8,
+ "monotonic_growth": false
+}

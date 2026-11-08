@@ -1,0 +1,34 @@
+{
+ "task": "same-board four-arm incl spacemit + chunk16",
+ "host": "10.65.21.113",
+ "model": "SpacemiT-Qwen3.5-2B-Q4_1-official.gguf",
+ "protocol": "pp512+tg128 -t 8 -ub 128 -r 3 -fa 0；2 轮 ABBA（spacemit 臂 10-31 21:56 补测）",
+ "arms": {
+  "stock": {
+   "prefill": 5.051,
+   "decode": 2.798,
+   "lib16": "eb79a850972b25c2"
+  },
+  "spacemit": {
+   "prefill": 5.024,
+   "decode": 2.856,
+   "lib16": "6909231321d5ce56"
+  },
+  "mee": {
+   "prefill": 19.163,
+   "decode": 2.809,
+   "lib16": "f20686b3b486a2de"
+  },
+  "chunk16": {
+   "prefill": 19.384,
+   "decode": 3.987,
+   "lib16": "4436a9f45bcc298b"
+  }
+ },
+ "deltas_pct": {
+  "chunk16_vs_mee_prefill": 1.15,
+  "chunk16_vs_mee_decode": 41.94,
+  "spacemit_vs_stock_prefill": -0.53
+ },
+ "note": "spacemit 臂为补测（同板同模型同协议、时间不同）；上一轮误判卡死已更正：该后端单轮约 550 s"
+}

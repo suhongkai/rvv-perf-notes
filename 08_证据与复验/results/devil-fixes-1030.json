@@ -1,0 +1,98 @@
+{
+ "task": "devil-advocate fixes",
+ "date": "2026-10-30",
+ "build": "chunk16 lib 4436a9f4",
+ "cells": {
+  "fleet4b": [
+   {
+    "host": "10.65.21.128",
+    "tag": "fleet4b-c16",
+    "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+    "prefill": [
+     9.837596
+    ],
+    "decode": [
+     1.769245
+    ],
+    "ok": true
+   },
+   {
+    "host": "10.65.21.130",
+    "tag": "fleet4b-c16",
+    "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+    "prefill": [
+     10.006936
+    ],
+    "decode": [
+     1.715667
+    ],
+    "ok": true
+   },
+   {
+    "host": "10.65.21.114",
+    "tag": "fleet4b-c16",
+    "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+    "prefill": [
+     9.755525
+    ],
+    "decode": [
+     1.637861
+    ],
+    "ok": true
+   }
+  ],
+  "q41": [
+   {
+    "host": "10.65.21.113",
+    "tag": "q41-c16",
+    "model": "SpacemiT-Qwen3.5-2B-Q4_1-official.gguf",
+    "prefill": [
+     19.489967
+    ],
+    "decode": [
+     4.042079
+    ],
+    "ok": true
+   },
+   {
+    "host": "10.65.21.114",
+    "tag": "q41-c16",
+    "model": "SpacemiT-Qwen3.5-4B-Q4_1-official.gguf",
+    "prefill": [
+     7.746524
+    ],
+    "decode": [
+     1.714507
+    ],
+    "ok": true
+   }
+  ],
+  "ppl": [
+   {
+    "host": "10.65.21.123",
+    "model": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+    "ppl": 20.1617,
+    "raw": "2.32.635.044 I perplexity: 137.22 seconds per pass - ETA 11.43 minutes\n11.43.881.232 I Final estimate: PPL = 20.1617 +/- 0.93395"
+   },
+   {
+    "host": "10.65.21.128",
+    "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+    "ppl": 16.8886,
+    "raw": "5.12.624.137 I perplexity: 283.36 seconds per pass - ETA 23.60 minutes\n24.10.202.254 I Final estimate: PPL = 16.8886 +/- 0.77764"
+   }
+  ]
+ },
+ "summary": {
+  "fleet4b_prefill_median": 9.838,
+  "fleet4b_n": 3,
+  "fleet4b_raw": [
+   9.838,
+   10.007,
+   9.756
+  ],
+  "q41_2b": 19.489967,
+  "q41_4b": 7.746524,
+  "ppl_2b": 20.1617,
+  "ppl_4b": 16.8886
+ }
+}

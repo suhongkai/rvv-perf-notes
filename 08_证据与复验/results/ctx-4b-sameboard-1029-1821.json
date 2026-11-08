@@ -1,0 +1,130 @@
+{
+ "task": "ctx-server",
+ "tag": "ctx-4b-sameboard",
+ "method": "llama-server 单遍，/tokenize 裁剪提示，/completion n_predict=1；取 timings.prompt_per_second",
+ "build": {
+  "bin": "build-final",
+  "libggml_cpu_sha256": "717a8ad8..."
+ },
+ "corpus": "06_素材库/src/ppl-corpus-zh.txt（重复拼接）",
+ "wall_s": 4777.1,
+ "summary": {
+  "4b@1024": {
+   "n": 1,
+   "median": 6.328,
+   "min": 6.328,
+   "max": 6.328
+  },
+  "4b@2048": {
+   "n": 1,
+   "median": 6.676,
+   "min": 6.676,
+   "max": 6.676
+  },
+  "4b@4096": {
+   "n": 1,
+   "median": 6.033,
+   "min": 6.033,
+   "max": 6.033
+  },
+  "4b@8192": {
+   "n": 1,
+   "median": 5.74,
+   "min": 5.74,
+   "max": 5.74
+  },
+  "4b@10240": {
+   "n": 1,
+   "median": 5.309,
+   "min": 5.309,
+   "max": 5.309
+  }
+ },
+ "runs": [
+  {
+   "host": "10.65.21.128",
+   "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "model_key": "4b",
+   "ctx": 1024,
+   "ok": true,
+   "t_start": "2026-10-29T17:01:39",
+   "load_s": 48.5,
+   "calib": "TOKENS 960",
+   "prompt_n": 960,
+   "prompt_ms": 151712.0,
+   "prompt_tps": 6.327778949588694,
+   "predicted_ms": 0.001,
+   "wall_s": 180.1,
+   "mem": "VmHWM:\t 4760628 kB VmRSS:\t 4760628 kB MemAvailable_kB 4923944",
+   "t_end": "2026-10-29T17:05:29"
+  },
+  {
+   "host": "10.65.21.128",
+   "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "model_key": "4b",
+   "ctx": 2048,
+   "ok": true,
+   "t_start": "2026-10-29T17:05:30",
+   "load_s": 38.5,
+   "calib": "TOKENS 1984",
+   "prompt_n": 1984,
+   "prompt_ms": 297184.817,
+   "prompt_tps": 6.675980354676061,
+   "predicted_ms": 0.001,
+   "wall_s": 300.2,
+   "mem": "VmHWM:\t 4794500 kB VmRSS:\t 4794500 kB MemAvailable_kB 4878768",
+   "t_end": "2026-10-29T17:11:10"
+  },
+  {
+   "host": "10.65.21.128",
+   "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "model_key": "4b",
+   "ctx": 4096,
+   "ok": true,
+   "t_start": "2026-10-29T17:11:10",
+   "load_s": 38.5,
+   "calib": "TOKENS 4032",
+   "prompt_n": 4032,
+   "prompt_ms": 668358.78,
+   "prompt_tps": 6.032688012267902,
+   "predicted_ms": 0.001,
+   "wall_s": 720.6,
+   "mem": "VmHWM:\t 4862416 kB VmRSS:\t 4862416 kB MemAvailable_kB 4812308",
+   "t_end": "2026-10-29T17:23:51"
+  },
+  {
+   "host": "10.65.21.128",
+   "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "model_key": "4b",
+   "ctx": 8192,
+   "ok": true,
+   "t_start": "2026-10-29T17:23:51",
+   "load_s": 38.5,
+   "calib": "TOKENS 8128",
+   "prompt_n": 8128,
+   "prompt_ms": 1415908.973,
+   "prompt_tps": 5.740482018966625,
+   "predicted_ms": 0.001,
+   "wall_s": 1441.3,
+   "mem": "VmHWM:\t 4999056 kB VmRSS:\t 4999056 kB MemAvailable_kB 4684228",
+   "t_end": "2026-10-29T17:48:33"
+  },
+  {
+   "host": "10.65.21.128",
+   "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "model_key": "4b",
+   "ctx": 10240,
+   "ok": true,
+   "t_start": "2026-10-29T17:48:33",
+   "load_s": 38.5,
+   "calib": "TOKENS 10176",
+   "prompt_n": 10176,
+   "prompt_ms": 1916684.358,
+   "prompt_tps": 5.309168386295141,
+   "predicted_ms": 0.001,
+   "wall_s": 1921.9,
+   "mem": "VmHWM:\t 5067608 kB VmRSS:\t 5067608 kB MemAvailable_kB 4613936",
+   "t_end": "2026-10-29T18:21:16"
+  }
+ ]
+}

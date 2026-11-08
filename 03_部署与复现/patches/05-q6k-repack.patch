@@ -1,0 +1,367 @@
+--- a/ggml/src/ggml-cpu/repack.h
++++ b/ggml/src/ggml-cpu/repack.h
+@@ -103,6 +103,24 @@
+ static_assert(sizeof(block_q5_Kx8) == sizeof(ggml_half) * 16 + K_SCALE_SIZE * 8 + QK_K * 5,
+               "wrong q5_K block size/padding");
+ 
++// Q6_K 16-row interleaved layout for the RISC-V 16x1 (outer product) kernels.
++//
++// 16 rows x 256 weights = 3360 B, exactly the size of 16 plain block_q6_K rows,
++// so the repack is a pure byte transpose (no size increase at all):
++//   d[16]        : super-block scale, one per row
++//   sc[16][16]   : [scale group][row] so that one 16-byte load gives the scale
++//                  of all 16 rows for that group
++//   qlh[64][48]  : per "l" position 48 B = ql[l] (16 rows) | ql[l+32] (16 rows)
++//                  | qh[l] (16 rows)
++struct block_q6_Kx16 {
++    ggml_half d[16];
++    int8_t    sc[16][16];
++    uint8_t   qlh[64][48];
++};
++
++static_assert(sizeof(block_q6_Kx16) == sizeof(ggml_half) * 16 + 256 + 3 * QK_K / 4 * 16,
++              "wrong q6_Kx16 block size/padding");
++
+ struct block_q6_Kx8 {
+     ggml_half d[8];
+     int8_t    scales[QK_K / 16 * 8];
+@@ -207,6 +225,8 @@
+ void ggml_gemv_q8_0_16x1_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemv_q2_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_0_16x1_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
++void ggml_gemv_q6_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
++void ggml_gemm_q6_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_1_16x1_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_iq4_nl_16x1_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -3788,6 +3788,51 @@
+     GGML_UNUSED(data_size);
+ }
+ 
++// Q6_K: 16 rows interleaved, fused byte transpose (pure size-preserving).
++static int repack_q6_K_to_q6_K_16_bl(struct ggml_tensor * t, int interleave_block, const void * GGML_RESTRICT data, size_t data_size) {
++    GGML_ASSERT(t->type == GGML_TYPE_Q6_K);
++    GGML_ASSERT(interleave_block == 1);
++    constexpr int nrows_interleaved = 16;
++
++    block_q6_Kx16 * dst = (block_q6_Kx16 *) t->data;
++    const block_q6_K * src = (const block_q6_K *) data;
++    const int nrow = ggml_nrows(t);
++    const int nblocks = t->ne[0] / QK_K;
++
++    GGML_ASSERT(data_size == (size_t) nrow * nblocks * sizeof(block_q6_K));
++
++    if (t->ne[1] % nrows_interleaved != 0) {
++        return -1;
++    }
++
++    for (int b = 0; b < nrow; b += nrows_interleaved) {
++        for (int x = 0; x < nblocks; x++) {
++            for (int r = 0; r < nrows_interleaved; r++) {
++                const block_q6_K * in = &src[x + r * nblocks];
++
++                dst->d[r] = in->d;
++                for (int g = 0; g < QK_K / 16; g++) {
++                    dst->sc[g][r] = in->scales[g];
++                }
++                for (int h = 0; h < 2; h++) {
++                    for (int l = 0; l < 32; l++) {
++                        uint8_t * p = dst->qlh[h * 32 + l];
++                        p[r]      = in->ql[h * 64 + l];
++                        p[16 + r] = in->ql[h * 64 + l + 32];
++                        p[32 + r] = in->qh[h * 32 + l];
++                    }
++                }
++            }
++            dst++;
++        }
++        src += nrows_interleaved * nblocks;
++    }
++    return 0;
++
++    GGML_UNUSED(data_size);
++}
++
++
+ static int repack_q5_K_to_q5_K_8_bl(struct ggml_tensor *       t,
+                                     int                        interleave_block,
+                                     const void * GGML_RESTRICT data,
+@@ -4386,6 +4431,10 @@
+     return repack_q4_1_to_q4_1_16_bl(t, 1, data, data_size);
+ }
+ 
++template <> int repack<block_q6_K, 1, 16>(struct ggml_tensor * t, const void * data, size_t data_size) {
++    return repack_q6_K_to_q6_K_16_bl(t, 1, data, data_size);
++}
++
+ template <> int repack<block_q4_K, 1, 16>(struct ggml_tensor * t, const void * data, size_t data_size) {
+     return repack_q4_K_to_q4_K_16_bl(t, 1, data, data_size);
+ }
+@@ -4510,6 +4559,10 @@
+ template <> void gemv<block_q2_K, 1, 16, GGML_TYPE_Q8_K>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     ggml_gemv_q2_K_16x1_q8_K(n, s, bs, vx, vy, nr, nc);
+ }
++
++template <> void gemv<block_q6_K, 1, 16, GGML_TYPE_Q8_K>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemv_q6_K_16x1_q8_K(n, s, bs, vx, vy, nr, nc);
++}
+ #endif
+ 
+ // gemm
+@@ -4619,6 +4672,10 @@
+ template <> void gemm<block_q2_K, 1, 16, GGML_TYPE_Q8_K>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     ggml_gemm_q2_K_16x1_q8_K(n, s, bs, vx, vy, nr, nc);
+ }
++
++template <> void gemm<block_q6_K, 1, 16, GGML_TYPE_Q8_K>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemm_q6_K_16x1_q8_K(n, s, bs, vx, vy, nr, nc);
++}
+ #endif
+ 
+ class tensor_traits_base : public ggml::cpu::tensor_traits {
+@@ -5044,6 +5101,7 @@
+     static const ggml::cpu::repack::tensor_traits<block_iq4_nl, 1, 16, GGML_TYPE_Q8_0> iq4_nl_16x1_q8_0;
+     static const ggml::cpu::repack::tensor_traits<block_q8_0, 1, 16, GGML_TYPE_Q8_0> q8_0_16x1_q8_0;
+     static const ggml::cpu::repack::tensor_traits<block_q2_K, 1, 16, GGML_TYPE_Q8_K> q2_K_16x1_q8_K;
++    static const ggml::cpu::repack::tensor_traits<block_q6_K, 1, 16, GGML_TYPE_Q8_K> q6_K_16x1_q8_K;
+ #endif
+ 
+     if (cur->type == GGML_TYPE_Q4_0) {
+@@ -5146,6 +5204,17 @@
+             }
+         }
+     } else if (cur->type == GGML_TYPE_Q6_K) {
++        if (ggml_cpu_has_riscv_v()) {
++            #if defined __riscv_zvfh
++            switch (__riscv_vlenb() * 8) {
++                case 128:  { break; } // TODO
++                case 256:  { if (cur->ne[1] % 16 == 0) { return &q6_K_16x1_q8_K; } break; }
++                case 512:  { break; } // TODO
++                case 1024: { break; } // TODO
++                default:   { return nullptr; }
++            }
++            #endif
++        }
+         if (ggml_cpu_has_neon() && ggml_cpu_has_matmul_int8()) {
+             if (cur->ne[1] % 8 == 0) {
+                 return &q6_K_8x8_q8_K;
+--- a/ggml/src/ggml-cpu/arch/riscv/repack.cpp
++++ b/ggml/src/ggml-cpu/arch/riscv/repack.cpp
+@@ -1970,4 +1970,215 @@
+         }
+     }
+ }
++// ---------------------------------------------------------------------------
++// Q6_K 16x1 outer-product GEMV (16 rows interleaved per tile, single column)
++//
++// The lane axis is the 16 rows, so the inner loop is a chain of `vwmacc` with a
++// scalar activation and there is no horizontal reduction and no `vget` at all -
++// that is the whole point compared with a row-at-a-time vec_dot on RVV.
++//
++// The 6-bit quants are combined into signed int8 in-register:
++//   q = ((ql nibble) | ((qh 2 bits) << 4)) - 32   in [-32, 31]
++// With |a| <= 127 the product is <= 4064, so 8 terms fit in int16 (32512) and
++// the two int16 accumulators of a 16-element group are widened to int32 before
++// being scaled by the per-row group scale.
++// ---------------------------------------------------------------------------
++
++// One element position pair: ql[l] (low/high nibble) and ql[l+32] (low/high
++// nibble) give 4 elements, each with its own activation and scale group.
++#define Q6K_16X1_STEP(L, ACC0, ACC1, ACC2, ACC3)                                           \
++    {                                                                                      \
++        const uint8_t * p = b_ptr[bl].qlh[h * 32 + (L)];                                   \
++        const vuint8mf2_t ql0 = __riscv_vle8_v_u8mf2(p, 16);                               \
++        const vuint8mf2_t ql1 = __riscv_vle8_v_u8mf2(p + 16, 16);                          \
++        const vuint8mf2_t qh  = __riscv_vle8_v_u8mf2(p + 32, 16);                          \
++        const int ae = h * 128 + (L);                                                      \
++        /* p0: (ql0 & 0xF) | ((qh & 3) << 4) */                                            \
++        vint8mf2_t q = __riscv_vsub_vx_i8mf2(                                              \
++            __riscv_vreinterpret_v_u8mf2_i8mf2(                                            \
++                __riscv_vor_vv_u8mf2(__riscv_vand_vx_u8mf2(ql0, 0x0F, 16),                 \
++                                     __riscv_vsll_vx_u8mf2(                                \
++                                         __riscv_vand_vx_u8mf2(qh, 0x03, 16), 4, 16), 16)),\
++            32, 16);                                                                       \
++        ACC0 = __riscv_vwmacc_vx_i16m1(ACC0, aq[ae + 0], q, 16);                           \
++        /* p1: (ql1 & 0xF) | (((qh >> 2) & 3) << 4) */                                     \
++        q = __riscv_vsub_vx_i8mf2(                                                         \
++            __riscv_vreinterpret_v_u8mf2_i8mf2(                                            \
++                __riscv_vor_vv_u8mf2(__riscv_vand_vx_u8mf2(ql1, 0x0F, 16),                 \
++                                     __riscv_vsll_vx_u8mf2(                                \
++                                         __riscv_vand_vx_u8mf2(                            \
++                                             __riscv_vsrl_vx_u8mf2(qh, 2, 16), 0x03, 16),  \
++                                         4, 16), 16)),                                     \
++            32, 16);                                                                       \
++        ACC1 = __riscv_vwmacc_vx_i16m1(ACC1, aq[ae + 32], q, 16);                          \
++        /* p2: (ql0 >> 4) | (((qh >> 4) & 3) << 4) */                                      \
++        q = __riscv_vsub_vx_i8mf2(                                                         \
++            __riscv_vreinterpret_v_u8mf2_i8mf2(                                            \
++                __riscv_vor_vv_u8mf2(__riscv_vsrl_vx_u8mf2(ql0, 4, 16),                    \
++                                     __riscv_vsll_vx_u8mf2(                                \
++                                         __riscv_vand_vx_u8mf2(                            \
++                                             __riscv_vsrl_vx_u8mf2(qh, 4, 16), 0x03, 16),  \
++                                         4, 16), 16)),                                     \
++            32, 16);                                                                       \
++        ACC2 = __riscv_vwmacc_vx_i16m1(ACC2, aq[ae + 64], q, 16);                          \
++        /* p3: (ql1 >> 4) | (((qh >> 6) & 3) << 4) */                                      \
++        q = __riscv_vsub_vx_i8mf2(                                                         \
++            __riscv_vreinterpret_v_u8mf2_i8mf2(                                            \
++                __riscv_vor_vv_u8mf2(__riscv_vsrl_vx_u8mf2(ql1, 4, 16),                    \
++                                     __riscv_vsll_vx_u8mf2(                                \
++                                         __riscv_vand_vx_u8mf2(                            \
++                                             __riscv_vsrl_vx_u8mf2(qh, 6, 16), 0x03, 16),  \
++                                         4, 16), 16)),                                     \
++            32, 16);                                                                       \
++        ACC3 = __riscv_vwmacc_vx_i16m1(ACC3, aq[ae + 96], q, 16);                          \
++    }
++
++// widen the two int16 accumulators of one 16-element group, scale by the
++// per-row group scale and accumulate into the int32 group sums.
++#define Q6K_16X1_FLUSH(SA, SB, GI)                                                         \
++    {                                                                                      \
++        vint32m2_t t = __riscv_vwadd_vv_i32m2((SA), (SB), 16);                             \
++        const vint8mf2_t scv = __riscv_vle8_v_i8mf2(&b_ptr[bl].sc[(GI)][0], 16);           \
++        t = __riscv_vmul_vv_i32m2(t, __riscv_vsext_vf4_i32m2(scv, 16), 16);                \
++        isum = __riscv_vadd_vv_i32m2(isum, t, 16);                                         \
++    }
++
++void ggml_gemv_q6_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
++    const int nb = n / QK_K;
++
++    assert(n % QK_K == 0);
++    assert(nc % 16 == 0);
++
++    UNUSED(bs);
++    UNUSED(nr);
++
++#if defined __riscv_v
++    if (__riscv_vlenb() * 8 == 256) {
++        const block_q8_K * a_ptr = (const block_q8_K *) vy;
++        for (int x = 0; x < nc / 16; x++) {
++            const block_q6_Kx16 * b_ptr = (const block_q6_Kx16 *) vx + (size_t) x * nb;
++
++            vfloat32m2_t sumf = __riscv_vfmv_v_f_f32m2(0.0f, 16);
++
++            for (int bl = 0; bl < nb; bl++) {
++                const block_q8_K * a = &a_ptr[bl];
++                const int8_t * aq = a->qs;   // q8_K quants are signed
++
++                vint32m2_t isum = __riscv_vmv_v_x_i32m2(0, 16);
++
++                for (int h = 0; h < 2; h++) {
++                    for (int g = 0; g < 2; g++) {
++                        vint16m1_t s0a = __riscv_vmv_v_x_i16m1(0, 16);
++                        vint16m1_t s0b = __riscv_vmv_v_x_i16m1(0, 16);
++                        vint16m1_t s1a = __riscv_vmv_v_x_i16m1(0, 16);
++                        vint16m1_t s1b = __riscv_vmv_v_x_i16m1(0, 16);
++                        vint16m1_t s2a = __riscv_vmv_v_x_i16m1(0, 16);
++                        vint16m1_t s2b = __riscv_vmv_v_x_i16m1(0, 16);
++                        vint16m1_t s3a = __riscv_vmv_v_x_i16m1(0, 16);
++                        vint16m1_t s3b = __riscv_vmv_v_x_i16m1(0, 16);
++
++                        for (int li = 0; li < 16; li += 2) {
++                            Q6K_16X1_STEP(g * 16 + li + 0, s0a, s1a, s2a, s3a)
++                            Q6K_16X1_STEP(g * 16 + li + 1, s0b, s1b, s2b, s3b)
++                        }
++
++                        // scale index == q8_K bsums index: h*8 + 2*p + g
++                        Q6K_16X1_FLUSH(s0a, s0b, h * 8 + g + 0)
++                        Q6K_16X1_FLUSH(s1a, s1b, h * 8 + g + 2)
++                        Q6K_16X1_FLUSH(s2a, s2b, h * 8 + g + 4)
++                        Q6K_16X1_FLUSH(s3a, s3b, h * 8 + g + 6)
++                    }
++                }
++
++                const vfloat16m1_t b_d = __riscv_vle16_v_f16m1((const _Float16 *) b_ptr[bl].d, 16);
++                const vfloat32m2_t d_0 = __riscv_vfmul_vf_f32m2(__riscv_vfwcvt_f_f_v_f32m2(b_d, 16), a->d, 16);
++
++                sumf = __riscv_vfmacc_vv_f32m2(sumf, __riscv_vfcvt_f_x_v_f32m2(isum, 16), d_0, 16);
++            }
++
++            __riscv_vse32_v_f32m2(s + x * 16, sumf, 16);
++        }
++        return;
++    }
++#endif
++
++    // scalar fallback
++    const block_q8_K * a_ptr = (const block_q8_K *) vy;
++    for (int x = 0; x < nc / 16; x++) {
++        const block_q6_Kx16 * b_ptr = (const block_q6_Kx16 *) vx + (size_t) x * nb;
++
++        float sumf[16] = {0.0f};
++
++        for (int bl = 0; bl < nb; bl++) {
++            const block_q8_K * a = &a_ptr[bl];
++            for (int r = 0; r < 16; r++) {
++                int sum = 0;
++                for (int h = 0; h < 2; h++) {
++                    for (int l = 0; l < 32; l++) {
++                        const uint8_t * p = b_ptr[bl].qlh[h * 32 + l];
++                        const int ql0 = p[r], ql1 = p[16 + r], qh = p[32 + r];
++                        for (int pp = 0; pp < 4; pp++) {
++                            int q;
++                            if (pp == 0)      q = (ql0 & 0xF) | ((qh & 3) << 4);
++                            else if (pp == 1) q = (ql1 & 0xF) | (((qh >> 2) & 3) << 4);
++                            else if (pp == 2) q = (ql0 >> 4)  | (((qh >> 4) & 3) << 4);
++                            else              q = (ql1 >> 4)  | (((qh >> 6) & 3) << 4);
++                            sum += (q - 32) * (int) a->qs[h * 128 + pp * 32 + l]
++                                 * (int) b_ptr[bl].sc[h * 8 + pp * 2 + l / 16][r];
++                        }
++                    }
++                }
++                sumf[r] += (float) sum * GGML_CPU_FP16_TO_FP32(b_ptr[bl].d[r]) * a->d;
++            }
++        }
++
++        for (int r = 0; r < 16; r++) {
++            s[x * 16 + r] = sumf[r];
++        }
++    }
++}
++
++#undef Q6K_16X1_STEP
++#undef Q6K_16X1_FLUSH
++
++// The 16x1 traits receive 4 columns interleaved in a block_q8_Kx4 when more than
++// 3 columns are computed at once (ggml_quantize_mat_q8_K_4x1). Q6_K tensors are
++// almost always tied embeddings / output heads, where even prefill only asks for
++// the logits of the last token (1 column), so this is a correctness fallback and
++// not a hot path: de-interleave into 4 plain q8_K rows and reuse the GEMV
++// kernel (4x the weight traffic, but it stays exact).
++void ggml_gemm_q6_K_16x1_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
++    const int nb = n / QK_K;
++
++    assert(n % QK_K == 0);
++    assert(nr % 4 == 0);
++    assert(nc % 16 == 0);
++
++    block_q8_K * tmp = (block_q8_K *) malloc(sizeof(block_q8_K) * (size_t) 4 * nb);
++    GGML_ASSERT(tmp != nullptr);
++
++    for (int y = 0; y < nr / 4; y++) {
++        const block_q8_Kx4 * a_ptr = (const block_q8_Kx4 *) vy + (size_t) y * nb;
++
++        for (int bl = 0; bl < nb; bl++) {
++            for (int r = 0; r < 4; r++) {
++                block_q8_K * dst = &tmp[r * nb + bl];
++                dst->d = a_ptr[bl].d[r];
++                for (int e = 0; e < QK_K; e++) {
++                    dst->qs[e] = a_ptr[bl].qs[4 * e + r];
++                }
++                memset(dst->bsums, 0, sizeof(dst->bsums));
++            }
++        }
++
++        for (int r = 0; r < 4; r++) {
++            ggml_gemv_q6_K_16x1_q8_K(n, s + (size_t) r * bs, 0, vx, tmp + r * nb, 1, nc);
++        }
++
++        s += (size_t) 4 * bs;
++    }
++
++    free(tmp);
++}
++
+ #endif

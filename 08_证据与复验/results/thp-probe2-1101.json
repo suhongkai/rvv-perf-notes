@@ -1,0 +1,49 @@
+{
+ "task": "K1 大页（THP）对 decode 的净效果（两板合并）",
+ "date": "2026-11-01",
+ "why": "decode 只跑到带宽上限的 64%，原假设是 4 KB 页导致 TLB 抖动（1.19 GB ÷ 4 KB = 30.5 万页 vs 2 MB 页 596 个）",
+ "protocol": "-lm none（权重进匿名内存）+ THP 策略切换；**运行中每 3 s** 采 AnonHugePages 与 VmRSS（第一版在进程退出后才采，全是 0，不可用）",
+ "boards": [
+  {
+   "host": "10.65.21.111",
+   "madvise": {
+    "decode": 4.293,
+    "prefill": 23.678,
+    "anon_huge_peak_kb": 0
+   },
+   "always": {
+    "decode": 3.817,
+    "prefill": 23.5,
+    "anon_huge_peak_kb": 1345536
+   },
+   "decode_delta_pct": -11.09,
+   "thp_engaged": true,
+   "snapshot_file": "thp-probe2-1101.json"
+  },
+  {
+   "host": "10.65.21.112",
+   "madvise": {
+    "decode": 4.235,
+    "prefill": 23.858,
+    "anon_huge_peak_kb": 0
+   },
+   "always": {
+    "decode": 4.112,
+    "prefill": 23.535,
+    "anon_huge_peak_kb": 903168
+   },
+   "decode_delta_pct": -2.9,
+   "thp_engaged": true,
+   "snapshot_file": "thp-probe2-1101.111651.json"
+  }
+ ],
+ "conclusion": {
+  "thp_engaged_both": true,
+  "decode_delta_pct_range": [
+   -11.09,
+   -2.9
+  ],
+  "verdict": "两板都做到大页真生效（匿名大页峰值 = 模型量级），但 decode **两板都变慢**（-11.09% / -2.90%）→ **TLB 假设被否**。decode 的 ~36% 带宽缺口不在缺页，而在 attention/KV/lm_head/同步等非 GEMV 开销。",
+  "implication": "可以明确告诉评委：我们试过大页、试过 no-mmap/mlock，都不是短板所在的层次。"
+ }
+}

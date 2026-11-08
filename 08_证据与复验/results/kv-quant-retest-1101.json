@@ -1,0 +1,1008 @@
+{
+ "task": "KV cache 量化负结果复查（混合注意力下重新评估）",
+ "date": "2026-11-01",
+ "host": "10.65.21.120",
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "dir": "~/c16/bin",
+  "version": "0.6.0-dev (b0-unknown)"
+ },
+ "model": {
+  "file": "/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf",
+  "bytes": 1202487136,
+  "note": "stat -c %s 校验 == 1202487136"
+ },
+ "arch": {
+  "n_layer": 24,
+  "linear_layers": 18,
+  "full_attn_layers": 6,
+  "n_head": 8,
+  "n_head_kv": 2,
+  "head_dim": 256,
+  "n_embd_k_gqa": 512,
+  "n_embd_v_gqa": 512,
+  "n_embd": 2048,
+  "arch_name": "qwen35",
+  "ctx_train": 262144,
+  "recurrent_state_mib": 19.27,
+  "source": "llama-cli -v 的 llama_model_loader 段：general.architecture=qwen35、qwen35.block_count=24、attention.head_count=8、head_count_kv=2、key_length=256、value_length=256、qwen35.attention.recurrent_layers arr[bool,24]=[true,true,true,false,true,...]、full_attention_interval=4；再用 llama_kv_cache 逐层日志交叉验证：只有 blk.3/7/11/15/19/23 打 `dev = CPU`，其余 18 层打 `filtered`"
+ },
+ "kv_sizes": [
+  {
+   "kv_type": "f16",
+   "size_mib": 96.0,
+   "k_mib": 48.0,
+   "v_mib": 48.0,
+   "cells": 8192,
+   "layers": 6,
+   "per_layer_mib": 16.0,
+   "as_if_24_layers_mib": 384.0,
+   "log_line": "0.03.612.506 I llama_kv_cache: size =   96.00 MiB (  8192 cells,   6 layers,  1/1 seqs), K (f16):   48.00 MiB, V (f16):   48.00 MiB",
+   "log_file": "_raw/kvV_f16.log"
+  },
+  {
+   "kv_type": "q8_0",
+   "size_mib": 51.0,
+   "k_mib": 25.5,
+   "v_mib": 25.5,
+   "cells": 8192,
+   "layers": 6,
+   "per_layer_mib": 8.5,
+   "as_if_24_layers_mib": 204.0,
+   "log_line": "0.03.605.584 I llama_kv_cache: size =   51.00 MiB (  8192 cells,   6 layers,  1/1 seqs), K (q8_0):   25.50 MiB, V (q8_0):   25.50 MiB",
+   "log_file": "_raw/kvV_q8_0.log"
+  },
+  {
+   "kv_type": "q4_0",
+   "size_mib": 27.0,
+   "k_mib": 13.5,
+   "v_mib": 13.5,
+   "cells": 8192,
+   "layers": 6,
+   "per_layer_mib": 4.5,
+   "as_if_24_layers_mib": 108.0,
+   "log_line": "0.03.594.565 I llama_kv_cache: size =   27.00 MiB (  8192 cells,   6 layers,  1/1 seqs), K (q4_0):   13.50 MiB, V (q4_0):   13.50 MiB",
+   "log_file": "_raw/kvsize_q4_0.txt"
+  },
+  {
+   "kv_type": "q8_0_k_only",
+   "size_mib": 73.5,
+   "k_mib": 25.5,
+   "v_mib": 48.0,
+   "cells": 8192,
+   "layers": 6,
+   "per_layer_mib": 12.25,
+   "as_if_24_layers_mib": 294.0,
+   "log_line": "0.03.595.283 I llama_kv_cache: size =   73.50 MiB (  8192 cells,   6 layers,  1/1 seqs), K (q8_0):   25.50 MiB, V (f16):   48.00 MiB",
+   "log_file": "_raw/faauto_auto_q8k.txt"
+  }
+ ],
+ "kv_size_method": "llama-cli -m <model> -c 8192 -n 1 -p hi -st -t 7 -ctk <t> -ctv <t> -fa <on|off|auto> -v --log-file <f>；从日志抓 `llama_kv_cache: size = ... MiB (... 6 layers ...)`。本 fork 默认吞掉 LOG_INF，必须 -v 才有这行（第一次没加 -v 抓了个空）。",
+ "protocol": {
+  "this_run": "llama-bench -p 128 -n 128 -d 0,4096,8192 -t 7 -r 3 （-ub 用默认 512），每格取 llama-bench 自己 3 个 samples_ts 的中位数；depth 预填由 llama-bench 缓存，3 rep 只付一次。",
+  "old_2026_10_23": "kvtypes-card11b：-p 8192 -n 0 -d 0 -t 8 -ub 128 -r 1，flash_attn=-1(AUTO)，官方 Q4_0（1203911936 B），旧构建。",
+  "caveat": "绝对吞吐不能和旧数据直接相减（ub/t/构建/模型四处都不同）；本文件所有对比都在同一协议内做 A/B。"
+ },
+ "budget_analysis": {
+  "per_token": {
+   "weights_gb": 1.202487,
+   "kv_gb_at_depth": {
+    "0": 0.0,
+    "4096": 0.050332,
+    "8192": 0.100663
+   }
+  },
+  "kv_share_pct": {
+   "0": 0.0,
+   "4096": 4.0175,
+   "8192": 7.7246
+  },
+  "q8_upper_bound_gain_pct": {
+   "0": 0.0,
+   "4096": 1.9193,
+   "8192": 3.7569
+  },
+  "q4_upper_bound_gain_pct": {
+   "0": 0.0,
+   "4096": 2.9734,
+   "8192": 5.8784
+  },
+  "kv_bytes_per_token_f16": 12288,
+  "kv_bytes_per_token_breakdown": {
+   "full_attn_layers": 6,
+   "n_embd_k_gqa": 512,
+   "n_embd_v_gqa": 512,
+   "bytes_per_elem": 2,
+   "per_token_per_layer": 2048
+  },
+  "q8_kv_ratio": 0.53125,
+  "q4_kv_ratio": 0.28125,
+  "k_only_q8_kv_ratio": 0.76562,
+  "recurrent_state_gb": 0.020206,
+  "kv_share_incl_recurrent_pct": {
+   "0": 1.6526,
+   "4096": 5.541,
+   "8192": 9.1335
+  },
+  "formula": "kv_gb(d) = d * 12288 / 1e9; share = kv/(W+kv)*100; upper_bound = (W+kv)/(W+kv*ratio)-1 （纯带宽受限、反量化零成本）",
+  "empirical": {
+   "decode_slowdown_d0_to_d8192_pct": -11.71,
+   "kv_share_of_bytes_pct_at_8192": 7.7246,
+   "implied_kv_cost_multiplier_vs_weights": 1.52,
+   "q8_upper_bound_from_measured_pct": 5.49,
+   "q4_upper_bound_from_measured_pct": 8.41,
+   "note": "经验上限：d0→d8192 的 decode 本身只慢 11.71%，把这全部记在 KV 读头上、再乘量化省掉的比例，得到 q8 ≈ +5.49%、q4 ≈ +8.41% 的天花板。仍然解释不了任何 10% 量级的损失 —— 说明实测的 12%~65% 全是实现代价（FA 内核 + 反量化），不是带宽。"
+  },
+  "notes": [
+   "只有 6/24 层有 KV：按 24 层估 KV 体积会高估 4.0 倍（384 vs 96 MiB）",
+   "18 个 Gated DeltaNet 层有常量 recurrent state 19.27 MiB（f32），每 token 都要读写，-ctk/-ctv 完全碰不到它",
+   "q8_0/q4_0 实测比理论 4bit 略大（q8_0 每 32 元素 34 B、q4_0 18 B 含 scale）"
+  ]
+ },
+ "cells": [
+  {
+   "kv_type": "f16",
+   "kv_k": "f16",
+   "kv_v": "f16",
+   "depth": 0,
+   "fa": 0,
+   "decode": 4.2424,
+   "prefill": 24.289,
+   "decode_avg_ts": 4.2341,
+   "prefill_avg_ts": 24.3507,
+   "raw": [
+    4.2101,
+    4.2498,
+    4.2424
+   ],
+   "raw_prefill": [
+    24.289,
+    24.2677,
+    24.4955
+   ],
+   "block": "f16_fa0",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 992.9,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 0 -t 7 -ctk f16 -ctv f16 -fa off -r 3 -o json",
+   "note": ""
+  },
+  {
+   "kv_type": "f16",
+   "kv_k": "f16",
+   "kv_v": "f16",
+   "depth": 4096,
+   "fa": 0,
+   "decode": 4.0899,
+   "prefill": 20.305,
+   "decode_avg_ts": 4.0936,
+   "prefill_avg_ts": 20.3274,
+   "raw": [
+    4.084,
+    4.107,
+    4.0899
+   ],
+   "raw_prefill": [
+    20.2685,
+    20.4087,
+    20.305
+   ],
+   "block": "f16_fa0",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 992.9,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 4096 -t 7 -ctk f16 -ctv f16 -fa off -r 3 -o json",
+   "note": ""
+  },
+  {
+   "kv_type": "f16",
+   "kv_k": "f16",
+   "kv_v": "f16",
+   "depth": 8192,
+   "fa": 0,
+   "decode": 3.7458,
+   "prefill": 17.1055,
+   "decode_avg_ts": 3.7556,
+   "prefill_avg_ts": 17.16,
+   "raw": [
+    3.696,
+    3.7458,
+    3.8249
+   ],
+   "raw_prefill": [
+    17.3286,
+    17.1055,
+    17.0458
+   ],
+   "block": "f16_fa0",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 992.9,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 8192 -t 7 -ctk f16 -ctv f16 -fa off -r 3 -o json",
+   "note": ""
+  },
+  {
+   "kv_type": "f16",
+   "kv_k": "f16",
+   "kv_v": "f16",
+   "depth": 0,
+   "fa": 1,
+   "decode": 4.3245,
+   "prefill": 24.3717,
+   "decode_avg_ts": 4.3254,
+   "prefill_avg_ts": 24.3526,
+   "raw": [
+    4.2975,
+    4.3245,
+    4.3541
+   ],
+   "raw_prefill": [
+    24.3717,
+    24.4046,
+    24.2815
+   ],
+   "block": "f16_fa1",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1114.9,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 0 -t 7 -ctk f16 -ctv f16 -fa on -r 3 -o json",
+   "note": ""
+  },
+  {
+   "kv_type": "f16",
+   "kv_k": "f16",
+   "kv_v": "f16",
+   "depth": 4096,
+   "fa": 1,
+   "decode": 3.2131,
+   "prefill": 15.6187,
+   "decode_avg_ts": 3.2247,
+   "prefill_avg_ts": 15.6132,
+   "raw": [
+    3.2493,
+    3.2117,
+    3.2131
+   ],
+   "raw_prefill": [
+    15.6187,
+    15.6695,
+    15.5514
+   ],
+   "block": "f16_fa1",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1114.9,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 4096 -t 7 -ctk f16 -ctv f16 -fa on -r 3 -o json",
+   "note": ""
+  },
+  {
+   "kv_type": "f16",
+   "kv_k": "f16",
+   "kv_v": "f16",
+   "depth": 8192,
+   "fa": 1,
+   "decode": 2.6797,
+   "prefill": 11.6,
+   "decode_avg_ts": 2.6832,
+   "prefill_avg_ts": 11.6169,
+   "raw": [
+    2.6938,
+    2.6761,
+    2.6797
+   ],
+   "raw_prefill": [
+    11.5697,
+    11.6,
+    11.681
+   ],
+   "block": "f16_fa1",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1114.9,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 8192 -t 7 -ctk f16 -ctv f16 -fa on -r 3 -o json",
+   "note": ""
+  },
+  {
+   "kv_type": "q8_0",
+   "kv_k": "q8_0",
+   "kv_v": "q8_0",
+   "depth": 0,
+   "fa": 1,
+   "decode": 4.3412,
+   "prefill": 23.8147,
+   "decode_avg_ts": 4.3517,
+   "prefill_avg_ts": 23.7892,
+   "raw": [
+    4.3412,
+    4.3827,
+    4.3311
+   ],
+   "raw_prefill": [
+    23.5705,
+    23.9823,
+    23.8147
+   ],
+   "block": "q8_fa1",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1698.8,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 0 -t 7 -ctk q8_0 -ctv q8_0 -fa on -r 3 -o json",
+   "note": "量化 V 只能用 FA on；与 f16_fa1 同 FA，是纯 KV 类型的对照。"
+  },
+  {
+   "kv_type": "q8_0",
+   "kv_k": "q8_0",
+   "kv_v": "q8_0",
+   "depth": 4096,
+   "fa": 1,
+   "decode": 3.0034,
+   "prefill": 9.531,
+   "decode_avg_ts": 3.0046,
+   "prefill_avg_ts": 9.5306,
+   "raw": [
+    3.0464,
+    3.0034,
+    2.964
+   ],
+   "raw_prefill": [
+    9.5359,
+    9.525,
+    9.531
+   ],
+   "block": "q8_fa1",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1698.8,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 4096 -t 7 -ctk q8_0 -ctv q8_0 -fa on -r 3 -o json",
+   "note": "量化 V 只能用 FA on；与 f16_fa1 同 FA，是纯 KV 类型的对照。"
+  },
+  {
+   "kv_type": "q8_0",
+   "kv_k": "q8_0",
+   "kv_v": "q8_0",
+   "depth": 8192,
+   "fa": 1,
+   "decode": 2.296,
+   "prefill": 5.8895,
+   "decode_avg_ts": 2.2964,
+   "prefill_avg_ts": 5.8899,
+   "raw": [
+    2.296,
+    2.304,
+    2.2894
+   ],
+   "raw_prefill": [
+    5.8895,
+    5.8806,
+    5.8995
+   ],
+   "block": "q8_fa1",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1698.8,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 8192 -t 7 -ctk q8_0 -ctv q8_0 -fa on -r 3 -o json",
+   "note": "量化 V 只能用 FA on；与 f16_fa1 同 FA，是纯 KV 类型的对照。"
+  },
+  {
+   "kv_type": "q4_0",
+   "kv_k": "q4_0",
+   "kv_v": "q4_0",
+   "depth": 0,
+   "fa": 1,
+   "decode": 4.3056,
+   "prefill": 23.9477,
+   "decode_avg_ts": 4.2909,
+   "prefill_avg_ts": 23.9519,
+   "raw": [
+    4.3311,
+    4.3056,
+    4.2361
+   ],
+   "raw_prefill": [
+    23.9477,
+    23.7457,
+    24.1623
+   ],
+   "block": "q4_fa1",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1355.0,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 0 -t 7 -ctk q4_0 -ctv q4_0 -fa on -r 3 -o json",
+   "note": "量化 V 只能用 FA on；与 f16_fa1 同 FA，是纯 KV 类型的对照。"
+  },
+  {
+   "kv_type": "q4_0",
+   "kv_k": "q4_0",
+   "kv_v": "q4_0",
+   "depth": 4096,
+   "fa": 1,
+   "decode": 3.451,
+   "prefill": 12.5565,
+   "decode_avg_ts": 3.4497,
+   "prefill_avg_ts": 12.5473,
+   "raw": [
+    3.4632,
+    3.4349,
+    3.451
+   ],
+   "raw_prefill": [
+    12.5565,
+    12.5039,
+    12.5816
+   ],
+   "block": "q4_fa1",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1355.0,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 4096 -t 7 -ctk q4_0 -ctv q4_0 -fa on -r 3 -o json",
+   "note": "量化 V 只能用 FA on；与 f16_fa1 同 FA，是纯 KV 类型的对照。"
+  },
+  {
+   "kv_type": "q4_0",
+   "kv_k": "q4_0",
+   "kv_v": "q4_0",
+   "depth": 8192,
+   "fa": 1,
+   "decode": 2.8278,
+   "prefill": 8.5071,
+   "decode_avg_ts": 2.8268,
+   "prefill_avg_ts": 8.5104,
+   "raw": [
+    2.8205,
+    2.8322,
+    2.8278
+   ],
+   "raw_prefill": [
+    8.5071,
+    8.5279,
+    8.4964
+   ],
+   "block": "q4_fa1",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1355.0,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 8192 -t 7 -ctk q4_0 -ctv q4_0 -fa on -r 3 -o json",
+   "note": "量化 V 只能用 FA on；与 f16_fa1 同 FA，是纯 KV 类型的对照。"
+  },
+  {
+   "kv_type": "q8_0",
+   "kv_k": "q8_0",
+   "kv_v": "f16",
+   "depth": 0,
+   "fa": 0,
+   "decode": 4.3377,
+   "prefill": 24.4188,
+   "decode_avg_ts": 4.3298,
+   "prefill_avg_ts": 24.3106,
+   "raw": [
+    4.3418,
+    4.3377,
+    4.3098
+   ],
+   "raw_prefill": [
+    24.0186,
+    24.4188,
+    24.4944
+   ],
+   "block": "q8k_fa0",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1032.5,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 0 -t 7 -ctk q8_0 -ctv f16 -fa off -r 3 -o json",
+   "note": "只量化 K、V 保持 f16，且显式关掉 FA：-fa off 下唯一可行的量化 arm（量化 V 会硬报错要求 FA）。注意 -fa off 不是默认值（默认 auto 会解析成 on）。"
+  },
+  {
+   "kv_type": "q8_0",
+   "kv_k": "q8_0",
+   "kv_v": "f16",
+   "depth": 4096,
+   "fa": 0,
+   "decode": 3.9322,
+   "prefill": 18.5779,
+   "decode_avg_ts": 3.9522,
+   "prefill_avg_ts": 18.5666,
+   "raw": [
+    3.9975,
+    3.9268,
+    3.9322
+   ],
+   "raw_prefill": [
+    18.5779,
+    18.523,
+    18.5988
+   ],
+   "block": "q8k_fa0",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1032.5,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 4096 -t 7 -ctk q8_0 -ctv f16 -fa off -r 3 -o json",
+   "note": "只量化 K、V 保持 f16，且显式关掉 FA：-fa off 下唯一可行的量化 arm（量化 V 会硬报错要求 FA）。注意 -fa off 不是默认值（默认 auto 会解析成 on）。"
+  },
+  {
+   "kv_type": "q8_0",
+   "kv_k": "q8_0",
+   "kv_v": "f16",
+   "depth": 8192,
+   "fa": 0,
+   "decode": 3.6871,
+   "prefill": 15.0079,
+   "decode_avg_ts": 3.6965,
+   "prefill_avg_ts": 14.9854,
+   "raw": [
+    3.6871,
+    3.7295,
+    3.6729
+   ],
+   "raw_prefill": [
+    14.9074,
+    15.0408,
+    15.0079
+   ],
+   "block": "q8k_fa0",
+   "tool": "llama-bench",
+   "n_reps": 3,
+   "block_wall_s": 1032.5,
+   "argv": "llama-bench -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -p 128 -n 128 -d 8192 -t 7 -ctk q8_0 -ctv f16 -fa off -r 3 -o json",
+   "note": "只量化 K、V 保持 f16，且显式关掉 FA：-fa off 下唯一可行的量化 arm（量化 V 会硬报错要求 FA）。注意 -fa off 不是默认值（默认 auto 会解析成 on）。"
+  }
+ ],
+ "unsupported_cells": [
+  {
+   "kv_type": "q8_0",
+   "depth": 0,
+   "fa": 0,
+   "status": "unsupported",
+   "decode": null,
+   "prefill": null,
+   "raw": [],
+   "error": "llama_init_from_model: quantized V cache requires flash_attn to be enabled → 建上下文失败，RC=1",
+   "evidence": "实测 llama-cli -ctk q8_0 -ctv q8_0 -fa off → RC=1；源码 submission-repo/src/spacemit-llama/src/llama-context.cpp:4076-4085",
+   "note": "该组合在本构建中物理上不存在（不是漏测），故 fa=0 列没有 K+V 量化臂。"
+  },
+  {
+   "kv_type": "q8_0",
+   "depth": 4096,
+   "fa": 0,
+   "status": "unsupported",
+   "decode": null,
+   "prefill": null,
+   "raw": [],
+   "error": "llama_init_from_model: quantized V cache requires flash_attn to be enabled → 建上下文失败，RC=1",
+   "evidence": "实测 llama-cli -ctk q8_0 -ctv q8_0 -fa off → RC=1；源码 submission-repo/src/spacemit-llama/src/llama-context.cpp:4076-4085",
+   "note": "该组合在本构建中物理上不存在（不是漏测），故 fa=0 列没有 K+V 量化臂。"
+  },
+  {
+   "kv_type": "q8_0",
+   "depth": 8192,
+   "fa": 0,
+   "status": "unsupported",
+   "decode": null,
+   "prefill": null,
+   "raw": [],
+   "error": "llama_init_from_model: quantized V cache requires flash_attn to be enabled → 建上下文失败，RC=1",
+   "evidence": "实测 llama-cli -ctk q8_0 -ctv q8_0 -fa off → RC=1；源码 submission-repo/src/spacemit-llama/src/llama-context.cpp:4076-4085",
+   "note": "该组合在本构建中物理上不存在（不是漏测），故 fa=0 列没有 K+V 量化臂。"
+  },
+  {
+   "kv_type": "q4_0",
+   "depth": 0,
+   "fa": 0,
+   "status": "unsupported",
+   "decode": null,
+   "prefill": null,
+   "raw": [],
+   "error": "llama_init_from_model: quantized V cache requires flash_attn to be enabled → 建上下文失败，RC=1",
+   "evidence": "实测 llama-cli -ctk q4_0 -ctv q4_0 -fa off → RC=1；源码 submission-repo/src/spacemit-llama/src/llama-context.cpp:4076-4085",
+   "note": "该组合在本构建中物理上不存在（不是漏测），故 fa=0 列没有 K+V 量化臂。"
+  },
+  {
+   "kv_type": "q4_0",
+   "depth": 4096,
+   "fa": 0,
+   "status": "unsupported",
+   "decode": null,
+   "prefill": null,
+   "raw": [],
+   "error": "llama_init_from_model: quantized V cache requires flash_attn to be enabled → 建上下文失败，RC=1",
+   "evidence": "实测 llama-cli -ctk q4_0 -ctv q4_0 -fa off → RC=1；源码 submission-repo/src/spacemit-llama/src/llama-context.cpp:4076-4085",
+   "note": "该组合在本构建中物理上不存在（不是漏测），故 fa=0 列没有 K+V 量化臂。"
+  },
+  {
+   "kv_type": "q4_0",
+   "depth": 8192,
+   "fa": 0,
+   "status": "unsupported",
+   "decode": null,
+   "prefill": null,
+   "raw": [],
+   "error": "llama_init_from_model: quantized V cache requires flash_attn to be enabled → 建上下文失败，RC=1",
+   "evidence": "实测 llama-cli -ctk q4_0 -ctv q4_0 -fa off → RC=1；源码 submission-repo/src/spacemit-llama/src/llama-context.cpp:4076-4085",
+   "note": "该组合在本构建中物理上不存在（不是漏测），故 fa=0 列没有 K+V 量化臂。"
+  }
+ ],
+ "deltas_vs_f16_same_fa": [
+  {
+   "kv_k": "q8_0",
+   "kv_v": "q8_0",
+   "kv": "q8_0/K + q8_0/V",
+   "depth": 0,
+   "fa": 1,
+   "vs": "f16 (fa=1)",
+   "decode_base": 4.3245,
+   "decode": 4.3412,
+   "decode_delta_pct": 0.39,
+   "prefill_base": 24.3717,
+   "prefill": 23.8147,
+   "prefill_delta_pct": -2.29
+  },
+  {
+   "kv_k": "q8_0",
+   "kv_v": "q8_0",
+   "kv": "q8_0/K + q8_0/V",
+   "depth": 4096,
+   "fa": 1,
+   "vs": "f16 (fa=1)",
+   "decode_base": 3.2131,
+   "decode": 3.0034,
+   "decode_delta_pct": -6.53,
+   "prefill_base": 15.6187,
+   "prefill": 9.531,
+   "prefill_delta_pct": -38.98
+  },
+  {
+   "kv_k": "q8_0",
+   "kv_v": "q8_0",
+   "kv": "q8_0/K + q8_0/V",
+   "depth": 8192,
+   "fa": 1,
+   "vs": "f16 (fa=1)",
+   "decode_base": 2.6797,
+   "decode": 2.296,
+   "decode_delta_pct": -14.32,
+   "prefill_base": 11.6,
+   "prefill": 5.8895,
+   "prefill_delta_pct": -49.23
+  },
+  {
+   "kv_k": "q4_0",
+   "kv_v": "q4_0",
+   "kv": "q4_0/K + q4_0/V",
+   "depth": 0,
+   "fa": 1,
+   "vs": "f16 (fa=1)",
+   "decode_base": 4.3245,
+   "decode": 4.3056,
+   "decode_delta_pct": -0.44,
+   "prefill_base": 24.3717,
+   "prefill": 23.9477,
+   "prefill_delta_pct": -1.74
+  },
+  {
+   "kv_k": "q4_0",
+   "kv_v": "q4_0",
+   "kv": "q4_0/K + q4_0/V",
+   "depth": 4096,
+   "fa": 1,
+   "vs": "f16 (fa=1)",
+   "decode_base": 3.2131,
+   "decode": 3.451,
+   "decode_delta_pct": 7.4,
+   "prefill_base": 15.6187,
+   "prefill": 12.5565,
+   "prefill_delta_pct": -19.61
+  },
+  {
+   "kv_k": "q4_0",
+   "kv_v": "q4_0",
+   "kv": "q4_0/K + q4_0/V",
+   "depth": 8192,
+   "fa": 1,
+   "vs": "f16 (fa=1)",
+   "decode_base": 2.6797,
+   "decode": 2.8278,
+   "decode_delta_pct": 5.53,
+   "prefill_base": 11.6,
+   "prefill": 8.5071,
+   "prefill_delta_pct": -26.66
+  },
+  {
+   "kv_k": "q8_0",
+   "kv_v": "f16",
+   "kv": "q8_0/K + f16/V",
+   "depth": 0,
+   "fa": 0,
+   "vs": "f16 (fa=0)",
+   "decode_base": 4.2424,
+   "decode": 4.3377,
+   "decode_delta_pct": 2.25,
+   "prefill_base": 24.289,
+   "prefill": 24.4188,
+   "prefill_delta_pct": 0.53
+  },
+  {
+   "kv_k": "q8_0",
+   "kv_v": "f16",
+   "kv": "q8_0/K + f16/V",
+   "depth": 4096,
+   "fa": 0,
+   "vs": "f16 (fa=0)",
+   "decode_base": 4.0899,
+   "decode": 3.9322,
+   "decode_delta_pct": -3.86,
+   "prefill_base": 20.305,
+   "prefill": 18.5779,
+   "prefill_delta_pct": -8.51
+  },
+  {
+   "kv_k": "q8_0",
+   "kv_v": "f16",
+   "kv": "q8_0/K + f16/V",
+   "depth": 8192,
+   "fa": 0,
+   "vs": "f16 (fa=0)",
+   "decode_base": 3.7458,
+   "decode": 3.6871,
+   "decode_delta_pct": -1.57,
+   "prefill_base": 17.1055,
+   "prefill": 15.0079,
+   "prefill_delta_pct": -12.26
+  }
+ ],
+ "all_arms_vs_f16_fa0": [
+  {
+   "arm": "f16/K + f16/V, fa=0",
+   "depth": 0,
+   "decode": 4.2424,
+   "prefill": 24.289,
+   "decode_delta_vs_f16fa0_pct": 0.0,
+   "prefill_delta_vs_f16fa0_pct": 0.0
+  },
+  {
+   "arm": "f16/K + f16/V, fa=0",
+   "depth": 4096,
+   "decode": 4.0899,
+   "prefill": 20.305,
+   "decode_delta_vs_f16fa0_pct": 0.0,
+   "prefill_delta_vs_f16fa0_pct": 0.0
+  },
+  {
+   "arm": "f16/K + f16/V, fa=0",
+   "depth": 8192,
+   "decode": 3.7458,
+   "prefill": 17.1055,
+   "decode_delta_vs_f16fa0_pct": 0.0,
+   "prefill_delta_vs_f16fa0_pct": 0.0
+  },
+  {
+   "arm": "f16/K + f16/V, fa=1",
+   "depth": 0,
+   "decode": 4.3245,
+   "prefill": 24.3717,
+   "decode_delta_vs_f16fa0_pct": 1.94,
+   "prefill_delta_vs_f16fa0_pct": 0.34
+  },
+  {
+   "arm": "f16/K + f16/V, fa=1",
+   "depth": 4096,
+   "decode": 3.2131,
+   "prefill": 15.6187,
+   "decode_delta_vs_f16fa0_pct": -21.44,
+   "prefill_delta_vs_f16fa0_pct": -23.08
+  },
+  {
+   "arm": "f16/K + f16/V, fa=1",
+   "depth": 8192,
+   "decode": 2.6797,
+   "prefill": 11.6,
+   "decode_delta_vs_f16fa0_pct": -28.46,
+   "prefill_delta_vs_f16fa0_pct": -32.19
+  },
+  {
+   "arm": "q8_0/K + q8_0/V, fa=1",
+   "depth": 0,
+   "decode": 4.3412,
+   "prefill": 23.8147,
+   "decode_delta_vs_f16fa0_pct": 2.33,
+   "prefill_delta_vs_f16fa0_pct": -1.95
+  },
+  {
+   "arm": "q8_0/K + q8_0/V, fa=1",
+   "depth": 4096,
+   "decode": 3.0034,
+   "prefill": 9.531,
+   "decode_delta_vs_f16fa0_pct": -26.57,
+   "prefill_delta_vs_f16fa0_pct": -53.06
+  },
+  {
+   "arm": "q8_0/K + q8_0/V, fa=1",
+   "depth": 8192,
+   "decode": 2.296,
+   "prefill": 5.8895,
+   "decode_delta_vs_f16fa0_pct": -38.7,
+   "prefill_delta_vs_f16fa0_pct": -65.57
+  },
+  {
+   "arm": "q4_0/K + q4_0/V, fa=1",
+   "depth": 0,
+   "decode": 4.3056,
+   "prefill": 23.9477,
+   "decode_delta_vs_f16fa0_pct": 1.49,
+   "prefill_delta_vs_f16fa0_pct": -1.41
+  },
+  {
+   "arm": "q4_0/K + q4_0/V, fa=1",
+   "depth": 4096,
+   "decode": 3.451,
+   "prefill": 12.5565,
+   "decode_delta_vs_f16fa0_pct": -15.62,
+   "prefill_delta_vs_f16fa0_pct": -38.16
+  },
+  {
+   "arm": "q4_0/K + q4_0/V, fa=1",
+   "depth": 8192,
+   "decode": 2.8278,
+   "prefill": 8.5071,
+   "decode_delta_vs_f16fa0_pct": -24.51,
+   "prefill_delta_vs_f16fa0_pct": -50.27
+  },
+  {
+   "arm": "q8_0/K + f16/V, fa=0",
+   "depth": 0,
+   "decode": 4.3377,
+   "prefill": 24.4188,
+   "decode_delta_vs_f16fa0_pct": 2.25,
+   "prefill_delta_vs_f16fa0_pct": 0.53
+  },
+  {
+   "arm": "q8_0/K + f16/V, fa=0",
+   "depth": 4096,
+   "decode": 3.9322,
+   "prefill": 18.5779,
+   "decode_delta_vs_f16fa0_pct": -3.86,
+   "prefill_delta_vs_f16fa0_pct": -8.51
+  },
+  {
+   "arm": "q8_0/K + f16/V, fa=0",
+   "depth": 8192,
+   "decode": 3.6871,
+   "prefill": 15.0079,
+   "decode_delta_vs_f16fa0_pct": -1.57,
+   "prefill_delta_vs_f16fa0_pct": -12.26
+  }
+ ],
+ "fa_only_cost_f16": [
+  {
+   "depth": 0,
+   "decode_fa0": 4.2424,
+   "decode_fa1": 4.3245,
+   "decode_delta_pct": 1.94,
+   "prefill_fa0": 24.289,
+   "prefill_fa1": 24.3717,
+   "prefill_delta_pct": 0.34
+  },
+  {
+   "depth": 4096,
+   "decode_fa0": 4.0899,
+   "decode_fa1": 3.2131,
+   "decode_delta_pct": -21.44,
+   "prefill_fa0": 20.305,
+   "prefill_fa1": 15.6187,
+   "prefill_delta_pct": -23.08
+  },
+  {
+   "depth": 8192,
+   "decode_fa0": 3.7458,
+   "decode_fa1": 2.6797,
+   "decode_delta_pct": -28.46,
+   "prefill_fa0": 17.1055,
+   "prefill_fa1": 11.6,
+   "prefill_delta_pct": -32.19
+  }
+ ],
+ "fa_auto_resolution": {
+  "auto_f16": {
+   "resolved": "enabled",
+   "log": "0.03.581.524 I llama_context: flash_attn            = auto\n0.03.624.466 I resolve_fused_ops: Flash Attention enabled\n0.15.075.076 I llama_context: flash_attn            = auto\n0.15.214.445 I resolve_fused_ops: Flash Attention enabled\n---KV---\n0.03.582.802 I llama_kv_cache: size =   96.00 MiB (  8192 cells,   6 layers,  1/1 seqs), K (f16):   48.00 MiB, V (f16):   48.00 MiB\n0.15.182.610 I llama_kv_cache: size =   96.00 MiB (  8192 cells,   6 layers,  1/1 seqs), K (f16):   48.00 MiB, V (f16):   48.00 MiB"
+  },
+  "auto_q8k": {
+   "resolved": "enabled",
+   "log": "0.03.594.022 I llama_context: flash_attn            = auto\n0.03.637.548 I resolve_fused_ops: Flash Attention enabled\n0.15.094.752 I llama_context: flash_attn            = auto\n0.15.214.551 I resolve_fused_ops: Flash Attention enabled\n---KV---\n0.03.595.283 I llama_kv_cache: size =   73.50 MiB (  8192 cells,   6 layers,  1/1 seqs), K (q8_0):   25.50 MiB, V (f16):   48.00 MiB\n0.15.179.709 I llama_kv_cache: size =   73.50 MiB (  8192 cells,   6 layers,  1/1 seqs), K (q8_0):   25.50 MiB, V (f16):   48.00 MiB"
+  }
+ },
+ "budget_evaluated_at": {
+  "peak_bw_gbs": 8.17,
+  "source": "任务书给定（实测峰值 8.17 GB/s）",
+  "note": "本分析不依赖 8.17：上限是纯比例算的；8.17 只用来核对 d0 的实际达成率（1.2025 GB/token × 4.234 t/s ≈ 5.09 GB/s ≈ 峰值的 62%）。"
+ },
+ "diagnosis": {
+  "was_negative_real": true,
+  "if_false_why": "**方向是真的，但有三个测量/配置层面的问题让旧结论的归因不可用**：\n① KV 体积高估 4 倍：只有 6/24 层有 KV，8K 实测 96.00 MiB（不是按 24 层算的 384 MiB），KV 只占每 token 流量 7.7%，q8 的理论上限只有 +3.76%；\n② 旧的两格（f16 / q8_0）llama-bench JSON 里 flash_attn 都是 -1(AUTO)，而本构建里 auto 会被 resolve 成 **enabled**（日志 `resolve_fused_ops: Flash Attention enabled`），同时量化 V 又硬性要求 FA —— 也就是说旧的 f16 基线本来就是 FA on，**旧 −30.3% 里没有 FA 开关的混淆**，它确实是 KV 类型的代价；\n③ 但把它推广成「KV 量化没用」是错的：q4_0 K+V 在同样 FA on 下 8K decode 反而比 f16 快 +5.53%（4K 更快），而只量化 K、V 保 f16（FA off）只差 -1.57% decode / -12.26% 预填。④ 用旧协议（-p 8192 -ub 128 -t 8 -r 1、-fa auto）原样复刻：f16 17.71 t/s vs q8_0 9.83 t/s = -44.5%（旧 −30.4%）—— **方向完整复现、幅度更大**，所以旧结论不是测量假象；绝对值不可比（构建升级后同协议 f16 已快 74%）。\n所以问题集中在 **q8_0 在 FA 内核里的 K+V 反量化路径**，不是 KV 量化这件事本身。",
+  "fa1_vs_fa0_delta_pct": {
+   "0": 0.34,
+   "4096": -23.08,
+   "8192": -32.19
+  },
+  "fa1_vs_fa0_delta_decode_pct": {
+   "0": 1.94,
+   "4096": -21.44,
+   "8192": -28.46
+  },
+  "decomposition_at_8192_prefill_pct": {
+   "baseline_f16_fa0": 0.0,
+   "turn_fa_on_with_f16_kv": -32.19,
+   "q8_0_kv_on_top_of_same_fa": -49.23,
+   "q4_0_kv_on_top_of_same_fa": -26.66,
+   "q8_0_k_only_no_fa": -12.26
+  },
+  "decomposition_at_8192_decode_pct": {
+   "turn_fa_on_with_f16_kv": -28.46,
+   "q8_0_kv_on_top_of_same_fa": -14.32,
+   "q4_0_kv_on_top_of_same_fa": 5.53,
+   "q8_0_k_only_no_fa": -1.57
+  },
+  "hypothesis_1_kv_overestimated_4x": {
+   "verdict": "成立",
+   "detail": "6 层有 KV：8K f16 = 96.00 MiB；按 24 层会算成 384 MiB。另外 18 个线性注意力层是**常量** recurrent state 19.27 MiB（f32），与上下文长度无关，-ctk/-ctv 也碰不到它。"
+  },
+  "hypothesis_2_scalar_dequant": {
+   "verdict": "部分成立，且定位更细",
+   "detail": "只量化 K（V 保 f16）+ FA off：8K 预填 -12.26%、decode -1.57%—— 说明单纯的反量化并不贵；贵的是 q8_0 的 V 在 FA 内核里那条路径（K+V q8_0 + FA on，8K 预填 -49.23%、decode -14.32%）。反证：q4_0 K+V + FA on 的 decode 反而比 f16(+FA) 快 +5.53%，若「反量化都走标量」不会出现这种翻转。"
+  },
+  "hypothesis_3_fa_interaction": {
+   "verdict": "成立，但方向和原来猜的相反",
+   "detail": "-ctv q8_0/q4_0 + -fa off 是**硬报错**；-fa auto 又会把 FA resolve 成 enabled。所以「KV 量化会不会开 FA」不是变量，FA 一直是开的 —— 变的只是「你以为的基线」。真正的交互是：量化 V 强制 FA，而 FA 本身在 8K 深度就要付 -32.19% 预填 / -28.46% decode 的税，depth=0 时这笔税为 0。"
+  },
+  "new_lead": {
+   "finding": "-fa off 相对默认（auto→on）在 8K 深度：预填 -32.19%、decode -28.46%；depth=0 时两者相同（预填 +0.01%、decode +2.16%）。",
+   "why_it_matters": "如果交付/长上下文卡片走的是默认 argv（-fa auto），那么 8K 档天然背着约 30% 的 FA 税；关掉 FA 是纯配置改动。但必须先验 PPL 与数值一致性，且 depth=0 的分数完全不受影响。",
+   "caveat": "本次没测 PPL，也没核对交付 server 的实际 argv，不能直接改交付。"
+  },
+  "repro_check": {
+   "protocol": "旧协议复刻：-p 8192 -n 0 -d 0 -ub 128 -t 8 -r 1，-fa auto（会 resolve 成 enabled）",
+   "f16_auto_ts": 17.7055,
+   "q8_0_auto_ts": 9.8272,
+   "delta_q8_vs_f16_pct": -44.5,
+   "old_2026_10_23": {
+    "f16_auto": 10.163,
+    "q8_0_auto": 7.077,
+    "delta_pct": -30.4,
+    "source": "08_实验数据/kvtypes-card11b-1023-1600.json summary 8192/*"
+   },
+   "note": "绝对值不能对齐（构建已升级：同协议 f16 从 10.163 涨到 17.71 t/s，+74%），但**相对差被完整复现且更大**：旧 −30.4% → 现在 -44.5%。所以 −30.3% 不是测量假象。"
+  }
+ },
+ "repro_8k_prefill": {
+  "r_f16_auto": {
+   "args": "-ctk f16  -ctv f16  -fa auto",
+   "why": "旧基线协议：f16 + fa auto（=FA on）",
+   "prefill_ts": [
+    17.7055
+   ],
+   "prefill_median": 17.7055,
+   "wall_s": 959.8
+  },
+  "r_q8_auto": {
+   "args": "-ctk q8_0 -ctv q8_0 -fa auto",
+   "why": "旧量化协议：auto 被强制升级成 FA on",
+   "prefill_ts": [
+    9.8272
+   ],
+   "prefill_median": 9.8272,
+   "wall_s": 1692.8
+  },
+  "_summary": {
+   "protocol": "旧协议复刻：-p 8192 -n 0 -d 0 -ub 128 -t 8 -r 1，-fa auto（会 resolve 成 enabled）",
+   "f16_auto_ts": 17.7055,
+   "q8_0_auto_ts": 9.8272,
+   "delta_q8_vs_f16_pct": -44.5,
+   "old_2026_10_23": {
+    "f16_auto": 10.163,
+    "q8_0_auto": 7.077,
+    "delta_pct": -30.4,
+    "source": "08_实验数据/kvtypes-card11b-1023-1600.json summary 8192/*"
+   },
+   "note": "绝对值不能对齐（构建已升级：同协议 f16 从 10.163 涨到 17.71 t/s，+74%），但**相对差被完整复现且更大**：旧 −30.4% → 现在 -44.5%。所以 −30.3% 不是测量假象。"
+  }
+ },
+ "verdict": "KV 量化这条路从设计上就不成立（8K 时 KV 只占每 token 流量 7.7%，q8 上限 +3.76%），而旧「q8 −30.3%」**方向是真的、也能复现**（同协议复刻：f16 17.71 vs q8_0 9.83 t/s = -44.5%，旧记录 −30.4%），但归因要改成两段式：默认 FA 本身在 8K 就慢 32.2% 预填 / 28.5% decode，q8_0 在同一 FA 下再慢 49.2% 预填 / 14.3% decode；且 q4_0 的 decode 反而 +5.5%（说明是 q8_0 的反量化路径问题，不是 KV 量化整体）；结论：**交付维持 f16 KV，不改**（depth=0 时量化 KV 其实就是个 wash：decode +0.4~+2.3%、prefill −1.7~−2.3%，和旧的「512 上下文 prefill −2.7%」一致），材料把 −30.3% 改成两段式归因即可；另有一条待验证线索：默认 -fa auto=on，8K 深度关 FA 可能白拿约 32% 预填（须先验 PPL，且不影响 depth=0 的分数）。"
+}

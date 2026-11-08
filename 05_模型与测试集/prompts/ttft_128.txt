@@ -1,0 +1,4 @@
+K1 端 Qwen3.5 推理部署与优化 · 完整成果报告
+面向对象：没参与过本项目、但需要理解结论与复现实验的读者。
+本文所有数字都可以用第 9 节的命令重新跑出来。
+赛题要求：在 SpacemiT K1（8GB） 上，用 spacemitcom/llama.cpp 跑 Qwen3.52BInstruct 与 Qwen3.54BInstruct，并围绕 prefill（预填充）、decode（解码）、长上下文 三个维度做可量化的优化，同时

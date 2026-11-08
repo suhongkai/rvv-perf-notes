@@ -1,0 +1,629 @@
+{
+ "task": "8 核 vs 4 核 对等性（官方 Q4_1 同板）",
+ "date": "2026-11-01",
+ "host": "10.65.21.129",
+ "model": {
+  "file": "SpacemiT-Qwen3.5-2B-Q4_1-official.gguf",
+  "bytes": 1288281984,
+  "path": "/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf",
+  "sha256_16": "c3f64bcb608353fd"
+ },
+ "protocol": "llama-bench -p 512 -n 128 -r 3 -fa 0；taskset 控制可用核",
+ "protocol_detail": {
+  "cmd": "taskset -c <cpus> ./llama-bench -m <官方Q4_1> -p 512 -n 128 -t <4|8> -r 3 -fa 0 -o json",
+  "ub": "未指定 -ub，llama-bench 默认 n_ubatch=512（已复核 JSON: n_ubatch=512）",
+  "cpus": "4 线程 → taskset -c 0-3（单簇 4 核，含全部 4 个 IME 核）；8 线程 → taskset -c 0-7（全 8 核）",
+  "clean": "每臂前 pkill -x llama-bench + sleep 2；每臂后 pkill + 校验无残留",
+  "banner": "MEE 臂从 stderr 原样抓 CPU_RISCV64_SPACEMIT banner",
+  "engine_env": "MEE: LD_LIBRARY_PATH=~/labdeploy/legacy/bin；our: LD_LIBRARY_PATH=~/c16/bin；无其它环境变量"
+ },
+ "builds": {
+  "mee": {
+   "dir": "/home/bianbu/labdeploy/legacy/bin",
+   "lib16": "f20686b3b486a2de",
+   "ok": true
+  },
+  "our": {
+   "dir": "/home/bianbu/c16/bin",
+   "lib16": "4436a9f45bcc298b",
+   "ok": true
+  }
+ },
+ "host_facts": {
+  "nproc": 8,
+  "ime_cores": "cpu0-3 的 /proc/cpuinfo isa 含 ime；cpu4-7 不含",
+  "governor": "performance",
+  "freq_mhz": 1600,
+  "soc_temp_c_range": "40-49",
+  "note": "测量期间板上无其它 llama/curl 进程；每臂前后 pkill 校验残留为空"
+ },
+ "arms": [
+  {
+   "engine": "mee",
+   "threads": 4,
+   "cpus": "0-3",
+   "prefill": 10.452,
+   "decode": 1.716,
+   "samples_ts": {
+    "prefill": [
+     10.433,
+     10.464,
+     10.457
+    ],
+    "decode": [
+     1.717,
+     1.711,
+     1.72
+    ]
+   },
+   "prefill_median": 10.457,
+   "decode_median": 1.717,
+   "prefill_stddev": 0.016,
+   "decode_stddev": 0.005,
+   "lib16": "f20686b3b486a2de",
+   "bin": "/home/bianbu/labdeploy/legacy/bin",
+   "n_ubatch": 512,
+   "wall_s": 434.6,
+   "cmd": "cd /home/bianbu/labdeploy/legacy/bin && LD_LIBRARY_PATH=/home/bianbu/labdeploy/legacy/bin taskset -c 0-3 timeout 1200 ./llama-bench -m /home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf -p 512 -n 128 -t 4 -r 3 -fa 0 -o json >/tmp/f_bench.json 2>/tmp/f_bench.err; echo RC=$?",
+   "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+   "banner_fields": {
+    "num_cores": "8",
+    "num_perfer_cores": "4",
+    "use_ime1": "1",
+    "use_ime2": "0",
+    "mem_backend": "HPAGE",
+    "perfer_core_arch_id": "a03c",
+    "exclude_main_thread": "0",
+    "cpu_mask": "f",
+    "aicpu_id_offset": "0"
+   }
+  },
+  {
+   "engine": "mee",
+   "threads": 8,
+   "cpus": "0-7",
+   "prefill": 17.325,
+   "decode": 2.856,
+   "samples_ts": {
+    "prefill": [
+     17.284,
+     17.323,
+     17.369
+    ],
+    "decode": [
+     2.855,
+     2.857,
+     2.857
+    ]
+   },
+   "prefill_median": 17.323,
+   "decode_median": 2.857,
+   "prefill_stddev": 0.042,
+   "decode_stddev": 0.001,
+   "lib16": "f20686b3b486a2de",
+   "bin": "/home/bianbu/labdeploy/legacy/bin",
+   "n_ubatch": 512,
+   "wall_s": 267.1,
+   "cmd": "cd /home/bianbu/labdeploy/legacy/bin && LD_LIBRARY_PATH=/home/bianbu/labdeploy/legacy/bin taskset -c 0-7 timeout 1200 ./llama-bench -m /home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf -p 512 -n 128 -t 8 -r 3 -fa 0 -o json >/tmp/f_bench.json 2>/tmp/f_bench.err; echo RC=$?",
+   "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+   "banner_fields": {
+    "num_cores": "8",
+    "num_perfer_cores": "4",
+    "use_ime1": "1",
+    "use_ime2": "0",
+    "mem_backend": "HPAGE",
+    "perfer_core_arch_id": "a03c",
+    "exclude_main_thread": "0",
+    "cpu_mask": "f",
+    "aicpu_id_offset": "0"
+   }
+  },
+  {
+   "engine": "our",
+   "threads": 4,
+   "cpus": "0-3",
+   "prefill": 11.095,
+   "decode": 3.353,
+   "samples_ts": {
+    "prefill": [
+     11.093,
+     11.097,
+     11.095
+    ],
+    "decode": [
+     3.355,
+     3.354,
+     3.35
+    ]
+   },
+   "prefill_median": 11.095,
+   "decode_median": 3.354,
+   "prefill_stddev": 0.002,
+   "decode_stddev": 0.002,
+   "lib16": "4436a9f45bcc298b",
+   "bin": "/home/bianbu/c16/bin",
+   "n_ubatch": 512,
+   "wall_s": 316.0,
+   "cmd": "cd /home/bianbu/c16/bin && LD_LIBRARY_PATH=/home/bianbu/c16/bin taskset -c 0-3 timeout 1200 ./llama-bench -m /home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf -p 512 -n 128 -t 4 -r 3 -fa 0 -o json >/tmp/f_bench.json 2>/tmp/f_bench.err; echo RC=$?",
+   "banner": "",
+   "banner_note": "我们的 chunk16 构建无 SPACEMIT banner"
+  },
+  {
+   "engine": "our",
+   "threads": 8,
+   "cpus": "0-7",
+   "prefill": 19.099,
+   "decode": 4.056,
+   "samples_ts": {
+    "prefill": [
+     19.174,
+     18.931,
+     19.191
+    ],
+    "decode": [
+     4.014,
+     4.097,
+     4.056
+    ]
+   },
+   "prefill_median": 19.174,
+   "decode_median": 4.056,
+   "prefill_stddev": 0.146,
+   "decode_stddev": 0.041,
+   "lib16": "4436a9f45bcc298b",
+   "bin": "/home/bianbu/c16/bin",
+   "n_ubatch": 512,
+   "wall_s": 219.1,
+   "cmd": "cd /home/bianbu/c16/bin && LD_LIBRARY_PATH=/home/bianbu/c16/bin taskset -c 0-7 timeout 1200 ./llama-bench -m /home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf -p 512 -n 128 -t 8 -r 3 -fa 0 -o json >/tmp/f_bench.json 2>/tmp/f_bench.err; echo RC=$?",
+   "banner": "",
+   "banner_note": "我们的 chunk16 构建无 SPACEMIT banner"
+  }
+ ],
+ "deltas_pct": {
+  "our_vs_mee_prefill_t4": 6.15,
+  "our_vs_mee_prefill_t8": 10.24,
+  "our_vs_mee_decode_t4": 95.4,
+  "our_vs_mee_decode_t8": 42.02,
+  "mee_prefill_t8_vs_t4": 65.76,
+  "our_prefill_t8_vs_t4": 72.14,
+  "mee_decode_t8_vs_t4": 66.43,
+  "our_decode_t8_vs_t4": 20.97
+ },
+ "affinity_matrix": {
+  "why": "主 2x2 只测了 (4t,0-3) 与 (8t,0-7)。评审会问『是线程数还是核数？』，所以把 线程数 × 可用核数 补全成 2x2x2（同协议 p512 n128 r3）。",
+  "protocol": "同上；补测四格：mee t4@0-7 / mee t8@0-3 / our t4@0-7 / our t8@0-3",
+  "cells": [
+   {
+    "engine": "mee",
+    "threads": 4,
+    "cores_available": "0-3",
+    "prefill": 10.452,
+    "decode": 1.716,
+    "samples_ts": {
+     "prefill": [
+      10.433,
+      10.464,
+      10.457
+     ],
+     "decode": [
+      1.717,
+      1.711,
+      1.72
+     ]
+    },
+    "lib16": "f20686b3b486a2de"
+   },
+   {
+    "engine": "mee",
+    "threads": 4,
+    "cores_available": "0-7",
+    "prefill": 17.104,
+    "decode": 2.843,
+    "samples_ts": {
+     "prefill": [
+      17.094,
+      17.084,
+      17.134
+     ],
+     "decode": [
+      2.842,
+      2.843,
+      2.843
+     ]
+    },
+    "lib16": "f20686b3b486a2de"
+   },
+   {
+    "engine": "mee",
+    "threads": 8,
+    "cores_available": "0-3",
+    "prefill": 10.335,
+    "decode": 1.705,
+    "samples_ts": {
+     "prefill": [
+      10.349,
+      10.302,
+      10.356
+     ],
+     "decode": [
+      1.705,
+      1.704,
+      1.707
+     ]
+    },
+    "lib16": "f20686b3b486a2de"
+   },
+   {
+    "engine": "mee",
+    "threads": 8,
+    "cores_available": "0-7",
+    "prefill": 17.325,
+    "decode": 2.856,
+    "samples_ts": {
+     "prefill": [
+      17.284,
+      17.323,
+      17.369
+     ],
+     "decode": [
+      2.855,
+      2.857,
+      2.857
+     ]
+    },
+    "lib16": "f20686b3b486a2de"
+   },
+   {
+    "engine": "our",
+    "threads": 4,
+    "cores_available": "0-3",
+    "prefill": 11.095,
+    "decode": 3.353,
+    "samples_ts": {
+     "prefill": [
+      11.093,
+      11.097,
+      11.095
+     ],
+     "decode": [
+      3.355,
+      3.354,
+      3.35
+     ]
+    },
+    "lib16": "4436a9f45bcc298b"
+   },
+   {
+    "engine": "our",
+    "threads": 4,
+    "cores_available": "0-7",
+    "prefill": 11.106,
+    "decode": 3.545,
+    "samples_ts": {
+     "prefill": [
+      11.11,
+      11.11,
+      11.099
+     ],
+     "decode": [
+      3.538,
+      3.539,
+      3.559
+     ]
+    },
+    "lib16": "4436a9f45bcc298b"
+   },
+   {
+    "engine": "our",
+    "threads": 8,
+    "cores_available": "0-3",
+    "prefill": 11.259,
+    "decode": 2.497,
+    "samples_ts": {
+     "prefill": [
+      11.244,
+      11.26,
+      11.274
+     ],
+     "decode": [
+      2.488,
+      2.503,
+      2.501
+     ]
+    },
+    "lib16": "4436a9f45bcc298b"
+   },
+   {
+    "engine": "our",
+    "threads": 8,
+    "cores_available": "0-7",
+    "prefill": 19.099,
+    "decode": 4.056,
+    "samples_ts": {
+     "prefill": [
+      19.174,
+      18.931,
+      19.191
+     ],
+     "decode": [
+      4.014,
+      4.097,
+      4.056
+     ]
+    },
+    "lib16": "4436a9f45bcc298b"
+   }
+  ],
+  "effects_pct": {
+   "mee_thread_effect_4cores(t8_vs_t4)": -1.12,
+   "mee_thread_effect_8cores(t8_vs_t4)": 1.29,
+   "mee_core_effect_4t(0-7_vs_0-3)": 63.64,
+   "mee_core_effect_8t(0-7_vs_0-3)": 67.63,
+   "our_thread_effect_4cores(t8_vs_t4)": 1.48,
+   "our_thread_effect_8cores(t8_vs_t4)": 71.97,
+   "our_core_effect_4t(0-7_vs_0-3)": 0.1,
+   "our_core_effect_8t(0-7_vs_0-3)": 69.63
+  },
+  "reading": "MEE 的吞吐只跟『能用几颗核』走（4 核 10.34-10.45，8 核 17.10-17.33），与 -t 几乎无关（±1.3%）；我们的吞吐只跟线程数走（4 线程 11.10-11.11 无论 4/8 核，8 线程+8 核才到 19.10）。所以『MEE 19.16 只用了 4 核』不成立：它是 8 核可用的成绩，限到 4 核只剩 10.4。"
+ },
+ "banner_probe": {
+  "question": "MEE 的 num_perfer_cores 会随 -t 或 taskset 变吗？",
+  "answer": "不变。四种组合（-t4/t8 × 绑 0-3/0-7/不绑）banner 全部为 num_cores: 8, num_perfer_cores: 4, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f。它读的是 SoC 拓扑，不是 affinity，也不看 -t。所以 banner 里的 4 是『IME 只在 4 个核上』的证据，不是『只用 4 个核跑』的证据。",
+  "probes": [
+   {
+    "threads": 4,
+    "cpus": "unpinned",
+    "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+    "fields": {
+     "num_cores": "8",
+     "num_perfer_cores": "4",
+     "use_ime1": "1",
+     "use_ime2": "0",
+     "mem_backend": "HPAGE",
+     "cpu_mask": "f"
+    },
+    "rc": "RC=0"
+   },
+   {
+    "threads": 4,
+    "cpus": "0-3",
+    "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+    "fields": {
+     "num_cores": "8",
+     "num_perfer_cores": "4",
+     "use_ime1": "1",
+     "use_ime2": "0",
+     "mem_backend": "HPAGE",
+     "cpu_mask": "f"
+    },
+    "rc": "RC=0"
+   },
+   {
+    "threads": 8,
+    "cpus": "unpinned",
+    "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+    "fields": {
+     "num_cores": "8",
+     "num_perfer_cores": "4",
+     "use_ime1": "1",
+     "use_ime2": "0",
+     "mem_backend": "HPAGE",
+     "cpu_mask": "f"
+    },
+    "rc": "RC=0"
+   },
+   {
+    "threads": 8,
+    "cpus": "0-7",
+    "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+    "fields": {
+     "num_cores": "8",
+     "num_perfer_cores": "4",
+     "use_ime1": "1",
+     "use_ime2": "0",
+     "mem_backend": "HPAGE",
+     "cpu_mask": "f"
+    },
+    "rc": "RC=0"
+   }
+  ],
+  "raw_banner_per_arm": {
+   "mee_t4_cpus0-3": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+   "mee_t8_cpus0-7": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0"
+  },
+  "stderr_context": [
+   "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+   "CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2",
+   "CPU_RISCV64_SPACEMIT: failed to allocate init_barrier from shared mem, falling back to heap"
+  ]
+ },
+ "core_utilization": {
+  "method": "跑 llama-bench 的同时 0.5s 采样 /proc/stat，按核算 busy%（busy = user+nice+system+irq+softirq；含 prefill+decode 全程）",
+  "protocol": "-p 256 -n 16 -r 1 -fa 0，不绑核（仅定性，不与主表数字混用）",
+  "runs": [
+   {
+    "engine": "mee",
+    "threads": 8,
+    "taskset": "unpinned",
+    "lib16": "f20686b3b486a2de",
+    "util_pct": {
+     "cpu0": 75.2,
+     "cpu1": 75.0,
+     "cpu2": 74.6,
+     "cpu3": 74.4,
+     "cpu4": 7.7,
+     "cpu5": 11.6,
+     "cpu6": 9.2,
+     "cpu7": 99.9
+    },
+    "wall_s": 45.6,
+    "prefill": 18.583,
+    "decode": 2.849,
+    "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+    "raw_tail": [
+     "UTIL {\"threads\": 8, \"taskset\": \"\", \"prompt\": 256, \"gen\": 16, \"wall_s\": 45.6, \"samples\": 91, \"util\": {\"cpu0\": 75.2, \"cpu1\": 75.0, \"cpu2\": 74.6, \"cpu3\": 74.4, \"cpu4\": 7.7, \"cpu5\": 11.6, \"cpu6\": 9.2, \"cpu7\": 99.9}}",
+     "TS {\"prefill\": 18.583, \"decode\": 2.849}",
+     "BANNER CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0"
+    ]
+   },
+   {
+    "engine": "mee",
+    "threads": 4,
+    "taskset": "unpinned",
+    "lib16": "f20686b3b486a2de",
+    "util_pct": {
+     "cpu0": 74.4,
+     "cpu1": 97.3,
+     "cpu2": 75.1,
+     "cpu3": 75.2,
+     "cpu4": 13.2,
+     "cpu5": 10.7,
+     "cpu6": 3.6,
+     "cpu7": 76.7
+    },
+    "wall_s": 45.1,
+    "prefill": 18.787,
+    "decode": 2.861,
+    "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+    "raw_tail": [
+     "UTIL {\"threads\": 4, \"taskset\": \"\", \"prompt\": 256, \"gen\": 16, \"wall_s\": 45.1, \"samples\": 90, \"util\": {\"cpu0\": 74.4, \"cpu1\": 97.3, \"cpu2\": 75.1, \"cpu3\": 75.2, \"cpu4\": 13.2, \"cpu5\": 10.7, \"cpu6\": 3.6, \"cpu7\": 76.7}}",
+     "TS {\"prefill\": 18.787, \"decode\": 2.861}",
+     "BANNER CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0"
+    ]
+   },
+   {
+    "engine": "our",
+    "threads": 8,
+    "taskset": "unpinned",
+    "lib16": "4436a9f45bcc298b",
+    "util_pct": {
+     "cpu0": 65.2,
+     "cpu1": 92.4,
+     "cpu2": 67.5,
+     "cpu3": 64.3,
+     "cpu4": 64.7,
+     "cpu5": 64.1,
+     "cpu6": 65.6,
+     "cpu7": 64.2
+    },
+    "wall_s": 45.1,
+    "prefill": 19.768,
+    "decode": 3.82,
+    "banner": "",
+    "raw_tail": [
+     "UTIL {\"threads\": 8, \"taskset\": \"\", \"prompt\": 256, \"gen\": 16, \"wall_s\": 45.1, \"samples\": 90, \"util\": {\"cpu0\": 65.2, \"cpu1\": 92.4, \"cpu2\": 67.5, \"cpu3\": 64.3, \"cpu4\": 64.7, \"cpu5\": 64.1, \"cpu6\": 65.6, \"cpu7\": 64.2}}",
+     "TS {\"prefill\": 19.768, \"decode\": 3.82}",
+     "BANNER "
+    ]
+   }
+  ],
+  "reading": "MEE t8 全程 cpu0-3 各约 75%，cpu7 约 100%，cpu4-6 仅 8-12%；MEE t4 也是 cpu0-3 各约 75-97% + cpu7 约 77%，cpu4-6 个位数。两组的总 CPU 时间都在 4.0-4.3 核，线程从 4 加到 8 既没增加总 CPU 时间也没提速：多出来的线程大多在等 barrier/同步，而不是在算。"
+ },
+ "per_core": {
+  "mee_prefill_per_core": 4.331,
+  "our_prefill_per_core": 2.387,
+  "ratio": 1.814,
+  "ratio_definition": "ratio = mee_prefill_per_core / our_prefill_per_core",
+  "definition": "主口径（上限）：MEE = 8 线程 prefill 17.325 / 4 个 IME 核 = 4.331；our = 8 线程 prefill 19.099 / 8 核 = 2.387。",
+  "by_normalization": {
+   "A_upper_bound_4_ime_cores": {
+    "mee_per_core": 4.331,
+    "our_per_core": 2.387,
+    "ratio": 1.814,
+    "formula": "MEE 8t@0-7 prefill / 4 个 IME 核；our 8t@0-7 prefill / 8 核",
+    "caveat": "把 MEE 8 线程的全部吞吐记到 4 个 IME 核上，是 IME 单核效率的上限；实测 MEE 绑 4 核会腰斩，说明另外 4 核有实际贡献，该口径偏高。"
+   },
+   "B_equal_4_threads_8cores_available": {
+    "mee_per_core": 4.276,
+    "our_per_core": 2.776,
+    "ratio": 1.54,
+    "formula": "两边都 -t4、都允许 0-7；MEE 17.104/4 vs our 11.106/4",
+    "caveat": "MEE 在 t4 时内部仍有 4 个 IME worker + 其它线程，实际吃的核不止 4 个。"
+   },
+   "C_equal_4_threads_on_4_cores": {
+    "mee_per_core": 2.613,
+    "our_per_core": 2.774,
+    "ratio": 0.942,
+    "formula": "主 2x2 的左列：-t4 + taskset 0-3"
+   },
+   "D_equal_8_threads_on_8_cores": {
+    "mee_per_core": 2.166,
+    "our_per_core": 2.387,
+    "ratio": 0.907,
+    "formula": "主 2x2 的右列：-t8 + taskset 0-7"
+   }
+  },
+  "recommended": "引用回对等性时应同时给 A（上限 1.81）与 C/D（同线程同核数 0.94/0.91）；只给 A 会被反问『你把 8 线程成绩记到 4 个核上』。",
+  "decode_8t_per_core": {
+   "mee": 0.357,
+   "our": 0.507,
+   "ratio_mee_over_our": 0.704,
+   "note": "decode 是带宽 bound，IME 不参与；按同 8 线程实际核数平均"
+  }
+ },
+ "fairness": {
+  "is_8core_vs_4core": false,
+  "verdict_evidence": [
+   "MEE -t8@0-7 = 17.325 vs -t4@0-3 = 10.452：差 65.8%，但把 -t 固定、只放开核数（-t4@0-7 = 17.104）就拿到 17.10 —— 说明差距来自『能用 cpu4-7』，不是线程数。",
+   "MEE -t8@0-3 = 10.335，与 -t4@0-3 = 10.452 几乎相同（-1.1%）：线程翻倍在 4 核上没有收益，进一步证明 MEE 是核集受限、不是线程受限。",
+   "厂商 19.16（本次 -ub128 同板复现 19.115）是 8 线程 + 8 核可用的成绩；所谓『只用了 4 个 IME 核』只对 IME 加速路径成立，对整机资源不成立。"
+  ],
+  "consequence": "主 2x2 两列都是同线程数、同可用核数的对等比较：4t vs 4t 同 0-3、8t vs 8t 同 0-7。"
+ },
+ "supplement_ub128": {
+  "why": "历史 19.16/19.38 是 -ub 128 测的；本任务协议默认 ub=512。补测 t8 两臂解释口径差。",
+  "arms": [
+   {
+    "engine": "mee",
+    "threads": 8,
+    "cpus": "0-7",
+    "ub": 128,
+    "prefill": 19.115,
+    "decode": 2.837,
+    "samples_ts": {
+     "prefill": [
+      19.092,
+      19.137,
+      19.117
+     ],
+     "decode": [
+      2.838,
+      2.838,
+      2.837
+     ]
+    },
+    "lib16": "f20686b3b486a2de",
+    "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0"
+   },
+   {
+    "engine": "our",
+    "threads": 8,
+    "cpus": "0-7",
+    "ub": 128,
+    "prefill": 19.075,
+    "decode": 3.713,
+    "samples_ts": {
+     "prefill": [
+      19.046,
+      19.102,
+      19.078
+     ],
+     "decode": [
+      3.749,
+      3.648,
+      3.743
+     ]
+    },
+    "lib16": "4436a9f45bcc298b",
+    "banner": ""
+   }
+  ],
+  "mee_ub512_vs_ub128_pct": -9.36,
+  "our_ub512_vs_ub128_pct": 0.13,
+  "our_vs_mee_ub128_pct": -0.21,
+  "conclusion": "MEE 对 ub 敏感（ub128 19.115 → ub512 17.325，-9.4%），我们几乎不变（19.075 → 19.099，+0.1%）。历史 19.16 vs 19.38 的『打平』是 ub128 口径；本任务默认 ub512 口径下我们 +10.2%。"
+ },
+ "per_core_note": "ratio>1（A）与 ratio<1（C/D）同时成立并不矛盾：A 把 MEE 8 线程的吞吐全记在4 个 IME 核上（上限），C/D 按实际线程/核数平均。真实结论是 IME 的算力优势没有转化为总吞吐优势，prefill 瓶颈更可能在共享带宽/跨簇调度，而不在单核算力。",
+ "verdict": "单核效率：同线程同核数实测 IME 是我们的 0.94 倍（4t@0-3）/ 0.91 倍（8t@0-7），只有把 MEE 8 线程总吞吐全记到 4 个 IME 核上才是 1.81 倍（上限口径）；总量 8 线程我们在官方 Q4_1 上领先 10.2%（ub512；历史 -ub128 口径 19.08 vs 19.12 打平），decode 领先 42%——因为厂商 19.16 本来就是 8 核可用成绩（限 4 核只剩 10.45，放开 8 核 4 线程也有 17.10），不存在 8 核打 4 核。",
+ "headline": "不存在 8 核打 4 核：厂商 19.16 也是 8 核成绩（限 4 核 10.45、放开 8 核 4 线程 17.10）；同 4 核我们 11.10 vs 10.45（+6%），同 8 核 19.10 vs 17.32（+10%，decode +42%）。"
+}

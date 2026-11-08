@@ -1,0 +1,1677 @@
+{
+ "generated_at": "2026-11-06 23:19:13",
+ "note": "所有对外数字的唯一来源。材料只能引用本表的 id；只许直接引用 build = 当前构建且无 superseded_by 的 claim，历史值只能出现在明确标注「旧构建/历史」的对照句里。",
+ "current_build": "4436a9f4",
+ "build_labels": {
+  "4436a9f4": "chunk16 交付构建（当前）",
+  "717a8ad8": "旧交付构建（历史）",
+  "other": "非交付构建（基线/第三方/厂商包/系统指标）"
+ },
+ "claims": [
+  {
+   "id": "C01-q4_1-prefill-t4",
+   "statement": "官方 Q4_1 格式的 prefill，在 t4 下由基线 2.79 提升到 11.33 t/s（4.05×）",
+   "evidence": "08_实验数据/authoritative-ab-1028-1812.json",
+   "expr": "summary[model=官方-Q4_1-2B,cfg=pp128+tg128 t4,metric=prefill]",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "other",
+   "value": {
+    "model": "官方-Q4_1-2B",
+    "cfg": "pp128+tg128 t4",
+    "metric": "prefill",
+    "a": 2.795,
+    "b": 11.326,
+    "ratio": 4.053
+   },
+   "evidence_sha256": "00a9aba7a3395ecd233da9a14534a493cc5c3ab6b94705a501f58c7e4d7ea4e1",
+   "evidence_mtime": "2026-10-28 18:12",
+   "status": "verified"
+  },
+  {
+   "id": "C02-q4_1-prefill-t8",
+   "statement": "官方 Q4_1 格式的 prefill，在 t8 下由基线 5.02 提升到 18.61 t/s（3.70×）",
+   "evidence": "08_实验数据/authoritative-ab-1028-1812.json",
+   "expr": "summary[model=官方-Q4_1-2B,cfg=pp512+tg128 t8,metric=prefill]",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "superseded_by": "C62",
+   "status_note": "已被 C62 取代，材料不得当作当前值引用",
+   "value": {
+    "model": "官方-Q4_1-2B",
+    "cfg": "pp512+tg128 t8",
+    "metric": "prefill",
+    "a": 5.024,
+    "b": 18.608,
+    "ratio": 3.704
+   },
+   "evidence_sha256": "00a9aba7a3395ecd233da9a14534a493cc5c3ab6b94705a501f58c7e4d7ea4e1",
+   "evidence_mtime": "2026-10-28 18:12",
+   "status": "verified"
+  },
+  {
+   "id": "C03-q4_0-concat-prefill",
+   "statement": "Q4_0 格式的 prefill，CONCAT 修复使 12.51 提升到 14.67 t/s（+17%）",
+   "evidence": "08_实验数据/authoritative-ab-1028-1812.json",
+   "expr": "summary[model=2B-Q4_0,cfg=pp512+tg128 t8,metric=prefill]",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "value": {
+    "model": "2B-Q4_0",
+    "cfg": "pp512+tg128 t8",
+    "metric": "prefill",
+    "a": 12.509,
+    "b": 14.671,
+    "ratio": 1.173
+   },
+   "evidence_sha256": "00a9aba7a3395ecd233da9a14534a493cc5c3ab6b94705a501f58c7e4d7ea4e1",
+   "evidence_mtime": "2026-10-28 18:12",
+   "status": "verified"
+  },
+  {
+   "id": "C04-requant-2b-prefill",
+   "statement": "2B requant 重算使 prefill 14.76 → 20.61 t/s（+39.7%）",
+   "evidence": "08_实验数据/verify-requant-1028-1948.json",
+   "expr": "summary.prefill_old|summary.prefill_new",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "value": [
+    14.755029,
+    20.614523
+   ],
+   "evidence_sha256": "c4d5be7d33527d1a0ed0c220b843f96073525aa47f36cee222cce9f32ea39110",
+   "evidence_mtime": "2026-10-28 19:48",
+   "status": "verified"
+  },
+  {
+   "id": "C05-requant-4b-prefill",
+   "statement": "4B requant 重算使 prefill 5.11 → 7.45 t/s（+45.7%）",
+   "evidence": "08_实验数据/verify-requant4b-1028-2103.json",
+   "expr": "summary.prefill_old|summary.prefill_new",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "value": [
+    5.114485,
+    7.450493
+   ],
+   "evidence_sha256": "c6c0266424c21033b9acd8224a2ad897108304153a816b7e67f80cf3b5ce60b9",
+   "evidence_mtime": "2026-10-28 21:03",
+   "status": "verified"
+  },
+  {
+   "id": "C06-mem-2b",
+   "statement": "2B 长上下文 30 分钟 soak：RSS 均值 2287.08 MB，标准差 0.63 MB，极差 3.0 MB",
+   "evidence": "08_实验数据/memsoak-20261028-1720.json",
+   "expr": "boards[tag=2b].rss_mb.mean",
+   "unit": "MB",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": 2287.08,
+   "evidence_sha256": "9f2a529ca1896522c0103e6301ad07f4d72942aa88358797ccf5966a41f5cea3",
+   "evidence_mtime": "2026-10-28 18:18",
+   "status": "verified"
+  },
+  {
+   "id": "C07-mem-4b",
+   "statement": "4B 长上下文 30 分钟 soak：RSS 均值 5114.30 MB，极差 3.2 MB，最低可用内存 4348.9 MB",
+   "evidence": "08_实验数据/memsoak-20261028-1720.json",
+   "expr": "boards[tag=4b].rss_mb.mean",
+   "unit": "MB",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": 5114.3,
+   "evidence_sha256": "9f2a529ca1896522c0103e6301ad07f4d72942aa88358797ccf5966a41f5cea3",
+   "evidence_mtime": "2026-10-28 18:18",
+   "status": "verified"
+  },
+  {
+   "id": "C08-ctx-2b-4k",
+   "statement": "2B 4K 上下文预填 13.221 t/s（新构建，比旧曲线 +15.3%）",
+   "evidence": "08_实验数据/ctxcurve-v2-1028-2103.json",
+   "expr": "new['2B']['4096'].prefill_ts_median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "value": 13.221,
+   "evidence_sha256": "3a41822a66e3aa241374faef9807fb17456ffa5b12157bfda00d3fe336e19c0f",
+   "evidence_mtime": "2026-10-28 21:03",
+   "status": "verified"
+  },
+  {
+   "id": "C09-ctx-2b-32k",
+   "statement": "2B 32K 上下文预填 6.854 t/s（8× 衰减 −48.2%）",
+   "evidence": "08_实验数据/ctxcurve-v2-1028-2103.json",
+   "expr": "new['2B']['32768'].prefill_ts_median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "value": 6.854,
+   "evidence_sha256": "3a41822a66e3aa241374faef9807fb17456ffa5b12157bfda00d3fe336e19c0f",
+   "evidence_mtime": "2026-10-28 21:03",
+   "status": "verified"
+  },
+  {
+   "id": "C10-4b-fleet-prefill",
+   "statement": "4B-Q4_0 在 10 块板上预填中位 5.148 t/s（IQR 1.0%）",
+   "evidence": "08_实验数据/fleet4b-1028-1941.json",
+   "expr": "bench.aggregate.t8_combined.prefill.median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "superseded_by": "C61",
+   "status_note": "已被 C61 取代，材料不得当作当前值引用",
+   "value": 5.148,
+   "evidence_sha256": "812ed9484721c00e2ccb9935276a4d7bf7ed37b5f801a56c1ae200084df23fc8",
+   "evidence_mtime": "2026-10-28 19:41",
+   "status": "verified"
+  },
+  {
+   "id": "C11-4b-t7-gain",
+   "statement": "4B 生成 t7 中位 1.750 t/s vs t8 1.553 t/s（+12.7%），10 台全胜",
+   "evidence": "08_实验数据/fleet4b-1028-1941.json",
+   "expr": "bench.aggregate.t7_gen.decode.median|bench.aggregate.t8_combined.decode.median",
+   "unit": "%",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    1.75,
+    1.553
+   ],
+   "evidence_sha256": "812ed9484721c00e2ccb9935276a4d7bf7ed37b5f801a56c1ae200084df23fc8",
+   "evidence_mtime": "2026-10-28 19:41",
+   "status": "verified"
+  },
+  {
+   "id": "C13-selfmade-vs-thirdparty",
+   "statement": "我方从官方 f16 量化的 selfmade 文件 prefill 20.53 t/s，比公开第三方 Q4_0 文件（14.49）快 41.7%",
+   "evidence": "08_实验数据/threeway-model-1028-2247.json",
+   "expr": "summary['我方量化'].prefill|summary['unsloth第三方'].prefill",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "other",
+   "value": [
+    20.53,
+    14.49
+   ],
+   "evidence_sha256": "8149ce1c707225a1280140547ecfb7ed497d78ee5acf677e309bd6d522bf1fe2",
+   "evidence_mtime": "2026-10-28 22:47",
+   "status": "verified"
+  },
+  {
+   "id": "C14-selfmade-sha",
+   "statement": "selfmade 模型 SHA256 前 16 位 27a683603a6ae716（与台账记录一致）",
+   "evidence": "08_实验数据/threeway-model-1028-2247.json",
+   "expr": "models['Qwen3.5-2B-Q4_0-selfmade.gguf']",
+   "unit": "sha",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": "27a683603a6ae7165bb2e393b4f57bbdec24aaf5e11ee1c58c7d01ea23bb19df",
+   "evidence_sha256": "8149ce1c707225a1280140547ecfb7ed497d78ee5acf677e309bd6d522bf1fe2",
+   "evidence_mtime": "2026-10-28 22:47",
+   "status": "verified"
+  },
+  {
+   "id": "C12-testset-cover",
+   "statement": "固定测试集 2B 平均覆盖 0.817（20 题 × 3 轮，greedy）",
+   "evidence": "08_实验数据/testset-2B-1028-2009.json",
+   "expr": "summary.mean_cover",
+   "unit": "比例",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": 0.817,
+   "evidence_sha256": "9a32f76e19d7d5e3b8c5afb3e2b9386080ab0ba43ad065ded63eebbe238b3ecb",
+   "evidence_mtime": "2026-10-28 20:09",
+   "status": "verified"
+  },
+  {
+   "id": "C15-2b-decode-selfmade",
+   "statement": "2B 交付模型 decode 3.74 t/s，第三方 Q4_0 文件 3.46 t/s（t8，同板 ABAB）",
+   "evidence": "08_实验数据/threeway-model-1028-2247.json",
+   "expr": "summary['我方量化'].decode|summary['unsloth第三方'].decode",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "other",
+   "value": [
+    3.74,
+    3.46
+   ],
+   "evidence_sha256": "8149ce1c707225a1280140547ecfb7ed497d78ee5acf677e309bd6d522bf1fe2",
+   "evidence_mtime": "2026-10-28 22:47",
+   "status": "verified"
+  },
+  {
+   "id": "C16-q4_1-decode-t4",
+   "statement": "官方 Q4_1 的 decode 在 t4 下由 1.92 提升到 3.47 t/s（+81%）",
+   "evidence": "08_实验数据/authoritative-ab-1028-1812.json",
+   "expr": "summary[model=官方-Q4_1-2B,cfg=pp128+tg128 t4,metric=decode].a|summary[model=官方-Q4_1-2B,cfg=pp128+tg128 t4,metric=decode].b",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "value": [
+    1.92,
+    3.471
+   ],
+   "evidence_sha256": "00a9aba7a3395ecd233da9a14534a493cc5c3ab6b94705a501f58c7e4d7ea4e1",
+   "evidence_mtime": "2026-10-28 18:12",
+   "status": "verified"
+  },
+  {
+   "id": "C17-q4_1-decode-t8",
+   "statement": "官方 Q4_1 的 decode 在 t8 下由 2.97 提升到 3.67 t/s（+24%）",
+   "evidence": "08_实验数据/authoritative-ab-1028-1812.json",
+   "expr": "summary[model=官方-Q4_1-2B,cfg=pp512+tg128 t8,metric=decode].a|summary[model=官方-Q4_1-2B,cfg=pp512+tg128 t8,metric=decode].b",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "value": [
+    2.968,
+    3.668
+   ],
+   "evidence_sha256": "00a9aba7a3395ecd233da9a14534a493cc5c3ab6b94705a501f58c7e4d7ea4e1",
+   "evidence_mtime": "2026-10-28 18:12",
+   "status": "verified"
+  },
+  {
+   "id": "C18-repack-ablation",
+   "statement": "关掉 repack 内核后 requant 增益从 +46.6% 塌回 +6.5%，证明收益来自 repack 覆盖",
+   "evidence": "08_实验数据/repack-ablation-1028.json",
+   "expr": "summary.repack_off.gain_pct|summary.repack_on.gain_pct",
+   "unit": "%",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "value": [
+    6.5,
+    46.6
+   ],
+   "evidence_sha256": "ef9b7b93a8b8e6f4d2578022902d5a0fa15691cf642933336e2be9f3b8876bfe",
+   "evidence_mtime": "2026-10-28 22:12",
+   "status": "verified"
+  },
+  {
+   "id": "C19-concurrency-8gb",
+   "statement": "8GB 板 4 客户端并发：-np 4 聚合 3.956 t/s，假并发（串行）3.286 t/s（n=9，三板）",
+   "evidence": "08_实验数据/concurrency-8gb-1028-2229.json",
+   "expr": "summary.np4_conc4.agg.median|summary.np1_serial4.agg.median",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "other",
+   "superseded_by": "C70",
+   "status_note": "已被 C70 取代，材料不得当作当前值引用",
+   "value": [
+    3.956,
+    3.286
+   ],
+   "evidence_sha256": "b3dff0e61c42132e589e0a454e05df12c79aabb22b28f3e7739d5e1f160ef77e",
+   "evidence_mtime": "2026-10-28 23:04",
+   "status": "verified"
+  },
+  {
+   "id": "C20-ime1-official-t8",
+   "statement": "官方 Q4_1 模型 t8：我方 pp512 18.09 t/s，厂商 IME1 整包 19.35 t/s（我们 −6.5%；2 板×2 轮 ABBA）",
+   "evidence": "08_实验数据/ime1-formal-1029.json",
+   "expr": "summary['official|A1|t8'].pp512.median|summary['official|A3|t8'].pp512.median",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "value": [
+    18.086,
+    19.35
+   ],
+   "evidence_sha256": "5f6ce64a247dea6f52b4b44ac1d47982f321dc6baffe0c3f523a8f5ffb5420c1",
+   "evidence_mtime": "2026-10-29 01:12",
+   "status": "verified"
+  },
+  {
+   "id": "C21-ime1-selfmade-t8",
+   "statement": "交付模型 selfmade 上 t8：我方 pp512 22.08 t/s，厂商 IME1 整包 13.81 t/s（我们 +60%）",
+   "evidence": "08_实验数据/ime1-formal-1029.json",
+   "expr": "summary['selfmade|A1|t8'].pp512.median|summary['selfmade|A3|t8'].pp512.median",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "value": [
+    22.076,
+    13.808
+   ],
+   "evidence_sha256": "5f6ce64a247dea6f52b4b44ac1d47982f321dc6baffe0c3f523a8f5ffb5420c1",
+   "evidence_mtime": "2026-10-29 01:12",
+   "status": "verified"
+  },
+  {
+   "id": "C23-ctx-2b-selfmade",
+   "statement": "2B 交付模型预填：4K 16.169 / 8K 13.726 / 16K 10.734 t/s（server 单遍，build-final）",
+   "evidence": "08_实验数据/ctx2b-selfmade-final-1029-0040.json",
+   "expr": "summary['2b@4096'].median|summary['2b@8192'].median|summary['2b@16384'].median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "value": [
+    16.169,
+    13.726,
+    10.734
+   ],
+   "evidence_sha256": "14afb980f6ca2c688a5ff9cf384618caf4abc6fc7717881cc8326b41fe288c9f",
+   "evidence_mtime": "2026-10-29 00:40",
+   "status": "verified"
+  },
+  {
+   "id": "C26-ppl-2b-selfmade-vs-unsloth",
+   "statement": "2B PPL：交付模型 38.5085 vs 第三方 unsloth 36.8719（+4.44%，略差）",
+   "evidence": "08_实验数据/ppl-pair-outhead-1029-0118.json",
+   "expr": "runs[host=10.65.21.119].cells[0].ppl|runs[host=10.65.21.119].cells[1].ppl",
+   "unit": "PPL",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "value": [
+    38.5085,
+    36.8719
+   ],
+   "evidence_sha256": "eceb597850ddd66700af9321119dcb93801aef123e8a44e7e4dd8b0666bca72e",
+   "evidence_mtime": "2026-10-29 01:18",
+   "status": "verified"
+  },
+  {
+   "id": "C27-ppl-4b-selfmade-vs-unsloth",
+   "statement": "4B PPL：交付模型 20.9262 vs 第三方 unsloth 20.2131（+3.53%，略差）",
+   "evidence": "08_实验数据/ppl-pair-outhead-1029-0118.json",
+   "expr": "runs[host=10.65.21.124].cells[0].ppl|runs[host=10.65.21.124].cells[1].ppl",
+   "unit": "PPL",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "value": [
+    20.9262,
+    20.2131
+   ],
+   "evidence_sha256": "eceb597850ddd66700af9321119dcb93801aef123e8a44e7e4dd8b0666bca72e",
+   "evidence_mtime": "2026-10-29 01:18",
+   "status": "verified"
+  },
+  {
+   "id": "C28-2x2-kernel-unsloth",
+   "statement": "第三方 Q4_0 文件上，交付构建把 prefill 从 12.174 提到 14.601 t/s（内核 +19.9%）",
+   "evidence": "08_实验数据/ab2x2-unsloth-1029-0111.json",
+   "expr": "summary['stock|t8'].prefill.median|summary['ours|t8'].prefill.median",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "value": [
+    12.174,
+    14.601
+   ],
+   "evidence_sha256": "66d7b0752ee873236ca70a6b5a767ef15890c58228fc438d4e18ef0f5d2cfd0a",
+   "evidence_mtime": "2026-10-29 01:11",
+   "status": "verified"
+  },
+  {
+   "id": "C29-2x2-recipe-selfmade",
+   "statement": "同构建下换成我方 selfmade，prefill 从 14.601 提到 20.72 t/s（配方 +41.9%）；原生构建上是 12.174→17.251",
+   "evidence": "08_实验数据/ab2x2-selfmade-1029-0118.json",
+   "expr": "summary['stock|t8'].prefill.median|summary['ours|t8'].prefill.median",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "value": [
+    17.251,
+    20.72
+   ],
+   "evidence_sha256": "b1348ebe494a24d720355bcebf1b46aaff5780ec88a1cf3b655d8cc992ccf725",
+   "evidence_mtime": "2026-10-29 01:18",
+   "status": "verified"
+  },
+  {
+   "id": "C30-C30-",
+   "statement": "2B 冷启动首 token（chunk16 交付构建 4436a9f4）：128/512/1024 = 5.30 / 20.68 / 42.11 s（114 板，llama-server）",
+   "evidence": "08_实验数据/chunk16-delivery-summary-1029.json",
+   "expr": "ttft_2b.new['128'].cold_s|ttft_2b.new['512'].cold_s|ttft_2b.new['1024'].cold_s",
+   "unit": "s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    5.3,
+    20.68,
+    42.11
+   ],
+   "evidence_sha256": "92488973ec913ecc13ec267dc9672355ca209c0030c4b4ca6a7926fd1e38d2df",
+   "evidence_mtime": "2026-10-29 22:12",
+   "status": "verified"
+  },
+  {
+   "id": "C58-chunk16-delivery",
+   "statement": "chunk16 分块倍率并入交付（lib 4436a9f4）：2B pp512 20.779→25.099（+20.8%）、4B 7.291→9.969（+36.7%），文本逐字节一致、PPL 0.000%",
+   "evidence": "08_实验数据/chunk16-delivery-summary-1029.json",
+   "expr": "headline[\"2b_pp512_pct\"]|headline[\"4b_pp512_pct\"]",
+   "unit": "%",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    20.79,
+    36.73
+   ],
+   "evidence_sha256": "92488973ec913ecc13ec267dc9672355ca209c0030c4b4ca6a7926fd1e38d2df",
+   "evidence_mtime": "2026-10-29 22:12",
+   "status": "verified"
+  },
+  {
+   "id": "C59-ctx-dual-curve",
+   "statement": "长上下文双曲线（同板 114，两臂 lib SHA 存证 eb79a850 vs 4436a9f4，1K 16.78 vs 24.52）：2B baseline −29.03% vs chunk16 −35.47%（ΔD=−6.44 pp），4B baseline −19.24% vs −27.83%（ΔD=−8.58 pp，跨板）",
+   "evidence": "08_实验数据/ctx-dual-curve-dd-v2-1030.json",
+   "expr": "[\"2b\"].deltaD_pp|[\"4b\"].deltaD_pp|[\"2b\"].D_base_pct|[\"2b\"].D_opt_pct",
+   "unit": "pp,%",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    -6.44,
+    -8.58,
+    29.03,
+    35.47
+   ],
+   "evidence_sha256": "69d7c689b86caac3457dcc71e7869c64c8048ea80e23c0811051557bd5b769c8",
+   "evidence_mtime": "2026-10-30 00:16",
+   "status": "verified"
+  },
+  {
+   "id": "C60-ttft-stock-vs-delivery",
+   "statement": "首 token 对照（2B，单板各 1 台 × 3 次重复；stock 在 113、chunk16 在 114，跨板 2—4%；C60 不传 -ub，与 C30 的 -ub 128 不可绝对比）：stock 7.30/32.71/66.99 s → chunk16 5.03/19.59/40.23 s，降 31.1%/40.1%/39.9%",
+   "evidence": "08_实验数据/ttft-ttft-c16-2b-r2-1030-0039.json",
+   "expr": "aggregate_by_length[\"128\"].cold_ttft_ms.median|aggregate_by_length[\"512\"].cold_ttft_ms.median|aggregate_by_length[\"1024\"].cold_ttft_ms.median",
+   "unit": "ms",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    5028.1,
+    19594.0,
+    40231.1
+   ],
+   "evidence_sha256": "96f3c146283c1d6384eddd43c0ace236ce6ba0f0355e293066382b2dbd1730fe",
+   "evidence_mtime": "2026-10-30 00:39",
+   "status": "verified"
+  },
+  {
+   "id": "C61-fleet-4b-c16",
+   "statement": "4B 交付模型 3 板复核（chunk16）：pp512 中位 9.838 t/s（3 板原始 9.838/10.007/9.756），不再是单板数据",
+   "evidence": "08_实验数据/devil-fixes-1030.json",
+   "expr": "summary.fleet4b_prefill_median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": 9.838,
+   "evidence_sha256": "fe31461619e824b42b325ca404a0a02b1e39a25a5c05d70241226c02a5b30278",
+   "evidence_mtime": "2026-10-30 10:48",
+   "status": "verified"
+  },
+  {
+   "id": "C62-q41-c16",
+   "statement": "官方 Q4_1 在 chunk16 交付构建上：2B 19.49 t/s、4B 7.75 t/s（旧构建 18.61/7.19）。注：C65 四臂同配置中位为 19.38，本数是另一次采样，材料主口径用 19.38",
+   "evidence": "08_实验数据/devil-fixes-1030.json",
+   "expr": "summary.q41_2b|summary.q41_4b",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    19.489967,
+    7.746524
+   ],
+   "evidence_sha256": "fe31461619e824b42b325ca404a0a02b1e39a25a5c05d70241226c02a5b30278",
+   "evidence_mtime": "2026-10-30 10:48",
+   "status": "verified"
+  },
+  {
+   "id": "C63-ppl-bigcorpus",
+   "statement": "扩语料 PPL 复核（约 10,240 token）：selfmade 2B 20.16 / 4B 16.89 vs 第三方 unsloth 19.38 / 16.00，差 +4.06% / +5.56%；小语料为 +4.44%/+3.53%，方向一致",
+   "evidence": "08_实验数据/ppl-bigcorpus-delta-1030.json",
+   "expr": "[\"2b\"].delta_pct|[\"4b\"].delta_pct",
+   "unit": "%",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    4.06,
+    5.56
+   ],
+   "evidence_sha256": "1275f82e937d80eec336125e6cd6fd2bbd106bf3393c1f75e2e7d85515ef6568",
+   "evidence_mtime": "2026-10-30 11:24",
+   "status": "verified"
+  },
+  {
+   "id": "C64-ladder-c16-vs-mee",
+   "statement": "同板三臂（旧构建+MEE 对照；官方 Q4_1、t8、113 板、ABBA 两轮）：stock 5.05 / 官方 MEE 19.16 / chunk16 19.38 t/s（+1.2%，噪声内同档）；decode MEE 2.81 vs chunk16 3.99（+42%）",
+   "evidence": "08_实验数据/ladder-five-chunk16-1031.json",
+   "expr": "summary.stock.prefill|summary.vm_legacy.prefill|summary.chunk16.prefill|summary.chunk16.decode|summary.vm_legacy.decode",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "superseded_by": "C65",
+   "status_note": "已被 C65 取代，材料不得当作当前值引用",
+   "value": [
+    5.051,
+    19.163,
+    19.384,
+    3.987,
+    2.809
+   ],
+   "evidence_sha256": "13e7b6f296cb3b57a4f82f60991cc5269a4e12cd15354d03c76b27706487309b",
+   "evidence_mtime": "2026-10-31 20:36",
+   "status": "verified"
+  },
+  {
+   "id": "C65-four-arm-final",
+   "statement": "同板四臂（官方 Q4_1、t8、113 板、ABBA 两轮；spacemit 臂补测）：stock 5.05 / 官方新后端 5.02（对 stock −0.5%，不加速 Qwen3.5）/ 官方 MEE 19.16 / chunk16 19.38；chunk16 对 MEE 预填 +1.15%、decode +41.9%",
+   "evidence": "08_实验数据/ladder-four-arm-final-1031.json",
+   "expr": "arms.stock.prefill|arms.spacemit.prefill|arms.mee.prefill|arms.chunk16.prefill|arms.mee.decode|arms.chunk16.decode|deltas_pct.chunk16_vs_mee_decode",
+   "unit": "t/s,%",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    5.051,
+    5.024,
+    19.163,
+    19.384,
+    2.809,
+    3.987,
+    41.94
+   ],
+   "evidence_sha256": "9f24db3dbf341c2012e2ced21f22385cf8583621c9984e6ed7ce1f11266303f4",
+   "evidence_mtime": "2026-10-31 22:14",
+   "status": "verified"
+  },
+  {
+   "id": "C31-bandwidth-8t",
+   "statement": "K1 内存带宽 8 线程实测中位 8.17 GB/s（最大 8.28）",
+   "evidence": "04_升级开发/roofline/measured.json",
+   "expr": "bw_read_8t",
+   "unit": "GB/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": 8.17,
+   "evidence_sha256": "098af5fe660561d77e55fd0436e29a245fd55ed0c851e3a1bdd1f78c44184a2b",
+   "evidence_mtime": "2026-10-24 04:47",
+   "status": "verified"
+  },
+  {
+   "id": "C32-fleet-2b-final",
+   "statement": "chunk16 交付构建 + 交付模型（2B）：8 板中位 pp512 **25.642** t/s（Tukey IQR 0.558）、t8@512 decode 3.913；t7 零深度 4.369（114 单板、n=128，另见 `08_实验数据/chunk16-delivery-summary-1029.json` 的 bench_2b.tg128_t7_p0）。**注**：这一轮 7/8 板的 lib_sha16 记录被 tar 告警覆盖（构建身份只被 112 板证明），11-01 逐板验指纹复测为 **25.294 / 3.769**（C74，差 −1.4%），两轮都在材料里报",
+   "evidence": "08_实验数据/fleet-2b-chunk16-1029-2217.json",
+   "expr": "summary.prefill_median|summary.decode_median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    25.642,
+    3.913
+   ],
+   "evidence_sha256": "034b547fa32e93a5ea5cf7172a651e04c16389281aca0b084186efecf10537e4",
+   "evidence_mtime": "2026-10-29 22:17",
+   "status": "verified"
+  },
+  {
+   "id": "C33-4b-q41-t8",
+   "statement": "4B 官方 Q4_1：t8 预填 1.971 → 7.193 t/s（3.65×），decode 1.216 → 1.718（+41%）",
+   "evidence": "08_实验数据/ab-4b-q41-1029-0155.json",
+   "expr": "summary['stock|t8'].prefill.median|summary['ours|t8'].prefill.median|summary['stock|t8'].decode.median|summary['ours|t8'].decode.median",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "superseded_by": "C62",
+   "status_note": "已被 C62 取代，材料不得当作当前值引用",
+   "value": [
+    1.971,
+    7.193,
+    1.216,
+    1.718
+   ],
+   "evidence_sha256": "6d49bd56b37164d3e4d11a7a48e02932d466ae5354ba807b1a93f0c14ea03383",
+   "evidence_mtime": "2026-10-29 01:55",
+   "status": "verified"
+  },
+  {
+   "id": "C34-4b-q41-t4",
+   "statement": "4B 官方 Q4_1：t4 预填 1.073 → 4.387 t/s（4.09×）",
+   "evidence": "08_实验数据/ab-4b-q41-1029-0155.json",
+   "expr": "summary['stock|t4'].prefill.median|summary['ours|t4'].prefill.median",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "717a8ad8",
+   "value": [
+    1.073,
+    4.387
+   ],
+   "evidence_sha256": "6d49bd56b37164d3e4d11a7a48e02932d466ae5354ba807b1a93f0c14ea03383",
+   "evidence_mtime": "2026-10-29 01:55",
+   "status": "verified"
+  },
+  {
+   "id": "C35-ctx-2b-32k",
+   "statement": "2B 交付模型 32K 预填 7.459 t/s（32663 token，server 单遍）；4K→32K 衰减 −53.9%",
+   "evidence": "08_实验数据/ctx2b-32k-fix-1029-0151.json",
+   "expr": "summary['2b@32768'].median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "value": 7.459,
+   "evidence_sha256": "bd4a5fe0604e499adbd5a71bafe547319f67d5d8b372029e059fa2077b536606",
+   "evidence_mtime": "2026-10-29 01:51",
+   "status": "verified"
+  },
+  {
+   "id": "C36-4b-selfmade",
+   "statement": "4B 交付模型（单板 125，2 reps）：预填 7.46 t/s、t8 深度 512 生成 1.717、t7 零深度生成 1.926",
+   "evidence": "08_实验数据/fleet-4b-final-1029-0228.json",
+   "expr": "aggregate['t8_combined.prefill'].median|aggregate['t8_combined.decode'].median|aggregate['t7_gen.decode'].median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "superseded_by": "C41",
+   "status_note": "已被 C41 取代，材料不得当作当前值引用",
+   "value": [
+    7.46,
+    1.717,
+    1.926
+   ],
+   "evidence_sha256": "6fb9afb40b7bc8509991c550051197b5ee5e94a644a863a33abd905dc65e0af8",
+   "evidence_mtime": "2026-10-29 02:28",
+   "status": "verified"
+  },
+  {
+   "id": "C37-testset-4b",
+   "statement": "固定测试集 4B：平均覆盖 0.875、通过率 0.70（20 题 × 2 轮 = 40 条，机器判分）",
+   "evidence": "08_实验数据/testset-4b-selfmade-1029-0230.json",
+   "expr": "summary.mean_cover|summary.pass_rate",
+   "unit": "比例",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "value": [
+    0.875,
+    0.7
+   ],
+   "evidence_sha256": "e527e318709e0341aef2144b67701700e9a7b7e6b49a24d602f7074d922753dd",
+   "evidence_mtime": "2026-10-29 02:30",
+   "status": "verified"
+  },
+  {
+   "id": "C38-ctx-4b-selfmade",
+   "statement": "4B 交付模型预填：4K 6.232 / 8K 5.513 / 16K 4.651 / 32K 3.723 t/s（server 单遍，build-final）；8× 衰减 −40.3%",
+   "evidence": "08_实验数据/ctx4b-selfmade-final-1029-0330.json",
+   "expr": "summary['4b@4096'].median|summary['4b@8192'].median|summary['4b@16384'].median|summary['4b@32768'].median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "value": [
+    6.232,
+    5.513,
+    4.651,
+    3.723
+   ],
+   "evidence_sha256": "ec69dd0561c503024bcc5cf621b5095fa6488cc0f98e27836b9c9d688dadeeff",
+   "evidence_mtime": "2026-10-29 03:30",
+   "status": "verified"
+  },
+  {
+   "id": "C39-testset-2b-selfmade",
+   "statement": "固定测试集 2B 交付模型：平均覆盖 0.75、通过率 0.45（20 题 × 3 轮 = 60 条）；第三方文件为 0.817（C12）",
+   "evidence": "08_实验数据/testset-2b-selfmade-1029-0337.json",
+   "expr": "summary.mean_cover|summary.pass_rate",
+   "unit": "比例",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "value": [
+    0.75,
+    0.45
+   ],
+   "evidence_sha256": "15cfa6197e1e4004f43fadef15d6cf01cdda6f3a695f02c6e773827daa9bdc06",
+   "evidence_mtime": "2026-10-29 03:37",
+   "status": "verified"
+  },
+  {
+   "id": "C40-C40-",
+   "statement": "4B 冷启动首 token（chunk16 交付构建，**单板 130**——原文误记为 128，2026-11-01 由 C69 核实更正）：128/512/1024 = 12.90 / 49.98 / 100.84 s（llama-server）",
+   "evidence": "08_实验数据/chunk16-delivery-summary-1029.json",
+   "expr": "ttft_4b.new['128'].cold_s|ttft_4b.new['512'].cold_s|ttft_4b.new['1024'].cold_s",
+   "unit": "s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "superseded_by": "C69",
+   "status_note": "已被 C69 取代，材料不得当作当前值引用",
+   "value": [
+    12.9,
+    49.98,
+    100.84
+   ],
+   "evidence_sha256": "92488973ec913ecc13ec267dc9672355ca209c0030c4b4ca6a7926fd1e38d2df",
+   "evidence_mtime": "2026-10-29 22:12",
+   "status": "verified"
+  },
+  {
+   "id": "C57-q41-mprime-fp32",
+   "statement": "Q4_1 的 m' 改 fp32 后 PPL 反而从 +0.277% 变 +0.447%，证明 0.277% 偏差来自 f32 累加顺序而非 m' 量化；文本仍逐字节一致、预填 3.66×",
+   "evidence": "08_实验数据/master-port-x-1029.json",
+   "expr": "verdict.q41_mbias_fp32_experiment.ppl.delta_qcg_vs_base_pct|verdict.q41_mbias_fp32_experiment.ppl.delta_mfix_vs_base_pct",
+   "unit": "%",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    0.2768,
+    0.4472
+   ],
+   "evidence_sha256": "63e678924df1e519b5d2b9828e7e8b808b94161586d4ff7b25f7b32146b75b12",
+   "evidence_mtime": "2026-10-29 16:50",
+   "status": "verified"
+  },
+  {
+   "id": "C55-master-port-outer",
+   "statement": "外围三补丁移植 master 0.7.0：官方 Q4_1 预填 5.018→17.887（3.57×），selfmade 17.455→20.715（+18.7%），4 构建×2 模型文本逐字节一致",
+   "evidence": "08_实验数据/master-port-x-1029.json",
+   "expr": "verdict.q41_prefill_gt_3x.value.ratio|verdict.selfmade_gt_15pct.value.delta_pct",
+   "unit": "×, %",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    3.565,
+    18.67
+   ],
+   "evidence_sha256": "63e678924df1e519b5d2b9828e7e8b808b94161586d4ff7b25f7b32146b75b12",
+   "evidence_mtime": "2026-10-29 16:50",
+   "status": "verified"
+  },
+  {
+   "id": "C56-master-port-ppl",
+   "statement": "外围三补丁的 PPL 代价：官方 Q4_1 34.9703→35.0671（+0.277%），selfmade 35.8745（0.00%）；与 fork 同值 ⇒ 是补丁固有数值属性，不是移植错误",
+   "evidence": "08_实验数据/master-port-x-1029.json",
+   "expr": "ppl.runs[\"base/q41\"].ppl|ppl.runs[\"q41/q41\"].ppl|verdict[\"ppl_lt_0.1pct\"].official",
+   "unit": "PPL, PPL, %",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    34.9703,
+    35.0671,
+    0.2768
+   ],
+   "evidence_sha256": "63e678924df1e519b5d2b9828e7e8b808b94161586d4ff7b25f7b32146b75b12",
+   "evidence_mtime": "2026-10-29 16:50",
+   "status": "verified"
+  },
+  {
+   "id": "C53-master-port-q5k",
+   "statement": "K-quant 三补丁移植到上游 master 0.7.0：内核逻辑零改动（12 函数/1017 行逐字节一致），Q4_K_M 上 Q5_K 预填 6.893→13.686（+98.5%）、decode +32.5%",
+   "evidence": "08_实验数据/master-port-y-1029-1603.json",
+   "expr": "deltas_vs_master[\"Qwen3.5-2B-Q4_K_M.gguf\"].b1.prefill_delta_pct|deltas_vs_master[\"Qwen3.5-2B-Q4_K_M.gguf\"].b1.decode_delta_pct",
+   "unit": "%",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    98.5,
+    32.5
+   ],
+   "evidence_sha256": "6205110016b9630922a95a9e8fb4606b92ede7b3f2623a277dc77267638665fd",
+   "evidence_mtime": "2026-10-29 16:03",
+   "status": "verified"
+  },
+  {
+   "id": "C54-master-port-q3k",
+   "statement": "Q3_K 移植到 master：Q3_K_M 预填 +64.5%（8.814→14.501），decode −5.7%（与 fork 的 −5.7% 一致，负收益如实复现）",
+   "evidence": "08_实验数据/master-port-y-1029-1603.json",
+   "expr": "deltas_vs_master[\"Qwen3.5-2B-Q3_K_M.gguf\"].b3.prefill_delta_pct|deltas_vs_master[\"Qwen3.5-2B-Q3_K_M.gguf\"].b3.decode_delta_pct",
+   "unit": "%",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    64.5,
+    -5.7
+   ],
+   "evidence_sha256": "6205110016b9630922a95a9e8fb4606b92ede7b3f2623a277dc77267638665fd",
+   "evidence_mtime": "2026-10-29 16:03",
+   "status": "verified"
+  },
+  {
+   "id": "C52-kv-persist",
+   "statement": "KV 存盘/恢复：8K 提示冷预填 576.2 s → 保存 412.6 ms（132.7 MB）→ 恢复 186.5 ms → 同提示 0.908 s，加速 634.8×（n_restored=6092）",
+   "evidence": "08_实验数据/slotpersist_raw.json",
+   "expr": "stages.cold.prompt_ms|stages.save.ms|stages.restore.ms|stages.after_restore.prompt_ms|speedup",
+   "unit": "ms,ms,ms,ms,×",
+   "unit_ratio": "—",
+   "build": "other",
+   "superseded_by": "C71",
+   "status_note": "已被 C71 取代，材料不得当作当前值引用",
+   "value": [
+    576207.2,
+    412.6,
+    186.5,
+    907.7,
+    634.8
+   ],
+   "evidence_sha256": "a0575f053446c211648b937ebae61dbc96f2d7a752beff91e0edb494ba01d201",
+   "evidence_mtime": "2026-10-25 04:22",
+   "status": "verified"
+  },
+  {
+   "id": "C51-ladder-four",
+   "statement": "同板四臂（官方 Q4_1，t8 预填）：社区默认 4.994 / 官方新后端 4.999 / 官方 MEE 19.383 / 我方 18.134（−6.4%）；decode 2.833 vs 3.629（+28%）",
+   "evidence": "08_实验数据/ladder-four-clean-1029-1413.json",
+   "expr": "summary.stock.prefill_median|summary.spacemit.prefill_median|summary.vm_legacy.prefill_median|summary.ours.prefill_median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "717a8ad8",
+   "superseded_by": "C65",
+   "status_note": "已被 C65 取代，材料不得当作当前值引用",
+   "value": [
+    4.994,
+    4.999,
+    19.383,
+    18.134
+   ],
+   "evidence_sha256": "c81aefeb248511eb5192c2328acf0ee8d39fd8ac01e4aa4cce072658db843fc4",
+   "evidence_mtime": "2026-10-29 14:13",
+   "status": "verified"
+  },
+  {
+   "id": "C50-soak-4b-rss",
+   "statement": "交付 4B 模型 soak：RSS 暖机后平台 4.49—4.52 GB（峰值 4.52 GB），8GB 板余量 3.68 GB，无单调增长；预填 7.396（半段 −1.65%）、decode 1.677（+0.68%）",
+   "evidence": "08_实验数据/soak-4b-steady-1029.json",
+   "expr": "peak_mb|plateau_mb_min|headroom_mb_8gb",
+   "unit": "MB",
+   "unit_ratio": "—",
+   "build": "other",
+   "superseded_by": "C80",
+   "status_note": "已被 C80 取代，材料不得当作当前值引用",
+   "value": [
+    4516.2,
+    4488.8,
+    3675.8
+   ],
+   "evidence_sha256": "20f670c3a027800e8c8808a3761caefed4263057df1b77db4d02ed92bac2d8cd",
+   "evidence_mtime": "2026-10-29 14:13",
+   "status": "verified"
+  },
+  {
+   "id": "C49-ttft-4b-short",
+   "statement": "4B 冷启动首 token：256 token 33.50 s、448 token 59.61 s（≤60 s 达标）；warm 0.98/1.26 s，加速 34.1×/47.3×",
+   "evidence": "08_实验数据/ttft-4b-short-1029-1352.json",
+   "expr": "summary['256'].cold_s|summary['448'].cold_s",
+   "unit": "s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    33.5,
+    59.61
+   ],
+   "evidence_sha256": "c6bc555abd0810965e894230c4bff872a1b59d703d9201acbf01f59f340e0a78",
+   "evidence_mtime": "2026-10-29 13:52",
+   "status": "verified"
+  },
+  {
+   "id": "C48-soak-4b",
+   "statement": "交付 4B 模型 31 分钟 soak（12 轮 pp512+tg128）：预填 7.331（半段漂移 +0.5%）、decode 1.695（−0.5%），无性能衰减",
+   "evidence": "08_实验数据/soak-4b-1029-1349.json",
+   "expr": "raw[0].avg_ts|raw[1].avg_ts",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    7.330875,
+    1.695226
+   ],
+   "evidence_sha256": "cdbd9b9d9ac06a1f6f475b8df63e65cd2ec74651bbcf771157ab8d4274be562c",
+   "evidence_mtime": "2026-10-29 13:49",
+   "status": "verified"
+  },
+  {
+   "id": "C47-soak-2b",
+   "statement": "交付 2B 模型 30 分钟 soak（24 轮 pp512+tg128）：预填中位 21.182、decode 3.901；稳态 RSS 1.92—2.01 GB（极差 86.6 MB），无 OOM",
+   "evidence": "08_实验数据/soak-2b-steady-1029.json",
+   "expr": "prefill_median|decode_median|steady_rss.range_mb|steady_rss.min_mb|steady_rss.max_mb",
+   "unit": "t/s, t/s, MB",
+   "unit_ratio": "—",
+   "build": "other",
+   "superseded_by": "C73",
+   "status_note": "已被 C73 取代，材料不得当作当前值引用",
+   "value": [
+    21.182,
+    3.901,
+    86.6,
+    1921.5,
+    2008.1
+   ],
+   "evidence_sha256": "da7a0c2ecfe7a9c257854a38e87b57489a34f9bcfb6793b729aec91f2d2c3b38",
+   "evidence_mtime": "2026-10-29 13:29",
+   "status": "verified"
+  },
+  {
+   "id": "C45-C45-",
+   "statement": "2B 长上下文 1K→10K（chunk16 交付构建，123 板；n=960/1984/4032/8128/10176）：25.365/23.217/20.874/17.814/16.343 t/s，10× 衰减 −35.6%（绝对提升 +43%→+25%）",
+   "evidence": "08_实验数据/chunk16-delivery-summary-1029.json",
+   "expr": "ctx_2b.new['1024'].median|ctx_2b.new['2048'].median|ctx_2b.new['4096'].median|ctx_2b.new['8192'].median|ctx_2b.new['10240'].median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    25.365,
+    23.217,
+    20.874,
+    17.814,
+    16.343
+   ],
+   "evidence_sha256": "92488973ec913ecc13ec267dc9672355ca209c0030c4b4ca6a7926fd1e38d2df",
+   "evidence_mtime": "2026-10-29 22:12",
+   "status": "verified"
+  },
+  {
+   "id": "C46-C46-",
+   "statement": "4B 长上下文 1K→10K（chunk16 交付构建，130 板；1K/2K/4K 各 2 次）：10.260/9.724/9.000/8.009/7.405 t/s，10× 衰减 −27.8%（绝对提升 +54%→+39.5%）",
+   "evidence": "08_实验数据/chunk16-delivery-summary-1029.json",
+   "expr": "ctx_4b.new['1024'].median|ctx_4b.new['2048'].median|ctx_4b.new['4096'].median|ctx_4b.new['8192'].median|ctx_4b.new['10240'].median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    10.26,
+    9.724,
+    9.0,
+    8.009,
+    7.405
+   ],
+   "evidence_sha256": "92488973ec913ecc13ec267dc9672355ca209c0030c4b4ca6a7926fd1e38d2df",
+   "evidence_mtime": "2026-10-29 22:12",
+   "status": "verified"
+  },
+  {
+   "id": "C44-master-baseline",
+   "statement": "上游 master 0.7.0 默认构建（社区版本基线）与 fork 0.6.0 默认构建一致：官方 Q4_1 5.027 vs 5.024、selfmade 17.148 vs 17.251（差 <0.7%）",
+   "evidence": "08_实验数据/master-baseline-1029-1219.json",
+   "expr": "summary[\"SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\"].prefill_median|summary[\"Qwen3.5-2B-Q4_0-selfmade.gguf\"].prefill_median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    5.027,
+    17.148
+   ],
+   "evidence_sha256": "2c8fbfe907ef68463c1e47bb5f68629ea6e58de0a6c234936978b9cd8bd79917",
+   "evidence_mtime": "2026-10-29 12:19",
+   "status": "verified"
+  },
+  {
+   "id": "C43-q3k-repack",
+   "statement": "Q3_K 16×1 repack（叠加在 Q5_K 补丁之上）：Q3_K_M 预填 9.524→14.313 t/s（+50.3%），decode 3.597→3.393（−5.7%，如实报负）",
+   "evidence": "08_实验数据/q3k-bench-1029.json",
+   "expr": "summary.g2_q5k.pp512_median|summary.g3_q3k.pp512_median|summary.g2_q5k.tg128_median|summary.g3_q3k.tg128_median",
+   "unit": "t/s",
+   "unit_ratio": "×",
+   "build": "other",
+   "value": [
+    9.5237285,
+    14.3132865,
+    3.597159,
+    3.3932615
+   ],
+   "evidence_sha256": "3879a6e01fff294b1bb66bf07b4ca2685671511170e3522cedd570b377318c3b",
+   "evidence_mtime": "2026-10-29 11:10",
+   "status": "verified"
+  },
+  {
+   "id": "C42-q2k-calibration",
+   "statement": "Q2_K 标定（单板 2 reps，build-final）：预填 14.026 t/s、t8 生成 4.012、t7 生成 4.141——低于 Q4_0 的 20.93/4.32",
+   "evidence": "08_实验数据/q2k-calib-1029-0942.json",
+   "expr": "aggregate['t8_combined.prefill'].median|aggregate['t8_combined.decode'].median|aggregate['t7_gen.decode'].median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    14.026,
+    4.012,
+    4.141
+   ],
+   "evidence_sha256": "f6466bcf232ff433ffa2a2e756738d8760d91d35bd566ddd010ab8bd9b4b8f83",
+   "evidence_mtime": "2026-10-29 09:42",
+   "status": "verified"
+  },
+  {
+   "id": "C41-C41-",
+   "statement": "chunk16 交付构建 + 交付模型（4B）：pp512 9.969 t/s（128 单板 3 次）、t8@512 decode 1.769、t7 零深度 2.006",
+   "evidence": "08_实验数据/chunk16-delivery-summary-1029.json",
+   "expr": "bench_4b.pp512.new.median|bench_4b.tg128_t8_p512.new.median|bench_4b.tg128_t7_p0.new.median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    9.969,
+    1.769,
+    2.006
+   ],
+   "evidence_sha256": "92488973ec913ecc13ec267dc9672355ca209c0030c4b4ca6a7926fd1e38d2df",
+   "evidence_mtime": "2026-10-29 22:12",
+   "status": "verified"
+  },
+  {
+   "id": "C66-4b-four-arm",
+   "statement": "4B 同板四臂（官方 Q4_1、t8、113 板、ABBA 两轮）：stock 1.951 / 官方新后端 1.958（也不加速 4B）/ 官方 MEE 7.639 / chunk16 7.717；chunk16 对 MEE prefill +1.02%（同档）、decode +45.8%（1.706 vs 1.170）。MEE 与 2B 同一 TCM fallback 状态（C68）",
+   "evidence": "08_实验数据/ladder-4b-four-arm-1031.json",
+   "expr": "summary.stock.prefill_med|summary.spacemit.prefill_med|summary.mee.prefill_med|summary.chunk16.prefill_med|summary.delta.prefill_pct_vs_mee|summary.delta.decode_pct_vs_mee",
+   "unit": "t/s, t/s, t/s, t/s, %, %",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    1.951,
+    1.958,
+    7.639,
+    7.717,
+    1.02,
+    45.81
+   ],
+   "evidence_sha256": "335845c6cdbc117a324ede7cd0870a0500cf2b3c6bed6c3ddf57addfa96fd323",
+   "evidence_mtime": "2026-11-01 00:42",
+   "status": "verified"
+  },
+  {
+   "id": "C67-gqa-marginal-master",
+   "statement": "GQA 折叠在 master 0.7.0 上的**边际**（qcg 减 qc，同板 117）：selfmade decode +0.45%、官方 Q4_1 decode −0.74%；即 GQA 单独几乎没有收益，归因里只算 CONCAT + chunk16",
+   "evidence": "08_实验数据/master-port-x-1029.json",
+   "expr": "bench.deltas.selfmade_q4_0.decode_qcg_vs_qc.delta_pct|bench.deltas.official_q41.decode_qcg_vs_qc.delta_pct",
+   "unit": "%",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    0.45,
+    -0.74
+   ],
+   "evidence_sha256": "63e678924df1e519b5d2b9828e7e8b808b94161586d4ff7b25f7b32146b75b12",
+   "evidence_mtime": "2026-10-29 16:50",
+   "status": "verified"
+  },
+  {
+   "id": "C68-tcm-sync-mem",
+   "statement": "厂商 MEE 的 /dev/tcm_sync_mem 在 17/17 块 K1 板上都不存在（内核只注册 /dev/tcm = misc 10:122，无任何 tcm_sync* 符号）；指向 /dev/tcm 会因 TCM 不支持 AMO 原子指令而 SIGSEGV（cause=7）；用合法 512 KB 共享文件顶替后告警消失但 prefill 17.06 vs 堆回退 17.30 t/s（−1.4%，无收益）——故本项目 MEE 数字未因 fallback 吃亏",
+   "evidence": "08_实验数据/tcm-probe-1101.json",
+   "expr": "survey.has_dev_tcm_sync_mem|survey.boards|experiments.tmpfs_substitute.pp512|experiments.baseline_heap_fallback.pp512|experiments.delta_pct",
+   "unit": "块, 块, t/s, t/s, %",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    0,
+    17,
+    17.06,
+    17.3,
+    -1.39
+   ],
+   "evidence_sha256": "ed5ce1aa259c9abf11574a9fda117b10314e3fec1360092501cf316d51c89d06",
+   "evidence_mtime": "2026-11-01 00:28",
+   "status": "verified"
+  },
+  {
+   "id": "C69-ttft-4b-3boards",
+   "statement": "4B 冷启动首 token 升级为 3 板（125/126/128，chunk16 交付构建 + 交付模型，每长度 9 个原始值）：128/512/1024 = 12.454 / 49.897 / 101.354 s（9 点池化中位；先每板取中位再取中位为 12.326 / 50.012 / 101.354），与 C40 单板值 −3.5%/−0.2%/+0.5%；缓存命中 1.01—1.20 s（冷/热 11.2×/44.4×/85.0×）",
+   "evidence": "08_实验数据/ttft-4b-3boards-1101.json",
+   "expr": "aggregate[\"128\"].median|aggregate[\"512\"].median|aggregate[\"1024\"].median",
+   "unit": "s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    12.454,
+    49.897,
+    101.354
+   ],
+   "evidence_sha256": "eccb6dc192fb7da0edd3bda69622336b47c0a6b9caa0ded552b5f9a6d59edab9",
+   "evidence_mtime": "2026-11-01 01:03",
+   "status": "verified"
+  },
+  {
+   "id": "C70-concurrency-chunk16",
+   "statement": "8GB 板 4 客户端并发（chunk16，122 板，各 3 次中位）。**与 C19 同 argv 的 48-token 臂**（npred=48/prompt 64/-c 8192/t7/tb8）：np4 聚合 **4.307** vs 串行 3.472（**+24.0%**）；对旧构建 C19 的 3.956 是 **+8.9%**（串行 3.472 vs 3.286 为 +5.7%）。**题面协议的 128-token 臂**（每路 128 token/-c 4096）：np4 聚合 **5.396** vs 串行 3.877（**+39.2%**）——⚠️ 与 C19 协议不同，不可直接与 3.956 比较（C19 每路只有 48 token，128 token 会摊薄预填）",
+   "evidence": "08_实验数据/concurrency-8gb-chunk16-1101.json",
+   "expr": "legacy48_c19_protocol.np4_concurrent.agg_median|legacy48_c19_protocol.np1_serial4.agg_median|legacy48_c19_protocol.delta_pct|legacy48_c19_protocol.vs_c19.np4_delta_pct|np4_concurrent.agg_median|np1_serial4.agg_median|delta_pct",
+   "unit": "t/s, t/s, %, %, t/s, t/s, %",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    4.307,
+    3.472,
+    24.0,
+    8.9,
+    5.396,
+    3.877,
+    39.2
+   ],
+   "evidence_sha256": "19f74da6e23af22b2cd7d81c8f67acabb4a9b640ed2e609a3feda2c7c83f885e",
+   "evidence_mtime": "2026-11-01 01:20",
+   "status": "verified"
+  },
+  {
+   "id": "C71-kv-persist-chunk16",
+   "statement": "KV 槽位存盘/恢复（chunk16，124 板，6077 token 提示，3 轮）：冷预填 276.2 s → 保存 827.3 ms（135.6 MB，6092 token）→ 恢复 240.7 ms → 同提示再问 0.698 s，**prompt 口径 395.6×**、端到端 6.81 s（旧构建 C52 冷预填 576.2 s、634.8×；绝对时延因 chunk16 预填提速而降了一半）",
+   "evidence": "08_实验数据/kv-persist-chunk16-1101.json",
+   "expr": "stages.cold.prompt_s|stages.after_restore.prompt_ms|speedup_prompt|e2e_s",
+   "unit": "s, ms, ×, s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    276.2,
+    698.2,
+    395.6,
+    6.81
+   ],
+   "evidence_sha256": "e46ebc3bd4a1f6d4e0976bc4984342b88331e7e30214c33e108f1fffd92aa75e",
+   "evidence_mtime": "2026-11-01 01:20",
+   "status": "verified"
+  },
+  {
+   "id": "C81-core-count-fairness",
+   "statement": "**核数对等性**（官方 Q4_1、同板 ABBA、n=4/格，2026-10-29 的 3 臂 × t4/t8 实验）：官方 MEE 对 `-t` **完全不敏感**（t4 **19.30**、t8 **19.35**，Δ**+0.3%**）——直接证明它固定在 4 个 IME 核的 SPERT 池上；我们随线程增长（t4 **11.22** → t8 **18.09**，**+61%**）。单核效率 MEE **4.82** vs 我们 **2.26** t/s/核（**1.7—2.1 倍**）；**但两者等效带宽都停在 6.2 GB/s**（MEE 6.23、我们 chunk16 6.24，**差 0.2%**）→ 预填的墙是内存，不是核数",
+   "evidence": "08_实验数据/ime1-formal-1029.json",
+   "expr": "summary['official|A3|t4'].pp512.median|summary['official|A3|t8'].pp512.median|summary['official|A1|t4'].pp512.median|summary['official|A1|t8'].pp512.median",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "superseded_by": "C85",
+   "status_note": "已被 C85 取代，材料不得当作当前值引用",
+   "value": [
+    19.295,
+    19.35,
+    11.222,
+    18.086
+   ],
+   "evidence_sha256": "5f6ce64a247dea6f52b4b44ac1d47982f321dc6baffe0c3f523a8f5ffb5420c1",
+   "evidence_mtime": "2026-10-29 01:12",
+   "status": "verified"
+  },
+  {
+   "id": "C92-mee-tcm-decode-placebo",
+   "statement": "**MEE 的 TCM 回退不影响 decode，+41.9% 站得住**（含安慰剂对照）：MEE 在「回退到堆」与「顶替 TCM 可用」两态下 tg128 为 **2.832 vs 2.839 t/s（+0.25%）**；而把同一 A/B 套到**我们不走 TCM 路径的构建**上，反而漂 **+0.61%**（4.082 vs 4.107）——即 MEE 的 +0.25% **小于本装置的噪声底**，只能读作噪声。机理：该共享内存只服务 16×192 B = 3 KB 的 barrier（全仓仅 `ime_env.cpp:295` 一个调用点），计算缓冲走 HPAGE，decode 不受影响符合预期。同板同协议下我们是 **4.08—4.11 vs MEE 2.83**，即 **+44.1%/+44.7%**（比 C65 的 41.9% 还高）",
+   "evidence": "08_实验数据/mee-tcm-decode-ab-1101.json",
+   "expr": "arms[0].decode|arms[1].decode",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    2.832,
+    2.839
+   ],
+   "evidence_sha256": "d89ca8b9a7968f1ab10dabe3d7f0a1acccec52bee9dec9396f95b17f7e78baba",
+   "evidence_mtime": "2026-11-01 14:19",
+   "status": "verified"
+  },
+  {
+   "id": "C91-kv-quant-retest",
+   "statement": "**KV 量化的旧归因要改，但负结果是真的**（混合注意力下重估 + 旧协议原样复刻）：① **量级先错 4 倍**——Qwen3.5-2B 只有 **6/24 层有 KV**（18 层线性注意力），8K 实测 KV 仅 **96.00 MiB**、占每 token 流量 **7.7%**，**q8 的理论天花板只有 +3.76%**（另有 18 层共 19.27 MiB 常量 recurrent state，`-ctk/-ctv` 碰不到）；② **旧 −30.3% 用旧协议原样复刻是 −44.5%**（f16 17.71 vs q8_0 9.83 t/s）→ **负结果真实，不是测量假象**；③ **但归因要拆两段**：本构建 `-fa auto` 默认 resolve 成 **开启**，而 FA 在 8K 本身就要付 **−32.2% 预填 / −28.5% decode**；q8_0 在**同一 FA 下再慢 −49.2%/−14.3%**；而 **q4_0 K+V 在同一 FA 下 decode 反而 +5.5%** → 是 `q8_0` 的 V 在 FA 内核里的反量化路径差，不是 KV 量化整体不行（量化 V 强制要求 FA on，`-ctk q8_0 -fa 0` 直接 RC=1）",
+   "evidence": "08_实验数据/kv-quant-retest-1101.json",
+   "expr": "kv_sizes[0].size_mib|budget_analysis.kv_share_pct['8192']|budget_analysis.q8_upper_bound_gain_pct['8192']",
+   "unit": "MiB, %, %",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    96.0,
+    7.7246,
+    3.7569
+   ],
+   "evidence_sha256": "51bfa035bb831d49ecb6e24e2c7599b4ba522efd73698a4f2e0159be1025a803",
+   "evidence_mtime": "2026-11-01 14:40",
+   "status": "verified"
+  },
+  {
+   "id": "C87-ngram-spec-reversal",
+   "statement": "**n-gram 投机不是负收益，旧的 −24.2% 是参数落错格**：构建默认 `--spec-ngram-mod-n-max=64`（n_min=48）在同一模板提示上实测 **2.651 t/s（−34.5%）**；显式设 `n_max=3/5` 即转正（模板 +5.3%/+8.1%，通用问答 +14.3%/+16.3%/+19.8%/+20.1%）。`ngram-map-k4v size_m=7` 在模板上达 **5.843 t/s（+44.3%）**。**4 的倍数理论不支持**：把验证批精确钉在 4/6/8，每步 414.7/399.7/381.4 ms，batch6 未退化成 6 条 GEMV",
+   "evidence": "08_实验数据/ngram-spec-retest-1101.json",
+   "expr": "default_config_probe.cells[0].tps|baseline_tps.template.median|verdict.is_any_positive",
+   "unit": "t/s, t/s, bool",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    2.651,
+    4.048,
+    true
+   ],
+   "evidence_sha256": "980b8ec88758316c82aedaf5a53bd97e56e3a6fa6161738da2e25e3b01e1949e",
+   "evidence_mtime": "2026-11-01 12:54",
+   "status": "verified"
+  },
+  {
+   "id": "C88-poll-falsified-t7-t8-split",
+   "statement": "**`--poll`（自旋等待）不解释 -t8 变慢**：t8 在 poll=50 下 3.808、poll=0 下 3.797（几乎相同），t7 也是 4.426/4.402 → 假设被否。但同一次扫描测出**分工**：**decode 最优 t7（4.426）、t8 掉到 3.808（−14.0%）**；**prefill 最优 t8（25.42）、t7 只有 23.85**（t6 21.38）。即交付用的 `-t 7 --threads-batch 8` 是**两侧分别取最优**，不是拍出来的",
+   "evidence": "08_实验数据/poll-spin-contention-1101.json",
+   "expr": "summary.t7_poll50|summary.t8_poll50|summary.t8_poll0",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    4.426,
+    3.808,
+    3.797
+   ],
+   "evidence_sha256": "b90330cd9f0149bfab9308a954f1bfedb5ed8c0d9a1409155d06849cd49ba527",
+   "evidence_mtime": "2026-11-01 13:11",
+   "status": "verified"
+  },
+  {
+   "id": "C89-thread-cluster-attribution",
+   "statement": "**-t8 慢于 -t7 的三个假设全被否**（8 臂 × 2 轮回文）：H1 主线程抢核只值 **−0.42%**（t7 绑 0-6 vs 不绑）；H2 跨簇被否（t8 绑/不绑差 +0.03%；t6 单簇 4.288 ≈ t7 跨簇 4.294）；H3 L2 容量被否（单簇 3→4→6 一路在涨 2.944→3.366→4.288）。**两簇等价**：cluster0（含 IME）3.366 vs cluster1（无 IME）3.328，**−1.13%**。真机制：**decode 在 6 线程就饱和（≈5.1 GB/s，峰值 8.17 的 62%）**，第 8 个 worker 只增加同步；且 **t8 是双稳态**（4.13 / 3.75，差 9%）",
+   "evidence": "08_实验数据/thread-cluster-attribution-1101.json",
+   "expr": "arms[0].decode|arms[2].decode|arms[5].decode",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    4.294,
+    3.937,
+    3.328
+   ],
+   "evidence_sha256": "0c33668263514e7388a4a494a63f7642b8daeda6b81aa30c72d6f9d2ac4fac8b",
+   "evidence_mtime": "2026-11-01 13:17",
+   "status": "verified"
+  },
+  {
+   "id": "C90-ngram-replicate-divergence",
+   "statement": "**n-gram 提速可复现，但输出不是逐字节无损**（独立复核，另一块板 112、`/completion` 原生补全、冷启动 3 轮）：baseline **4.140** → k4v **4.843 t/s（+17.0%）**，两臂各自 3 次**完全确定性**（同臂 sha 三次一致）。**但两臂输出从第 ~35 个 token 起分叉**（同一起句后给出不同判断）→ 批内验证与逐 token 生成的浮点累加顺序不同，贪心在近似并列处分叉。**结论：提速真实，但不能宣称「无损」；要用必须配结果校验或接受语义漂移**",
+   "evidence": "08_实验数据/ngram-spec-replicate2-1101.json",
+   "expr": "summary.baseline_median|summary.k4v_median|summary.gain_pct",
+   "unit": "t/s, t/s, %",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    4.14,
+    4.843,
+    16.98
+   ],
+   "evidence_sha256": "faa4291bc77553876412ca6e5c596e486662c19556b63368fc011a5f5e92551e",
+   "evidence_mtime": "2026-11-01 13:26",
+   "status": "verified"
+  },
+  {
+   "id": "C86-decode-depth-retention",
+   "statement": "**decode 随深度的保留率**（chunk16 交付构建、2B、t7 交付配置、`-p 0 -n 32 -d <depth> -fa 0`）：depth 0 **4.303** → 2048 **4.286**（−0.4%）→ 4096 **4.040**（−6.1%）→ 8192 **3.663**（**−14.9%，保留 85.1%**）。t8 口径 8K 保留 88.7%（4.109→3.643）。**即 decode 在 8K 深度只掉约 15%**。内部勘误表里那条「8K −38%」是 `-t 8` 慢态下的数（`-n 64` 与 `-n 32` 无差异：3.652 vs 3.663，差 0.3%）；**本条只更正 decode 保留率，不影响 C59 的预填衰减结论**",
+   "evidence": "08_实验数据/ctx-decode-depth-1101.json",
+   "expr": "cells[0].decode|cells[1].decode|cells[2].decode|cells[3].decode|summary.t7_retention_pct",
+   "unit": "t/s, t/s, t/s, t/s, %",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    4.303,
+    4.286,
+    4.04,
+    3.663,
+    85.1
+   ],
+   "evidence_sha256": "afed83b8847a67cfd29e6b2c32d1b1a23de208264cf1915c20c83c8ee811e60b",
+   "evidence_mtime": "2026-11-01 12:46",
+   "status": "verified"
+  },
+  {
+   "id": "C85-core-count-fairness-taskset",
+   "statement": "**核数对等性（用 taskset 把「可用 CPU 数」与「线程数」分开）**：同一官方 Q4_1、同板，官方 MEE `0-3` **10.452** → `0-7` **17.325**（**+65.8%**），我们 `0-3` **11.095** → `0-7` **19.099**（**+72.1%**）。**同样 CPU 数下我们 +6.2%（4 核）/ +10.2%（8 核）**。据此推翻 C81 的解读——「我们单核效率只有 IME 一半」是把 8 线程总吞吐全记账到 4 个 IME 核的口径假象；MEE 并没有只跑 4 核",
+   "evidence": "08_实验数据/fairness-4core-8core-1101.json",
+   "expr": "arms[0].prefill|arms[1].prefill|arms[2].prefill|arms[3].prefill",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    10.452,
+    17.325,
+    11.095,
+    19.099
+   ],
+   "evidence_sha256": "a64d2d23cba6fdf0be8ba313d0a2c86f9389fc019185f43c60aac93471c867c6",
+   "evidence_mtime": "2026-11-01 12:49",
+   "status": "verified"
+  },
+  {
+   "id": "C82-ime-hardware-cluster",
+   "statement": "**K1 两簇硬件不同**：`/proc/cpuinfo` 的 ISA 里**只有 cpu0-3 含 `ime`（集成矩阵引擎），cpu4-7 没有**。用厂商自己的 `SPACEMIT_PERFER_CORE_ID` 把 cpu4-7（或 0-7）声明为可用核 → **SIGSEGV（同一偏移 +0xba610）**；`MEM_BACKEND=POSIX`、`DISABLE_TCM=1` 都能正常跑但 `use_ime2` 恒为 0。**六种配置都没能打开 IME2** → 厂商 MEE 的 19 t/s 是「半块芯片 + 一种格式」的上限，不是配置疏漏",
+   "evidence": "08_实验数据/mee-ime2-probe-1101.json",
+   "expr": "conclusion.ime2_ever_on|conclusion.best_prefill",
+   "unit": "bool, t/s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    false,
+    19.544
+   ],
+   "evidence_sha256": "c9502b7660c8012380e489b1f360a73d6815daa4bc2f1f16ac8770674f195d4a",
+   "evidence_mtime": "2026-11-01 11:18",
+   "status": "verified"
+  },
+  {
+   "id": "C84-fa-8k-negative",
+   "statement": "**FlashAttention 在 8K 长上下文下仍是负收益**（全项目历史测量都固定 `-fa 0`，故单独验证）：`-p 0 -n 32 -d 8192` 下 fa0 **3.276 t/s**（305 ms/token）vs fa1 **2.606**（384 ms），**−20.45%** → 「我们的长上下文衰减改不了」不是因为忘了开 FA。顺带更正：8K decode 在本协议下是 **3.276**，材料里长期引用的 2.37 来自 C59 的另一套协议（`-n 64`），两者不可混用",
+   "evidence": "08_实验数据/fa-8k-1101.json",
+   "expr": "cells[0].decode_tps|cells[1].decode_tps|delta_pct",
+   "unit": "t/s, t/s, %",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    3.276,
+    2.606,
+    -20.45
+   ],
+   "evidence_sha256": "9af355b7a4cfa5f08b8b349c8a8566b0411d2c53df6020ceee793e2f9f494238",
+   "evidence_mtime": "2026-11-01 12:18",
+   "status": "verified"
+  },
+  {
+   "id": "C83-thp-falsified",
+   "statement": "**大页（THP）假设被否**：decode 只跑到带宽的 64%，怀疑是 4 KB 页造成 TLB 抖动（1.19 GB ÷ 4 KB = 30.5 万页）。两板实测（**运行中每 3 s 采 AnonHugePages**，不是退出后采）：大页确实生效（匿名大页峰值 1.28 GB / 0.90 GB = 模型量级），但 decode **两板都变慢**（**−11.09% / −2.90%**）→ 带宽缺口不在缺页，而在 attention/KV/lm_head/同步等非 GEMV 开销",
+   "evidence": "08_实验数据/thp-probe2-1101.json",
+   "expr": "boards[0].decode_delta_pct|boards[1].decode_delta_pct|conclusion.thp_engaged_both",
+   "unit": "%, %, bool",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    -11.09,
+    -2.9,
+    true
+   ],
+   "evidence_sha256": "eb1e15da98aa08ae124299053ba5f7fc25655db72eaf25bceb96fb884a0073ad",
+   "evidence_mtime": "2026-11-01 11:18",
+   "status": "verified"
+  },
+  {
+   "id": "C80-soak-4b-chunk16",
+   "statement": "4B **交付模型（2,543,899,168 B）+ chunk16** 持续负载 38 分钟（114 板，`-r 17`，单轮 ≈135 s）：预填中位 **9.913 t/s**（漂移 +0.97%）、decode 中位 **1.658**（漂移 **−0.11%**）；**稳态 RSS 4489—4517 MB（极差 27.6 MB，无增长）**、swap 0、频率全程满、温度峰值 54℃。替换掉旧 4B soak——旧那次因 **build `717a8ad8`** 退役。**注意：`model_size` 不是文件大小**（2,532,931,584 是张量数据大小，比文件 2,543,899,168 小 10,967,584 B，那是 GGUF 元数据开销），旧 soak 用的**就是同一个模型文件**；此前把它当成「用错文件」是量纲误判，已撤回",
+   "evidence": "08_实验数据/soak-4b-chunk16-1board-1101.json",
+   "expr": "aggregate.prefill_median_of_boards|aggregate.decode_median_of_boards|aggregate.rss_plateau_range_mb.max|aggregate.temp_max_c",
+   "unit": "t/s, t/s, MB, ℃",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    9.913,
+    1.658,
+    27.6,
+    54.0
+   ],
+   "evidence_sha256": "ac1747aa9df9913422f9a146e96032b3d3c05c1400bd982b528a4f319a104977",
+   "evidence_mtime": "2026-11-01 04:09",
+   "status": "verified"
+  },
+  {
+   "id": "C79-ttft-2b-3boards",
+   "statement": "2B 冷启动首 token **3 板复核**（125/128/118，chunk16 + 交付模型，每板每长度 3 次 = n=9）：128/512/1024 = **5.154 / 20.272 / 41.610 s**（先板内取中位再取中位；池化中位 5.107/20.263/41.636）；与 C30 的单板 114 值 5.30/20.68/42.11 相差 **−2.8%/−2.0%/−1.2%**。执行说明：125/128 同批并行、118 次批（`all_three_simultaneous=false`），所以只写「3 板中位」、不写「3 板并行」",
+   "evidence": "08_实验数据/ttft-2b-3boards-1101.json",
+   "expr": "aggregate['128'].median_of_board_medians|aggregate['512'].median_of_board_medians|aggregate['1024'].median_of_board_medians",
+   "unit": "s",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    5.154,
+    20.272,
+    41.61
+   ],
+   "evidence_sha256": "8bd65ec5e2e5d03fdea357bc9418cdd747a8b3d7b1334d77547b75b8989513fc",
+   "evidence_mtime": "2026-11-01 03:15",
+   "status": "verified"
+  },
+  {
+   "id": "C78-outhead-q4-tradeoff",
+   "statement": "输出头 Q6_K→Q4_0 的取舍（chunk16，**逐张量隔离**）：2B decode **+7.64%**（重复跑 +9.07%、旧构建 +7.4%，可复现）、PPL **+2.02%**（配对逐块 20/20 同号、均值 +1.66%±0.09）、体积 −131.1 MB；4B decode +3.16%、PPL +1.17%、−163.9 MB。**只改 `token_embd.weight` 一个张量**（2B 319/320、4B 425/426 逐字节相同）。按评分表权重（decode 10 分 / 质量 5 分）折算：2B 收益/代价 **1.90:1**、4B 1.36:1。**默认不采纳**，作为可选配方写入文档",
+   "evidence": "08_实验数据/outhead-q4-vs-q6-1101.json",
+   "expr": "delta['2b'].decode_pct|delta['2b'].ppl_pct|delta['4b'].decode_pct|delta['4b'].ppl_pct|delta['2b'].bytes_delta_mb",
+   "unit": "%, %, %, %, MB",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    7.645,
+    2.015,
+    3.164,
+    1.167,
+    -131.1
+   ],
+   "evidence_sha256": "43c2fa19f97b260c96bdb0e86877efd52eb2db0217c8d3c9c054639daa14b2ef",
+   "evidence_mtime": "2026-11-01 03:02",
+   "status": "verified"
+  },
+  {
+   "id": "C77-chunk-mult-sweep",
+   "statement": "`GGML_CPU_CHUNK_MULT` 全扫（4/8/12/16/24/32/48，chunk16 构建、运行时环境变量、PPL 逐位不变）：**2B 最优点就是默认 16（26.290 t/s），往上调全掉**（24 −1.8%、32 −2.9%、48 −3.3%）→ 对 2B 已探底；**4B 最优 48（10.419，+1.93% vs 16）**，协议外补点 64 再 +0.52%，是平台不是悬崖。decode 与 prefill **同峰同谷**（2B 4→16 是 +8.6%/+5.7% 两轮），不是完全不变。交叉验证：本次 4→16 = 2B +19.1% / 4B +38.3%，与交付时的 +20.8% / +36.7% 吻合",
+   "evidence": "08_实验数据/chunk-mult-sweep-1101.json",
+   "expr": "best.prefill|best.gain_vs_16_pct|best_4b.prefill|best_4b.gain_vs_16_pct|ppl_check.chunks_identical",
+   "unit": "t/s, %, t/s, %, bool",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    26.29029,
+    0.0,
+    10.419122,
+    1.93,
+    true
+   ],
+   "evidence_sha256": "6195347b4093c19190b77b735a909267955146157c09b15bf7291504e7179ce5",
+   "evidence_mtime": "2026-11-01 02:52",
+   "status": "verified"
+  },
+  {
+   "id": "C75-mee-4b-selfmade",
+   "statement": "4B 在**我们的 selfmade 配方**上：官方 MEE **6.359** t/s vs chunk16 **8.936**（prefill **+40.5%**），decode 1.231 vs 1.650（**+34.0%**）。**四臂论证闭环**：同一个 MEE 构建，官方 Q4_1 上 7.639（C66）→ selfmade 6.359（**−16.8%**），而我们从 7.717 → 8.936（**+15.8%**）——换配方把 prefill 排序彻底翻转。附注：chunk16 第 1 rep 9.83—9.93（与 C41 的 9.969 对得上）、2—3 rep 掉到 8.4，两轮可复现；MEE 无此模式",
+   "evidence": "08_实验数据/mee-4b-selfmade-1101.json",
+   "expr": "mee.prefill_med|chunk16.prefill_med|delta_pct.prefill|delta_pct.decode",
+   "unit": "t/s, t/s, %, %",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    6.359,
+    8.936,
+    40.53,
+    34.04
+   ],
+   "evidence_sha256": "55aac87fe3b5f62ef9956fb72f0908815d78e5614bed05f4202e1ffe1432a585",
+   "evidence_mtime": "2026-11-01 01:47",
+   "status": "verified"
+  },
+  {
+   "id": "C76-testset-4b-unsloth",
+   "statement": "unsloth 第三方 4B（`Qwen3.5-4B-Q4_0.gguf`，与 C27 同一文件）在工业固定测试集（20 题、greedy、关键词命中、≥0.8 记通过）：**平均覆盖 0.871、通过 13/20**；对照我们 selfmade 4B 的 **0.875 / 14/20**（C37）→ **差 −0.4 个百分点、少 1 题**。确定性复验 3 题两轮逐字节相同。结论：**我们的量化在任务指标上不输第三方**（且第三方是含 33% 高精度张量的混合配方）",
+   "evidence": "08_实验数据/testset-4b-unsloth-1101.json",
+   "expr": "summary.mean_cover|summary.passed|compare_to_selfmade.selfmade_cover|compare_to_selfmade.selfmade_pass|compare_to_selfmade.delta_pp",
+   "unit": "覆盖率, 题, 覆盖率, 题, pp",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    0.871,
+    13,
+    0.875,
+    14,
+    -0.4
+   ],
+   "evidence_sha256": "3630b4e906e6303c333072aa9a6b3da86c930133d224930068b06ce8ed6146cd",
+   "evidence_mtime": "2026-11-01 02:38",
+   "status": "verified"
+  },
+  {
+   "id": "C73-soak-7boards-100min",
+   "statement": "2B 交付构建（chunk16 + 交付模型）7 板 × 100 分钟持续负载（114/115/116/118/119/120/121）：预填中位 **24.694 t/s**（漂移 −0.07% ~ +0.39%，中位 +0.04%）、decode 中位 **3.962**（漂移中位 +0.06%，单板 9.32% 异常）；**稳态 RSS 1990—2008 MB，极差仅 17.7—18.2 MB**；swap 全程 0、频率全程 1600 MHz、温度峰值 58℃、无 OOM、7/7 板正常收尾",
+   "evidence": "08_实验数据/soak-chunk16-7boards-1101.json",
+   "expr": "aggregate.prefill_median_of_boards|aggregate.prefill_drift_pct.median|aggregate.decode_median_of_boards|aggregate.rss_plateau_range_mb.max|aggregate.temp_max_c",
+   "unit": "t/s, %, t/s, MB, ℃",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    24.694,
+    0.04,
+    3.962,
+    18.2,
+    58.0
+   ],
+   "evidence_sha256": "02b9985bd3fd7a16e6bbc6dcc0d8d562db0f5e93fbe977ec0dc7c5afd3f7f516",
+   "evidence_mtime": "2026-11-01 02:32",
+   "status": "verified"
+  },
+  {
+   "id": "C74-fleet-8boards-attested",
+   "statement": "2B 预填 8 板复测（**逐板验证 lib sha16 与模型字节**，2026-11-01）：中位 **25.294 t/s**、IQR 25.117—25.546、最小 24.831、最大 25.915；**8/8 板 lib16 = 4436a9f4、模型 1,202,487,136 B 全一致**；与 10-29 那次 25.642 相差 −1.4%（板间/会话差）。补上 10-29 那次 7/8 板 SHA 被 tar 告警覆盖的缺口",
+   "evidence": "08_实验数据/fleet-2b-chunk16-attested-1101.json",
+   "expr": "aggregate.prefill_median|aggregate.prefill_min|aggregate.prefill_max|aggregate.boards_ok|aggregate.lib16_all_same",
+   "unit": "t/s, t/s, t/s, 板, bool",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    25.294,
+    24.831,
+    25.915,
+    8,
+    true
+   ],
+   "evidence_sha256": "350c4d79e90679b70f57cc1d236113f9ff126074e7cfe333a84ace7dd5094b71",
+   "evidence_mtime": "2026-11-01 02:36",
+   "status": "verified"
+  },
+  {
+   "id": "C72-ppl-crossdomain",
+   "statement": "跨域 PPL（英文技术文档 + C++ 源码 + 合成工业告警日志各 1/3，14.6 KB ≈ 4.6K token，**实际只跑到 9 个 chunk**、比 C63 少 55% 样本；命令行与 C63 完全一致）：2B selfmade **8.4403** vs unsloth 8.5569（**−1.36%**，合并 SE 0.77、z=−0.15）；4B **9.4666** vs 8.7743（**+7.89%**，比中文同域 +5.56% 大 2.3 pp，合并 SE 0.86、z=0.81）。结论：**4B 有同方向的额外退化迹象但未达显著，2B 未复现退化**；跨域绝对 PPL 远低于中文同域（8.4—9.5 vs 16.9—20.2），只可比相对差",
+   "evidence": "08_实验数据/ppl-crossdomain-1101.json",
+   "expr": "runs['2b'].delta_pct|runs['4b'].delta_pct|corpus.n_chunks_actual|runs['2b'].selfmade.ppl|runs['4b'].selfmade.ppl",
+   "unit": "%, %, 个, PPL, PPL",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    -1.36,
+    7.89,
+    9,
+    8.4403,
+    9.4666
+   ],
+   "evidence_sha256": "b4f25774230c2ca54e7ab69b999a6854b980d524b18bfc5f2e923383c896d1e1",
+   "evidence_mtime": "2026-11-01 01:35",
+   "status": "verified"
+  },
+  {
+   "id": "C93-ttft-stock-ab-4boards",
+   "statement": "2B 首 token 的 stock vs chunk16 A/B 在 **4 块板**（120/121/122/124）上复刻 C60 协议（不传 `-ub`、128/512/1024 × 3 次冷启动、同板两臂、prompt 逐字节相同）：stock **7.10/33.38/67.02 s** → chunk16 **5.05/19.49/40.15 s**，降 **28.9%/41.6%/40.1%**；12/12 格 stock 均慢，与 C60 单板差 +2.2/−1.5/−0.2 pp，板间比值极差 ≤0.096；72/72 格有效、0 失败",
+   "evidence": "08_实验数据/ttft-stock-ab-4boards-1101.json",
+   "expr": "aggregate[len=128].stock_median_4boards|aggregate[len=128].c16_median_4boards|aggregate[len=512].stock_median_4boards|aggregate[len=512].c16_median_4boards|aggregate[len=1024].stock_median_4boards|aggregate[len=1024].c16_median_4boards",
+   "unit": "ms",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    7096.6,
+    5047.3,
+    33384.3,
+    19489.2,
+    67022.1,
+    40151.4
+   ],
+   "evidence_sha256": "8e1583d33032b65671b514fd1991f9b7910696b2db41291ee809c70530af5e86",
+   "evidence_mtime": "2026-11-01 18:13",
+   "status": "verified"
+  },
+  {
+   "id": "C94-long-prefix-reuse-lossless",
+   "statement": "**同一文档、换问题**（不预热；2B/chunk16；6077 token 文档；116/121 两板 × Q1—Q4）：Q1 冷 **6118 token / 273.6—275.8 s**；Q2—Q4 只重填 **512/508/512 token**、**26.6—27.3 s**，相对冷启动 **10.2—10.3×**，且复用输出与冷启动**逐字节相同**（Q2/Q3/Q4 三题全等、两板 sha 相同）；机制 = slot 上下文 checkpoint（`-ctxcp 0` 下 Q2 退回 6114 token / 278.5 s）。**60× 的「预热文档」路径不是无损**（第 32 token 分叉），不作为主口径",
+   "evidence": "08_实验数据/长前缀复用-复现-1101.json",
+   "expr": "summary.speedup_vs_full_refill_q2['116']|summary.p1_reuse_prompt_ms_median_116|summary.q1_cold_prompt_ms['116']|stability.cross_board.reuse_prompt_n['q2']['116']",
+   "unit": "×, ms, ms, token",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    10.2,
+    27082.8,
+    275832.8,
+    512
+   ],
+   "evidence_sha256": "96934f209e77a4244e3bc5181aa4a2035ffb226dbb0d4aeb237c30532ba2a533",
+   "evidence_mtime": "2026-11-01 19:40",
+   "status": "verified"
+  },
+  {
+   "id": "C95-ttft-4b-stock-ab-4boards",
+   "statement": "**4B 首 token 的 stock vs chunk16 A/B（4 板 120/121/122/124）**：冷启动 128/512/1024 = **18.48 / 85.97 / 173.57 s → 12.81 / 49.47 / 99.56 s**（**−30.7% / −42.5% / −42.6%**），4 板中位、12/12 格 stock 全慢、板间比值 1.433—1.753；与 2B 的 −28.9/−41.6/−40.1%（C93）同向、差 ≤2.5 pp",
+   "evidence": "08_实验数据/ttft-4b-stock-ab-4boards-1101.json",
+   "expr": "aggregate[len=128].stock_median|aggregate[len=128].c16_median|aggregate[len=512].stock_median|aggregate[len=512].c16_median|aggregate[len=1024].stock_median|aggregate[len=1024].c16_median",
+   "unit": "ms",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    18484.1,
+    12809.2,
+    85968.8,
+    49471.3,
+    173570.9,
+    99563.1
+   ],
+   "evidence_sha256": "4916d673e1883a6afb1cf531acf1ddc662f8c8df335f2409fcf93fe689205107",
+   "evidence_mtime": "2026-11-01 22:44",
+   "status": "verified"
+  },
+  {
+   "id": "C96-ctx-curve-2b-chunk16",
+   "statement": "**2B 长上下文 chunk16 同板曲线（116）**：4K/8K/16K/32K token = **20.700 / 17.352 / 12.822 / 8.400 t/s**（每档 1 次冷启动、prompt 逐字节前缀）；相对 4K 衰减 **−16.2% / −38.1% / −59.4%**；对旧构建 C23（16.169/13.726/10.734/7.459）+28.0/+26.4/+19.5/+12.6%。与 (a) 表 8K 17.814 交叉差 −2.6%",
+   "evidence": "08_实验数据/ctx-curve-2b-chunk16-1101.json",
+   "expr": "points[0].tps|points[1].tps|points[2].tps|points[3].tps",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    20.7,
+    17.352,
+    12.822,
+    8.4
+   ],
+   "evidence_sha256": "26c769c1f3e3581e69b8802f472a49a77b8e5995438d7700e86c706ab0edea44",
+   "evidence_mtime": "2026-11-01 23:44",
+   "status": "verified"
+  },
+  {
+   "id": "C97-ctx-curve-4b-chunk16",
+   "statement": "**4B 长上下文 chunk16 同板曲线（125）**：4K/8K/16K = **9.289 / 8.113 / 6.480 t/s**；相对 4K 衰减 **−12.7% / −30.2%**；对旧构建 C38（6.232/5.513/4.651）+49.1/+47.2/+39.3%；32K 单点见 C98",
+   "evidence": "08_实验数据/ctx-curve-4b-chunk16-1101.json",
+   "expr": "points[0].tps|points[1].tps|points[2].tps",
+   "unit": "t/s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    9.289,
+    8.113,
+    6.48
+   ],
+   "evidence_sha256": "0b47bcdb03b2396af510576d53718ffdabe6dd28ea5e19b033aee4bdf88fb4bd",
+   "evidence_mtime": "2026-11-01 23:04",
+   "status": "verified"
+  },
+  {
+   "id": "C98-ctx-32k-4b-chunk16",
+   "statement": "**4B 32K chunk16 单点（125）**：32768 token / **7111.0 s / 4.608 t/s**；对 16K 6.480 **−28.9%**、对旧构建 C38 3.723 **+23.8%**；32 token decode 0.385 t/s（80.4 s）。耗时 119 分钟，只作压力数据",
+   "evidence": "08_实验数据/ctx-32k-4b-chunk16-1101.json",
+   "expr": "prompt_n|prompt_ms|tps",
+   "unit": "token, ms, t/s",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    32768,
+    7110996.9,
+    4.608
+   ],
+   "evidence_sha256": "eebc6eaa1146ad38052a5cc8d6fc6debb4601de8850b650265ff65e3c90afe96",
+   "evidence_mtime": "2026-11-02 01:08",
+   "status": "verified"
+  },
+  {
+   "id": "C99-concurrency-4b-chunk16",
+   "statement": "**4B 四路并发（118，8 GB，chunk16）**：48-token 臂 np4 聚合 **2.027 t/s** vs 串行 1.541（**+31.5%**，每路 0.726 vs 1.982）；128-token 臂 **1.241 vs 1.083（+14.6%）**——臂变长后聚合反降（512-token 预填抢核）；RSS 峰值 5432 MB、无 OOM",
+   "evidence": "08_实验数据/concurrency-4b-chunk16-1101.json",
+   "expr": "summary.speedup_vs_serial['48-token'].np4_agg_tps|summary.speedup_vs_serial['48-token'].speedup_pct|summary.speedup_vs_serial['128-token'].speedup_pct",
+   "unit": "t/s, %, %",
+   "unit_ratio": "—",
+   "build": "4436a9f4",
+   "value": [
+    2.027,
+    31.5,
+    14.6
+   ],
+   "evidence_sha256": "a4f9e35be3c759fd662a56a9cb03d24e09adf6acb0d787e7d4bb9774e7f81ed3",
+   "evidence_mtime": "2026-11-01 23:02",
+   "status": "verified"
+  },
+  {
+   "id": "C100-4b-decode-stock-vs-c16",
+   "statement": "**4B 零深度 decode 的 stock vs chunk16（4 板，`-p 0 -n 128 -t 7 -fa 0 -r 3`）**：stock 中位 **1.913 t/s**、chunk16 **1.970 t/s**，**+3.03%**；4/4 板同向（板内比值 0.958—0.985）。与 C41 单板 2.006 差 −1.8%。**注意**：+45.8%（C66）是对 MEE、+29.2% 是对第三方基线，均非对 stock",
+   "evidence": "08_实验数据/ttft-4b-stock-ab-4boards-1101.json",
+   "expr": "decode_aggregate.stock_median|decode_aggregate.c16_median|decode_aggregate.c16_delta_pct",
+   "unit": "t/s, t/s, %",
+   "unit_ratio": "—",
+   "build": "other",
+   "value": [
+    1.913,
+    1.97,
+    3.03
+   ],
+   "evidence_sha256": "4916d673e1883a6afb1cf531acf1ddc662f8c8df335f2409fcf93fe689205107",
+   "evidence_mtime": "2026-11-01 22:44",
+   "status": "verified"
+  }
+ ]
+}

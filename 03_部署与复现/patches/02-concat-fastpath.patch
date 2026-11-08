@@ -1,0 +1,38 @@
+--- a/ggml/src/ggml-cpu/ops.cpp
++++ b/ggml/src/ggml-cpu/ops.cpp
+@@ -2057,6 +2057,35 @@
+ 
+     const float * x;
+ 
++    // CONCAT_FASTPATH (dim 0, f32, dst/src0 contiguous in i0): dst[, j] for each
++    // column j is [src0 rows (ne00)] ++ [src1 rows]. src1 is frequently a
++    // transposed view (nb10 >> 4), so the generic one-float-per-iteration loop
++    // below degenerates into a 24 KB-strided gather with four bounds checks per
++    // element. Qwen3.5's DeltaNet conv state hits this on every layer: 805k
++    // scalar iterations per call, measured 94 ms on SpacemiT K1 (245x slower
++    // than the 3.2 MB it moves). Hoist the checks and tile the transpose.
++    if (dim == 0 && nb0 == (int64_t) sizeof(float) && nb00 == (int64_t) sizeof(float) &&
++        ne2 == 1 && ne3 == 1) {
++        const int64_t n1 = ne10;
++        const size_t  es = sizeof(float);
++        for (int64_t j = ith; j < ne1; j += nth) {
++            memcpy((char *)dst->data + j*nb1, (const char *)src0->data + j*nb01,
++                   (size_t) ne00 * es);
++        }
++        const int64_t JB = 16;
++        for (int64_t jb = 0; jb < ne1; jb += JB) {
++            const int64_t jn = (jb + JB <= ne1) ? JB : (ne1 - jb);
++            for (int64_t k = (int64_t) ith; k < n1; k += (int64_t) nth) {
++                const float * src = (const float *)((const char *)src1->data + k*nb10 + jb*nb11);
++                char * dcol = (char *)dst->data + (ne00 + k)*es + jb*nb1;
++                for (int64_t j = 0; j < jn; j++) {
++                    *(float *)(dcol + j*nb1) = src[j];
++                }
++            }
++        }
++        return;
++    }
++
+     // TODO: smarter multi-theading
+     for (int i3 = 0; i3 < ne3; i3++) {
+         for (int i2 = ith; i2 < ne2; i2 += nth) {

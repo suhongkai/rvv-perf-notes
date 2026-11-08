@@ -1,0 +1,35 @@
+# Repack GEMM row-chunking: nth*4 -> nth*16 (env GGML_CPU_CHUNK_MULT, default 16).
+# Bonus finding of the M8 work: +17.6% Q4_0 prefill at -p 512 with the unmodified
+# 4-token kernel.  Apply from the fork root:  patch -p1 < chunk_mult16.patch
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -12,6 +12,7 @@
+ #include "arch-fallback.h"
+ 
+ #include <cmath>
++#include <cstdlib>
+ #include <cstring>
+ #include <cassert>
+ #include <cstdio>  // for GGML_ASSERT
+@@ -4785,7 +4786,20 @@
+         // 4x chunks per thread
+         const int64_t nr0 = ggml_nrows(op->src[0]);
+ 
+-        int     nth_scaled  = nth * 4;
++        // Split the weight matrix into nth*16 row chunks instead of nth*4 so that
++        // every thread walks a slice small enough to stay in L1 (16 columns of a
++        // 2K-wide ffn matrix ~= 18 KB) instead of re-reading a 74 KB slice from L2
++        // for every group of four prompt rows.
++        // GGML_CPU_CHUNK_MULT=4 restores the previous behaviour.
++        static int chunk_mult = 0;
++        if (chunk_mult == 0) {
++            const char * e = getenv("GGML_CPU_CHUNK_MULT");
++            chunk_mult = e ? atoi(e) : 16;
++            if (chunk_mult < 1) {
++                chunk_mult = 16;
++            }
++        }
++        int     nth_scaled  = nth * chunk_mult;
+         int64_t chunk_size0 = (nr0 + nth_scaled - 1) / nth_scaled;
+         int64_t nchunk0     = (nr0 + chunk_size0 - 1) / chunk_size0;
+ 

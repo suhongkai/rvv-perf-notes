@@ -1,0 +1,90 @@
+{
+ "task": "验证自旋等待（--poll）能否解释 -t8 慢于 -t7（用户假说：主线程抢核）",
+ "date": "2026-11-01",
+ "host": "10.65.21.111",
+ "hypothesis": "llama.cpp 线程池默认 --poll 50 自旋；-t8 时 8 worker + 1 主线程 = 9 线程抢 8 核，主线程自旋周期性饿死 worker → 双稳态（4.12 / 3.76）。若成立，--poll 0 应消除惩罚。",
+ "build": {
+  "bin": "~/chunk16-build/bin",
+  "lib16": "4436a9f45bcc298b"
+ },
+ "protocol": "llama-bench -p 512 -n 128 -r 3 -fa 0；只改 -t 与 --poll",
+ "cells": [
+  {
+   "threads": 7,
+   "poll": 50,
+   "prefill": 23.848,
+   "decode": 4.426,
+   "decode_samples": [
+    4.472,
+    4.443,
+    4.362
+   ]
+  },
+  {
+   "threads": 7,
+   "poll": 0,
+   "prefill": 23.894,
+   "decode": 4.402,
+   "decode_samples": [
+    4.408,
+    4.403,
+    4.396
+   ]
+  },
+  {
+   "threads": 8,
+   "poll": 50,
+   "prefill": 24.976,
+   "decode": 3.808,
+   "decode_samples": [
+    3.802,
+    3.819,
+    3.803
+   ]
+  },
+  {
+   "threads": 8,
+   "poll": 0,
+   "prefill": 25.021,
+   "decode": 3.797,
+   "decode_samples": [
+    3.803,
+    3.795,
+    3.792
+   ]
+  },
+  {
+   "threads": 8,
+   "poll": 1,
+   "prefill": 25.39,
+   "decode": 4.13,
+   "decode_samples": [
+    4.073,
+    4.139,
+    4.178
+   ]
+  },
+  {
+   "threads": 6,
+   "poll": 50,
+   "prefill": 21.383,
+   "decode": 4.319,
+   "decode_samples": [
+    4.312,
+    4.324,
+    4.321
+   ]
+  }
+ ],
+ "summary": {
+  "t7_poll50": 4.426,
+  "t7_poll0": 4.402,
+  "t8_poll50": 3.808,
+  "t8_poll0": 3.797,
+  "t8_poll1": 4.13,
+  "t6_poll50": 4.319,
+  "t8_penalty_poll50_pct": -13.96,
+  "t8_penalty_poll0_pct": -13.74,
+  "poll0_recovers_t8": false
+ }
+}

@@ -1,0 +1,940 @@
+{
+ "task": "long-prefix-reuse-reproduce",
+ "date": "2026-11-01",
+ "hosts": [
+  "10.65.21.116",
+  "10.65.21.121"
+ ],
+ "build": {
+  "bin": "/home/bianbu/c16/bin/llama-server",
+  "lib16": "4436a9f45bcc298b",
+  "server_sha16": "adf5c445c416e31c",
+  "version": "0.6.0-dev (build 0)",
+  "flags": "-cms/--checkpoint-min-step（默认 8192）、-ctxcp（默认 32）、-cram 1024、-ub（默认 512）"
+ },
+ "model": {
+  "file": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+  "bytes": 1202487136,
+  "path": "/home/bianbu/labdeploy/models/"
+ },
+ "corpus": {
+  "doc_chars": 8219,
+  "doc_tokens": 6077,
+  "doc_sha256": "2d2d9ec01360bd9627d9c93c4f7e9492eeaad8726ee61b481963446e05cfacb0",
+  "same_as_previous": true
+ },
+ "questions": {
+  "q1": "3号注塑机液压油温度连续三个班次超过78摄氏度，请按SOP给出从冷却器到油泵的排查步骤，并明确立即停机与降负荷运行的判据。",
+  "q2": "7号注塑机合模压力在第4段突然下降12%，同时液压阀有异响，请按可能原因排序给出处置顺序和需要记录的参数。",
+  "q3": "12号注塑机料筒三段加热圈电流偏差达到15%，请说明应当检查的项目、判定阈值以及交接班记录要求。",
+  "q4": "5号空压机排气温度夜班升到102摄氏度且加载率下降，请给出从冷却水到油路的排查顺序，并说明何时切备用机。",
+  "suffix_tokens": {
+   "q1": 41,
+   "q2": 37,
+   "q3": 33,
+   "q4": 37
+  },
+  "full_prompt_tokens": {
+   "q1": 6118,
+   "q2": 6114,
+   "q3": 6110,
+   "q4": 6114
+  }
+ },
+ "protocol": "不预热：每相位新起 llama-server（-c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024，默认 -ctxcp 32；阶段2/3 加 -cms 256/128），先 /tokenize 复核 doc=6077，再 /completion：prompt = doc + \"\\n\\n问题：\" + Qx，temperature 0、seed 1234、top_k 1、repeat_penalty 1.0、cache_prompt true、ignore_eos true；Q1 n_predict=64，Q2/Q3/Q4 n_predict=32。复用相位：Q1 冷跑后不重启，紧接 Q2/Q3/Q4；冷跑相位：新进程只发该题整段。跑前 pkill -x llama-server、跑后 pgrep CLEAN；板内串行、板间并行；未碰 118/119/123/127。补充相位（非协议要求，用于回答 40×）：116 上 -ub 128 再做 Q1 冷 → Q2，并与同参数冷跑 doc+Q2 对照。",
+ "cells": [
+  {
+   "host": "116",
+   "phase": "P1_default",
+   "cms": "default(8192)",
+   "q": "Q1",
+   "kind": "reuse",
+   "n_predict": 64,
+   "prompt_n": 6118,
+   "prompt_ms": 275832.8,
+   "wall_s": 298.13,
+   "sha256_out": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+   "chars": 112,
+   "cold_sha256": null,
+   "identical": null
+  },
+  {
+   "host": "116",
+   "phase": "P1_default",
+   "cms": "default(8192)",
+   "q": "Q2",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 512,
+   "prompt_ms": 26856.9,
+   "wall_s": 37.663,
+   "sha256_out": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "chars": 124,
+   "cold_sha256": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "identical": true,
+   "cold_ref": "116/P1_cold_q2"
+  },
+  {
+   "host": "116",
+   "phase": "P1_default",
+   "cms": "default(8192)",
+   "q": "Q3",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 508,
+   "prompt_ms": 27259.1,
+   "wall_s": 37.879,
+   "sha256_out": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+   "chars": 59,
+   "cold_sha256": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+   "identical": true,
+   "cold_ref": "121/P1_cold_q3（跨板同构建冷参照）"
+  },
+  {
+   "host": "116",
+   "phase": "P1_default",
+   "cms": "default(8192)",
+   "q": "Q4",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 512,
+   "prompt_ms": 27082.8,
+   "wall_s": 37.79,
+   "sha256_out": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+   "chars": 60,
+   "cold_sha256": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+   "identical": true,
+   "cold_ref": "121/P1_cold_q4（跨板同构建冷参照）"
+  },
+  {
+   "host": "116",
+   "phase": "P1_cold_q2",
+   "cms": "default(8192)",
+   "q": "Q2",
+   "kind": "cold",
+   "n_predict": 32,
+   "prompt_n": 6114,
+   "prompt_ms": 274753.6,
+   "wall_s": 285.907,
+   "sha256_out": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "chars": 124,
+   "cold_sha256": null,
+   "identical": null
+  },
+  {
+   "host": "121",
+   "phase": "P1_default",
+   "cms": "default(8192)",
+   "q": "Q1",
+   "kind": "reuse",
+   "n_predict": 64,
+   "prompt_n": 6118,
+   "prompt_ms": 273640.6,
+   "wall_s": 296.334,
+   "sha256_out": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+   "chars": 112,
+   "cold_sha256": null,
+   "identical": null
+  },
+  {
+   "host": "121",
+   "phase": "P1_default",
+   "cms": "default(8192)",
+   "q": "Q2",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 512,
+   "prompt_ms": 26646.3,
+   "wall_s": 37.416,
+   "sha256_out": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "chars": 124,
+   "cold_sha256": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "identical": true,
+   "cold_ref": "121/P1_cold_q2"
+  },
+  {
+   "host": "121",
+   "phase": "P1_default",
+   "cms": "default(8192)",
+   "q": "Q3",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 508,
+   "prompt_ms": 26734.3,
+   "wall_s": 37.404,
+   "sha256_out": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+   "chars": 59,
+   "cold_sha256": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+   "identical": true,
+   "cold_ref": "121/P1_cold_q3"
+  },
+  {
+   "host": "121",
+   "phase": "P1_default",
+   "cms": "default(8192)",
+   "q": "Q4",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 512,
+   "prompt_ms": 26634.4,
+   "wall_s": 37.333,
+   "sha256_out": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+   "chars": 60,
+   "cold_sha256": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+   "identical": true,
+   "cold_ref": "121/P1_cold_q4"
+  },
+  {
+   "host": "121",
+   "phase": "P1_cold_q2",
+   "cms": "default(8192)",
+   "q": "Q2",
+   "kind": "cold",
+   "n_predict": 32,
+   "prompt_n": 6114,
+   "prompt_ms": 274274.5,
+   "wall_s": 285.44,
+   "sha256_out": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "chars": 124,
+   "cold_sha256": null,
+   "identical": null
+  },
+  {
+   "host": "121",
+   "phase": "P1_cold_q3",
+   "cms": "default(8192)",
+   "q": "Q3",
+   "kind": "cold",
+   "n_predict": 32,
+   "prompt_n": 6110,
+   "prompt_ms": 274132.1,
+   "wall_s": 285.049,
+   "sha256_out": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+   "chars": 59,
+   "cold_sha256": null,
+   "identical": null
+  },
+  {
+   "host": "121",
+   "phase": "P1_cold_q4",
+   "cms": "default(8192)",
+   "q": "Q4",
+   "kind": "cold",
+   "n_predict": 32,
+   "prompt_n": 6114,
+   "prompt_ms": 274781.8,
+   "wall_s": 285.777,
+   "sha256_out": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+   "chars": 60,
+   "cold_sha256": null,
+   "identical": null
+  },
+  {
+   "host": "116",
+   "phase": "P2_cms256",
+   "cms": "256",
+   "q": "Q1",
+   "kind": "reuse",
+   "n_predict": 64,
+   "prompt_n": 6118,
+   "prompt_ms": 279477.1,
+   "wall_s": 302.34,
+   "sha256_out": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+   "chars": 112,
+   "cold_sha256": null,
+   "identical": null
+  },
+  {
+   "host": "116",
+   "phase": "P2_cms256",
+   "cms": "256",
+   "q": "Q2",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 512,
+   "prompt_ms": 26949.6,
+   "wall_s": 38.293,
+   "sha256_out": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "chars": 124,
+   "cold_sha256": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "identical": true,
+   "cold_ref": "116/P2_cold_q2"
+  },
+  {
+   "host": "116",
+   "phase": "P2_cms256",
+   "cms": "256",
+   "q": "Q3",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 508,
+   "prompt_ms": 26820.1,
+   "wall_s": 37.83,
+   "sha256_out": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+   "chars": 59,
+   "cold_sha256": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+   "identical": true,
+   "cold_ref": "121/P1_cold_q3（跨板同构建冷参照）"
+  },
+  {
+   "host": "116",
+   "phase": "P2_cms256",
+   "cms": "256",
+   "q": "Q4",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 512,
+   "prompt_ms": 27310.4,
+   "wall_s": 38.232,
+   "sha256_out": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+   "chars": 60,
+   "cold_sha256": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+   "identical": true,
+   "cold_ref": "121/P1_cold_q4（跨板同构建冷参照）"
+  },
+  {
+   "host": "116",
+   "phase": "P2_cold_q2",
+   "cms": "256",
+   "q": "Q2",
+   "kind": "cold",
+   "n_predict": 32,
+   "prompt_n": 6114,
+   "prompt_ms": 282298.4,
+   "wall_s": 293.588,
+   "sha256_out": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "chars": 124,
+   "cold_sha256": null,
+   "identical": null
+  },
+  {
+   "host": "116",
+   "phase": "P3_cms128",
+   "cms": "128",
+   "q": "Q1",
+   "kind": "reuse",
+   "n_predict": 64,
+   "prompt_n": 6118,
+   "prompt_ms": 278544.0,
+   "wall_s": 301.445,
+   "sha256_out": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+   "chars": 112,
+   "cold_sha256": null,
+   "identical": null
+  },
+  {
+   "host": "116",
+   "phase": "P3_cms128",
+   "cms": "128",
+   "q": "Q2",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 512,
+   "prompt_ms": 27243.3,
+   "wall_s": 38.408,
+   "sha256_out": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "chars": 124,
+   "cold_sha256": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "identical": true,
+   "cold_ref": "116/P3_cold_q2"
+  },
+  {
+   "host": "116",
+   "phase": "P3_cold_q2",
+   "cms": "128",
+   "q": "Q2",
+   "kind": "cold",
+   "n_predict": 32,
+   "prompt_n": 6114,
+   "prompt_ms": 278853.7,
+   "wall_s": 290.085,
+   "sha256_out": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "chars": 124,
+   "cold_sha256": null,
+   "identical": null
+  },
+  {
+   "host": "116",
+   "phase": "S_ub128",
+   "cms": "default(8192)",
+   "q": "Q1",
+   "kind": "reuse",
+   "n_predict": 64,
+   "prompt_n": 6118,
+   "prompt_ms": 324421.4,
+   "wall_s": 346.495,
+   "sha256_out": "cdfe20f7f0e7a5a92dc4911dbf57c030125c117009380274a2458a8bca1c9f9b",
+   "chars": 114,
+   "cold_sha256": null,
+   "identical": null,
+   "note": "补充相位 -ub 128 的冷首问"
+  },
+  {
+   "host": "116",
+   "phase": "S_ub128",
+   "cms": "default(8192)",
+   "q": "Q2",
+   "kind": "reuse",
+   "n_predict": 32,
+   "prompt_n": 128,
+   "prompt_ms": 8894.8,
+   "wall_s": 19.887,
+   "sha256_out": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "chars": 124,
+   "cold_sha256": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "cold_ref": "116/S_ub128_cold_q2",
+   "identical": true,
+   "note": "补充相位：-ub 128 下同进程换问"
+  },
+  {
+   "host": "116",
+   "phase": "S_ub128_cold_q2",
+   "cms": "default(8192)",
+   "q": "Q2",
+   "kind": "cold",
+   "n_predict": 32,
+   "prompt_n": 6114,
+   "prompt_ms": 321007.5,
+   "wall_s": 332.015,
+   "sha256_out": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "chars": 124,
+   "cold_sha256": null,
+   "identical": null,
+   "note": "补充相位 -ub 128 冷跑 doc+Q2"
+  }
+ ],
+ "phases": [
+  {
+   "host": "116",
+   "phase": "P1_default",
+   "cms": "default(8192)",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "default(512)",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 16.3,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": {
+    "q1": 41,
+    "q2": 37,
+    "q3": 33,
+    "q4": 37
+   }
+  },
+  {
+   "host": "116",
+   "phase": "P1_cold_q2",
+   "cms": "default(8192)",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "default(512)",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 17.1,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": {
+    "q1": 41,
+    "q2": 37,
+    "q3": 33,
+    "q4": 37
+   }
+  },
+  {
+   "host": "116",
+   "phase": "P2_cms256",
+   "cms": "256",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "default(512)",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 -cms 256 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 17.1,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": {
+    "q1": 41,
+    "q2": 37,
+    "q3": 33,
+    "q4": 37
+   }
+  },
+  {
+   "host": "116",
+   "phase": "P2_cold_q2",
+   "cms": "256",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "default(512)",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 -cms 256 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 16.1,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": {
+    "q1": 41,
+    "q2": 37,
+    "q3": 33,
+    "q4": 37
+   }
+  },
+  {
+   "host": "116",
+   "phase": "P3_cms128",
+   "cms": "128",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "default(512)",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 -cms 128 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 16.1,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": {
+    "q1": 41,
+    "q2": 37,
+    "q3": 33,
+    "q4": 37
+   }
+  },
+  {
+   "host": "116",
+   "phase": "P3_cold_q2",
+   "cms": "128",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "default(512)",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 -cms 128 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 16.1,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": {
+    "q1": 41,
+    "q2": 37,
+    "q3": 33,
+    "q4": 37
+   }
+  },
+  {
+   "host": "121",
+   "phase": "P1_default",
+   "cms": "default(8192)",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "default(512)",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 16.3,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": {
+    "q1": 41,
+    "q2": 37,
+    "q3": 33,
+    "q4": 37
+   }
+  },
+  {
+   "host": "121",
+   "phase": "P1_cold_q2",
+   "cms": "default(8192)",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "default(512)",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 16.1,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": {
+    "q1": 41,
+    "q2": 37,
+    "q3": 33,
+    "q4": 37
+   }
+  },
+  {
+   "host": "121",
+   "phase": "P1_cold_q3",
+   "cms": "default(8192)",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "default(512)",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 16.1,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": {
+    "q1": 41,
+    "q2": 37,
+    "q3": 33,
+    "q4": 37
+   }
+  },
+  {
+   "host": "121",
+   "phase": "P1_cold_q4",
+   "cms": "default(8192)",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "default(512)",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 17.1,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": {
+    "q1": 41,
+    "q2": 37,
+    "q3": 33,
+    "q4": 37
+   }
+  },
+  {
+   "host": "116",
+   "phase": "S_ub128",
+   "cms": "default(8192)",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "128",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 -ub 128 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 16.3,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": null
+  },
+  {
+   "host": "116",
+   "phase": "S_ub128_cold_q2",
+   "cms": "default(8192)",
+   "ctxcp": "default(32)",
+   "cram": "1024",
+   "ub": "128",
+   "cmd": "/home/bianbu/c16/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf -c 16384 -t 7 --threads-batch 8 -np 1 -cram 1024 -ub 128 --host 127.0.0.1 --port 8080",
+   "server": "ok",
+   "startup_s": 17.1,
+   "ok": true,
+   "err": null,
+   "pgrep": "CLEAN",
+   "tok_doc": 6077,
+   "tok_suffix": null
+  }
+ ],
+ "stability": {
+  "same_board_repeat": {
+   "note": "同板同题重复：Q1 冷跑在同一块板上由 3 个独立进程（默认/-cms256/-cms128）各跑一次；Q2/Q3/Q4 的复用输出与同板新进程冷跑整段比较",
+   "q1_cold_116_three_processes": {
+    "default": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+    "cms256": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+    "cms128": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+    "all_equal": true,
+    "prompt_n": [
+     6118,
+     6118,
+     6118
+    ],
+    "prompt_ms": [
+     275832.8,
+     279477.1,
+     278544.0
+    ]
+   },
+   "q2_116_reuse_vs_cold": {
+    "reuse": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+    "cold": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+    "identical": true
+   },
+   "q3_121_reuse_vs_cold": {
+    "reuse": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+    "cold": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+    "identical": true
+   },
+   "q4_121_reuse_vs_cold": {
+    "reuse": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+    "cold": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+    "identical": true
+   }
+  },
+  "cross_board": {
+   "q1_cold": {
+    "116": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+    "121": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a"
+   },
+   "q1_cold_identical": true,
+   "q2_cold": {
+    "116": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+    "121": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704"
+   },
+   "q2_cold_identical": true,
+   "q2_cold_prompt_n": {
+    "116": 6114,
+    "121": 6114
+   },
+   "q2_cold_prompt_ms": {
+    "116": 274753.6,
+    "121": 274274.5
+   },
+   "reuse_p1": {
+    "q2": {
+     "116": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+     "121": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704"
+    },
+    "q3": {
+     "116": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+     "121": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c"
+    },
+    "q4": {
+     "116": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+     "121": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014"
+    }
+   },
+   "reuse_identical": {
+    "q2": true,
+    "q3": true,
+    "q4": true
+   },
+   "reuse_prompt_n": {
+    "q2": {
+     "116": 512,
+     "121": 512
+    },
+    "q3": {
+     "116": 508,
+     "121": 508
+    },
+    "q4": {
+     "116": 512,
+     "121": 512
+    }
+   },
+   "reuse_prompt_n_identical": {
+    "q2": true,
+    "q3": true,
+    "q4": true
+   },
+   "reuse_prompt_ms": {
+    "q2": {
+     "116": 26856.9,
+     "121": 26646.3
+    },
+    "q3": {
+     "116": 27259.1,
+     "121": 26734.3
+    },
+    "q4": {
+     "116": 27082.8,
+     "121": 26634.4
+    }
+   }
+  },
+  "previous_round": {
+   "cold_q1_sha_expected": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+   "cold_q1_116": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+   "cold_q1_116_match": true,
+   "cold_q1_121": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+   "cold_q1_121_match": true,
+   "a2_q2_reuse_sha_expected": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "p1_q2_116": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+   "p1_q2_116_match": true,
+   "a2_q2_prompt_n_expected": 512,
+   "p1_q2_116_prompt_n": 512,
+   "p1_q2_121_prompt_n": 512
+  },
+  "cms_effect": {
+   "256": {
+    "q1_cold_prompt_n": 6118,
+    "q1_cold_prompt_ms": 279477.1,
+    "q2_reuse_prompt_n": 512,
+    "q2_reuse_prompt_ms": 26949.6,
+    "q2_reuse_wall_s": 38.293,
+    "q2_reuse_sha": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+    "q2_cold_prompt_n": 6114,
+    "q2_cold_prompt_ms": 282298.4,
+    "q2_cold_sha": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+    "identical_reuse_vs_cold": true,
+    "same_sha_as_default_q2": true,
+    "refill_delta_vs_default": 0,
+    "prompt_ms_delta_vs_default": 92.7,
+    "q3_reuse_prompt_n": 508,
+    "q4_reuse_prompt_n": 512,
+    "q3_reuse_sha": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+    "q4_reuse_sha": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014"
+   },
+   "128": {
+    "q1_cold_prompt_n": 6118,
+    "q1_cold_prompt_ms": 278544.0,
+    "q2_reuse_prompt_n": 512,
+    "q2_reuse_prompt_ms": 27243.3,
+    "q2_reuse_wall_s": 38.408,
+    "q2_reuse_sha": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+    "q2_cold_prompt_n": 6114,
+    "q2_cold_prompt_ms": 278853.7,
+    "q2_cold_sha": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+    "identical_reuse_vs_cold": true,
+    "same_sha_as_default_q2": true,
+    "refill_delta_vs_default": 0,
+    "prompt_ms_delta_vs_default": 386.4
+   }
+  },
+  "supplementary_ub128": {
+   "note": "补充相位（非协议要求）：-ub 128，用结构性旋钮（末尾 checkpoint = 4+n_ubatch）把重填压到 128，回答『10× 能否变 40×』",
+   "q1_cold": {
+    "prompt_n": 6118,
+    "prompt_ms": 324421.4,
+    "wall_s": 346.495,
+    "sha": "cdfe20f7f0e7a5a92dc4911dbf57c030125c117009380274a2458a8bca1c9f9b",
+    "default_q1_sha": "a02f00b23acb236bcb4a5a2e456f0856608556e7282669f3f51f9b1d897eef6a",
+    "same_as_default_q1": false
+   },
+   "q2_reuse": {
+    "prompt_n": 128,
+    "prompt_ms": 8894.8,
+    "wall_s": 19.887,
+    "sha": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704"
+   },
+   "q2_cold": {
+    "prompt_n": 6114,
+    "prompt_ms": 321007.5,
+    "wall_s": 332.015,
+    "sha": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704"
+   },
+   "q2_identical_reuse_vs_cold": true,
+   "q2_same_as_default_q2": true,
+   "speedup_prefill_vs_default_cold": 30.9,
+   "speedup_prefill_vs_ub128_cold": 36.1,
+   "speedup_wall_vs_ub128_cold": 16.7,
+   "note_cost": "同参数冷跑更慢：Q1 冷 324.4 s（默认 275.8 s），冷 Q2 321.0 s（默认 274.8 s），故 40× 分母被抬高"
+  }
+ },
+ "summary": {
+  "p1_reuse_prompt_ms_116": {
+   "q2": 26856.9,
+   "q3": 27259.1,
+   "q4": 27082.8
+  },
+  "p1_reuse_prompt_ms_121": {
+   "q2": 26646.3,
+   "q3": 26734.3,
+   "q4": 26634.4
+  },
+  "p1_reuse_prompt_ms_median_116": 27082.8,
+  "p1_reuse_prompt_ms_median_121": 26646.3,
+  "cold_q2_prompt_ms": {
+   "116": 274753.6,
+   "121": 274274.5
+  },
+  "cold_q3_q4_prompt_ms_121": {
+   "q3": 274132.1,
+   "q4": 274781.8
+  },
+  "q1_cold_prompt_ms": {
+   "116": 275832.8,
+   "121": 273640.6
+  },
+  "q1_cold_wall_s": {
+   "116": 298.13,
+   "121": 296.334
+  },
+  "speedup_vs_full_refill_q2": {
+   "116": 10.2,
+   "121": 10.3
+  },
+  "lossless_p1": {
+   "116": {
+    "q2": {
+     "reuse_sha": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+     "cold_sha": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+     "cold_host": "116",
+     "identical": true
+    },
+    "q3": {
+     "reuse_sha": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+     "cold_sha": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+     "cold_host": "121",
+     "identical": true
+    },
+    "q4": {
+     "reuse_sha": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+     "cold_sha": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+     "cold_host": "121",
+     "identical": true
+    }
+   },
+   "121": {
+    "q2": {
+     "reuse_sha": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+     "cold_sha": "ba90c20afa8f589d79e75a534e64e9b0ad3af03453166cb3e547287c1676f704",
+     "cold_host": "121",
+     "identical": true
+    },
+    "q3": {
+     "reuse_sha": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+     "cold_sha": "39fe66d4ef21bfbde47c27f2e1d0131a6ef3aa811257d8518e45e1494fd53d7c",
+     "cold_host": "121",
+     "identical": true
+    },
+    "q4": {
+     "reuse_sha": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+     "cold_sha": "eff90af978e5b4a51aead68fb2e53d8fbeac78ac911f9f4e8348b7878db95014",
+     "cold_host": "121",
+     "identical": true
+    }
+   }
+  },
+  "supplementary_ub128": {
+   "q1_cold_prompt_ms": 324421.4,
+   "q2_reuse_prompt_n": 128,
+   "q2_reuse_prompt_ms": 8894.8,
+   "q2_cold_prompt_ms": 321007.5,
+   "identical_q2": true,
+   "speedup_prefill_vs_default_cold": 30.9,
+   "speedup_prefill_vs_ub128_cold": 36.1,
+   "speedup_wall_vs_ub128_cold": 16.7
+  }
+ },
+ "verdict": "① 默认档（-cms 默认 8192、-ctxcp 32、-cram 1024、-ub 512）不预热：Q1 冷跑 6118 tok / 275.8 s（116）、273.6 s（121），sha a02f00b2… 与上一轮冷跑逐字节相同；同进程紧接 Q2/Q3/Q4 只重填 512/508/512 tok、26.9/27.3/27.1 s（116）、26.6/26.7/26.6 s（121），相对整段冷跑 274.1—282.3 s 约 10.2—10.3×。② 无损性：Q2 复用=冷跑（ba90c20a…）在 116/121 两板同板验证；Q3（39fe66d4…）、Q4（eff90af9…）在 121 同板复用=冷跑，116 的 Q3/Q4 复用输出与 121 冷跑逐字节相同；两板冷 Q1/Q2 亦相同 → Q2/Q3/Q4 逐题皆为『是』，无分叉。③ 稳定性：Q1 冷跑在 116 由 3 个独立进程（默认/-cms256/-cms128）各跑一次全部 a02f00b2…、prompt_n 恒 6118；两板 Q1—Q4 的 sha 与 prompt_n 完全一致；prompt_n 稳定为 512/508/512。④ 可调性：-cms 256 与 128 对重填量零效果（prompt_n 仍 512/508/512，prompt_ms 26.95/27.24 s，输出与默认档及冷跑全同）。512 = 4+n_ubatch（-ub 默认 512）决定的『末尾前强制 checkpoint』位置；-cms 只约束用户轮次之间的中点 checkpoint，本协议是单轮 raw /completion，没有作用点 → 『-cms 把 512 压小』被否定。⑤ 40×：补充相位 -ub 128（非协议要求）把重填压到 128 tok / 8.9 s，且 Q2 复用 = 同参数冷跑（ba90c20a…）= 默认档冷跑，仍逐字节无损；但对默认冷跑 274.8 s 仅 30.9×、对同参数冷跑 321.0 s 为 36.1×（端到端 332.0→19.9 s，16.7×），未达 40×（需 ~6.9 s）；且 -ub 128 下 Q1 冷答变为 cdfe20f7…（默认 a02f00b2…），属不同参数体制，Q3/Q4 在该档未验证。结论：不预热·同文档换问题的 10× 在本轮参数下可宣称逐字节无损，且跨题、跨板稳定；-cms 不能把它变成 40×；-ub 128 可到 30.9—36.1× 且 Q2 仍无损，但不是 40×。所有档位均未出现分叉，故不存在『某档不能宣称无损』（-cms 两档是无收益，不是分叉）。",
+ "failures": [
+  "-cms 256/128 未把重填量压到 256/128：两档 prompt_n 均为 512（Q3 508），与默认档完全相同；prompt_ms 变化仅 +92.7 ms / +386.4 ms（噪声级），输出亦全同。原假设『-cms 可把 512 压小』被否定——这两档只能宣称『仍无损但无收益』。",
+  "无损 40× 未达成：-ub 128 实测重填 128 tok / 8.9 s，对默认冷跑 30.9×、对同参数冷跑 36.1×、端到端 16.7×；要到 40× 需重填 ≤6.9 s（约 -ub 64 量级），本轮未测，不能宣称。",
+  "-ub 128 只在 Q2 上验证了无损（Q3/Q4 未跑）；且该档 Q1 冷答 cdfe20f7… ≠ 默认档 a02f00b2…，Q1 对 ub 敏感，两档输出不能混用或互称一致。",
+  "116 的 Q3/Q4 冷跑参照取自 121（同构建、同模型、同参数），未在 116 上再跑冷 Q3/Q4（时间盒）；已用两板冷 Q1/Q2 逐字节一致证明板间确定性，故该跨板参照可用，但不是 116 同板直接对照。",
+  "未做 --ctx-checkpoints 0 全隔离、未测多文档 checkpoint 内存占用（沿用上一轮未决项）；4B 未动（116 的 4B 不完整）。"
+ ],
+ "raw": {
+  "board": "/tmp/lp1101c/{result_116.json,result_121.json,result_116_ub128.json,run_*.log,srv_*.err}",
+  "driver": "PC 临时目录 C:\\Users\\ai_shk\\AppData\\Local\\Temp\\lp1101c\\（未入仓）",
+  "started": "2026-11-01T18:49:18+0800",
+  "elapsed_s": {
+   "116": 2178.1,
+   "121": 1358.2,
+   "116_ub128": 741.1
+  }
+ }
+}

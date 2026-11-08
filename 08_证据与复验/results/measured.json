@@ -1,0 +1,20 @@
+{
+ "bw_read_8t": 8.17,
+ "bw_read_1t": 6.37,
+ "bw_copy_8t": 6.27,
+ "bw_write_8t": 7.28,
+ "bw_read_max": 8.28,
+ "bw_axpy_8t": 5.17,
+ "fma_gflops_1t": 25.55,
+ "fma_gflops_8t": 204.31,
+ "i8_gmac_1t": 3.18,
+ "i8_gmac_8t": 26.21,
+ "model_2b_bytes": 1214873856,
+ "model_4b_bytes": 2583221408,
+ "model_2b_params": 1880000000,
+ "model_4b_params": 4210000000,
+ "pp_2b_t8": 10.86,
+ "tg_2b_t8": 3.77,
+ "pp_4b_t8": 4.28,
+ "tg_4b_t8": 1.56
+}

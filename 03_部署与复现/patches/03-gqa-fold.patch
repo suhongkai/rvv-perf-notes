@@ -1,0 +1,178 @@
+--- a/ggml/src/ggml-cpu/vec.h
++++ b/ggml/src/ggml-cpu/vec.h
+@@ -71,6 +71,13 @@
+ GGML_API void ggml_vec_dot_f32(int n, float * GGML_RESTRICT s, size_t bs, const float * GGML_RESTRICT x, size_t bx, const float * GGML_RESTRICT y, size_t by, int nrc);
+ void ggml_vec_dot_bf16(int n, float * GGML_RESTRICT s, size_t bs, ggml_bf16_t * GGML_RESTRICT x, size_t bx, ggml_bf16_t * GGML_RESTRICT y, size_t by, int nrc);
+ void ggml_vec_dot_f16(int n, float * GGML_RESTRICT s, size_t bs, ggml_fp16_t * GGML_RESTRICT x, size_t bx, ggml_fp16_t * GGML_RESTRICT y, size_t by, int nrc);
++
++// Compute `nout` dot products of one shared vector x with `nout` different vectors y[k].
++// Used by the GQA decode path where several query heads share the same KV row, so that
++// the KV row is loaded from memory once instead of once per query head.
++void ggml_vec_dot_f16_multi(int n, float * GGML_RESTRICT s, int nout,
++                            const ggml_fp16_t * GGML_RESTRICT x,
++                            const ggml_fp16_t * const * y);
+ 
+ void ggml_vec_silu_f32(const int n, float * y, const float * x);
+ ggml_float ggml_vec_cvar_f32(const int n, float * y, const float * x, const float mean); //it will also center y ( y = y - mean )
+--- a/ggml/src/ggml-cpu/vec.cpp
++++ b/ggml/src/ggml-cpu/vec.cpp
+@@ -611,3 +611,103 @@
+     }
+     return sum = (ggml_float)logf(sum);
+ }
++
++// ---------------------------------------------------------------------------
++// ggml_vec_dot_f16_multi: nout dot products that all share the same x vector.
++// x is loaded once per chunk and reused by all nout accumulators, so streaming
++// x costs the same as a single dot product instead of nout times.
++// ---------------------------------------------------------------------------
++#if defined(__riscv_v_intrinsic) && defined(__riscv_zvfh)
++#define GGML_F16_DOT4_LOAD(K)                                                       \
++    const vfloat16m2_t v##K = __riscv_vle16_v_f16m2((const _Float16 *) (y[K] + i), vl)
++#define GGML_F16_DOT4_FMA(K)                                                        \
++    a##K = __riscv_vfwmacc_vv_f32m4(a##K, vx, v##K, vl)
++#endif
++
++static void ggml_vec_dot_f16_multi_4(int n, float * s, const ggml_fp16_t * x,
++                                     const ggml_fp16_t * const * y) {
++    float sum0 = 0.0f, sum1 = 0.0f, sum2 = 0.0f, sum3 = 0.0f;
++    int i = 0;
++
++#if defined(__riscv_v_intrinsic) && defined(__riscv_zvfh)
++    {
++        const size_t vlmax = __riscv_vsetvlmax_e16m2();
++        vfloat32m4_t a0 = __riscv_vfmv_v_f_f32m4(0.0f, vlmax);
++        vfloat32m4_t a1 = __riscv_vfmv_v_f_f32m4(0.0f, vlmax);
++        vfloat32m4_t a2 = __riscv_vfmv_v_f_f32m4(0.0f, vlmax);
++        vfloat32m4_t a3 = __riscv_vfmv_v_f_f32m4(0.0f, vlmax);
++
++        for (; (size_t) (n - i) >= vlmax; i += (int) vlmax) {
++            const size_t vl = __riscv_vsetvl_e16m2(n - i);
++            const vfloat16m2_t vx = __riscv_vle16_v_f16m2((const _Float16 *) (x + i), vl);
++            GGML_F16_DOT4_LOAD(0); GGML_F16_DOT4_FMA(0);
++            GGML_F16_DOT4_LOAD(1); GGML_F16_DOT4_FMA(1);
++            GGML_F16_DOT4_LOAD(2); GGML_F16_DOT4_FMA(2);
++            GGML_F16_DOT4_LOAD(3); GGML_F16_DOT4_FMA(3);
++        }
++
++        const vfloat32m1_t zero = __riscv_vfmv_v_f_f32m1(0.0f, 1);
++        sum0 = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredusum_vs_f32m4_f32m1(a0, zero, vlmax));
++        sum1 = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredusum_vs_f32m4_f32m1(a1, zero, vlmax));
++        sum2 = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredusum_vs_f32m4_f32m1(a2, zero, vlmax));
++        sum3 = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredusum_vs_f32m4_f32m1(a3, zero, vlmax));
++    }
++#endif
++
++    for (; i < n; ++i) {
++        const float vx = GGML_CPU_FP16_TO_FP32(x[i]);
++        sum0 += vx * GGML_CPU_FP16_TO_FP32(y[0][i]);
++        sum1 += vx * GGML_CPU_FP16_TO_FP32(y[1][i]);
++        sum2 += vx * GGML_CPU_FP16_TO_FP32(y[2][i]);
++        sum3 += vx * GGML_CPU_FP16_TO_FP32(y[3][i]);
++    }
++
++    s[0] = sum0; s[1] = sum1; s[2] = sum2; s[3] = sum3;
++}
++
++static void ggml_vec_dot_f16_multi_2(int n, float * s, const ggml_fp16_t * x,
++                                     const ggml_fp16_t * const * y) {
++    float sum0 = 0.0f, sum1 = 0.0f;
++    int i = 0;
++
++#if defined(__riscv_v_intrinsic) && defined(__riscv_zvfh)
++    {
++        const size_t vlmax = __riscv_vsetvlmax_e16m2();
++        vfloat32m4_t a0 = __riscv_vfmv_v_f_f32m4(0.0f, vlmax);
++        vfloat32m4_t a1 = __riscv_vfmv_v_f_f32m4(0.0f, vlmax);
++
++        for (; (size_t) (n - i) >= vlmax; i += (int) vlmax) {
++            const size_t vl = __riscv_vsetvl_e16m2(n - i);
++            const vfloat16m2_t vx = __riscv_vle16_v_f16m2((const _Float16 *) (x + i), vl);
++            GGML_F16_DOT4_LOAD(0); GGML_F16_DOT4_FMA(0);
++            GGML_F16_DOT4_LOAD(1); GGML_F16_DOT4_FMA(1);
++        }
++
++        const vfloat32m1_t zero = __riscv_vfmv_v_f_f32m1(0.0f, 1);
++        sum0 = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredusum_vs_f32m4_f32m1(a0, zero, vlmax));
++        sum1 = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredusum_vs_f32m4_f32m1(a1, zero, vlmax));
++    }
++#endif
++
++    for (; i < n; ++i) {
++        const float vx = GGML_CPU_FP16_TO_FP32(x[i]);
++        sum0 += vx * GGML_CPU_FP16_TO_FP32(y[0][i]);
++        sum1 += vx * GGML_CPU_FP16_TO_FP32(y[1][i]);
++    }
++
++    s[0] = sum0; s[1] = sum1;
++}
++
++void ggml_vec_dot_f16_multi(int n, float * s, int nout, const ggml_fp16_t * x,
++                            const ggml_fp16_t * const * y) {
++    if (nout == 4) {
++        ggml_vec_dot_f16_multi_4(n, s, x, y);
++    } else if (nout == 2) {
++        ggml_vec_dot_f16_multi_2(n, s, x, y);
++    } else {
++        for (int k = 0; k < nout; ++k) {
++            ggml_vec_dot_f16(n, &s[k], 0, const_cast<ggml_fp16_t *>(x), 0,
++                             const_cast<ggml_fp16_t *>(y[k]), 0, 1);
++        }
++    }
++}
+--- a/ggml/src/ggml-cpu/ggml-cpu.c
++++ b/ggml/src/ggml-cpu/ggml-cpu.c
+@@ -1222,6 +1222,53 @@
+     // attempt to reduce false-sharing (does not seem to make a difference)
+     // 16 * 2, accounting for mmla kernels
+     float tmp[32];
++
++    // ------------------------------------------------------------------
++    // GQA / MQA decode fast path.
++    // When several src1 columns (query heads) share the same src0 rows (KV head),
++    // the generic loops below re-read the whole KV row once per query head
++    // (r2 = ne12/ne02 times). Here one src0 row is loaded once and multiplied
++    // with all r2 shared columns at the same time, so the KV cache is streamed
++    // exactly once. Numerically each output element is still a single dot
++    // product over the same data (only the vector width of the kernel differs).
++    //
++    // The row loop is the outer one so that every head group of a given row is
++    // handled while that row is hot: for K the two KV heads are interleaved in
++    // memory (nb02 = 512 B, nb01 = 1024 B), so this turns a 50%-duty strided
++    // stream into a sequential one; for V the row is one contiguous block.
++    // ------------------------------------------------------------------
++    if (num_rows_per_vec_dot == 1 && ne11 == 1 && r2 >= 2 && r2 <= 4 &&
++        src0->type == GGML_TYPE_F16 && vec_dot_type == GGML_TYPE_F16 && ne00 >= 256 &&
++        (src1_cont || src1->type != vec_dot_type) &&
++        ir1_start % r2 == 0 && (ir1_end - ir1_start) % r2 == 0 && ir1_start < ir1_end) {
++        const ggml_fp16_t * vy[4];
++        float * dst_col[4];
++
++        for (int64_t ir0 = ir0_start; ir0 < ir0_end; ++ir0) {
++            for (int64_t ir1 = ir1_start; ir1 < ir1_end; ir1 += r2) {
++                const int64_t i13 = ir1 / ne12;
++                const int64_t i12 = ir1 - i13 * ne12;
++                const int64_t i02 = i12 / r2;
++                const int64_t i03 = i13 / r3;
++
++                const char * src0_row = (const char *) src0->data + i02 * nb02 + i03 * nb03;
++
++                for (int64_t k = 0; k < r2; ++k) {
++                    vy[k] = (const ggml_fp16_t *) ((const char *) wdata +
++                            (i13 * ne12 + i12 + k) * row_size);
++                    dst_col[k] = (float *) ((char *) dst->data + (i12 + k) * nb2 + i13 * nb3);
++                }
++
++                float dtmp[4];
++                ggml_vec_dot_f16_multi((int) ne00, dtmp, (int) r2,
++                        (const ggml_fp16_t *) (src0_row + ir0 * nb01), vy);
++                for (int64_t k = 0; k < r2; ++k) {
++                    dst_col[k][ir0] = dtmp[k];
++                }
++            }
++        }
++        return;
++    }
+ 
+     for (int64_t iir1 = ir1_start; iir1 < ir1_end; iir1 += blck_1) {
+         for (int64_t iir0 = ir0_start; iir0 < ir0_end; iir0 += blck_0) {

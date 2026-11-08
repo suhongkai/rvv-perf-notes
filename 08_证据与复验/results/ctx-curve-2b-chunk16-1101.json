@@ -1,0 +1,170 @@
+{
+ "task": "ctx-curve-2b-chunk16",
+ "date": "2026-11-01",
+ "host": "10.65.21.116",
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "bin": "/home/bianbu/c16/bin",
+  "old_build_ref": "717a8ad8"
+ },
+ "model": {
+  "name": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+  "bytes": 1202487136
+ },
+ "protocol": {
+  "server_argv": "llama-server -c 36864 -t 8 -ub 128 -b 2048 --host 127.0.0.1 --port 8097 -np 1 -m /home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf",
+  "ctx_fixed": 36864,
+  "prompt": "06_素材库/src/ppl-corpus-zh.txt repeated, /tokenize binary search; tiers are byte-identical prefixes",
+  "per_tier": "1 cold start (pkill clean before each tier)",
+  "decode": "same /completion request, n_predict=32, ignore_eos, cache_prompt=false",
+  "timings": "prompt_n/prompt_ms/prompt_per_second; predicted_n/predicted_ms/predicted_per_second",
+  "calib": {
+   "4096": {
+    "chars": 5994,
+    "tokens": 4096,
+    "sha256": "7917165202d0acbf72de2d58607379b0760d28712641fbf7c3d51848b86c87b6"
+   },
+   "8192": {
+    "chars": 11945,
+    "tokens": 8192,
+    "sha256": "3e6973214bd5d6f65868d6b3657b4393069a8cdfb1df07f6de4ae76a92f7e13b"
+   },
+   "16384": {
+    "chars": 23720,
+    "tokens": 16384,
+    "sha256": "2e61d63372054fa062afd7e85251d77bf9702cadf91775739b48c0499bd36bc1"
+   },
+   "32768": {
+    "chars": 48241,
+    "tokens": 32768,
+    "sha256": "1d93763f5cecf39c27ae62f7a370ca9f70729144f48e703eab0cbf9059292b1a"
+   }
+  },
+  "wall_s_total": 6116.0,
+  "note": "old build 717a8ad8 C23 table was cross-board; this is board 116 only, same build + same model, fixed -c 36864."
+ },
+ "points": [
+  {
+   "len": 4096,
+   "prompt_n": 4096,
+   "prompt_ms": 197869.72,
+   "tps": 20.7,
+   "decode_tps": 2.947,
+   "reps": [
+    {
+     "t_start": "2026-11-01T22:03:40",
+     "t_end": "2026-11-01T22:07:25",
+     "load_s": 20.2,
+     "prompt_n": 4096,
+     "prompt_ms": 197869.72,
+     "tps": 20.7,
+     "predicted_n": 32,
+     "predicted_ms": 10517.645,
+     "decode_tps": 2.947,
+     "wall_s": 225.2,
+     "mem": "VmHWM:\t 2549952 kB MemAvail_kB 5812404"
+    }
+   ]
+  },
+  {
+   "len": 8192,
+   "prompt_n": 8192,
+   "prompt_ms": 472120.07,
+   "tps": 17.352,
+   "decode_tps": 2.465,
+   "reps": [
+    {
+     "t_start": "2026-11-01T22:07:47",
+     "t_end": "2026-11-01T22:16:03",
+     "load_s": 20.1,
+     "prompt_n": 8192,
+     "prompt_ms": 472120.07,
+     "tps": 17.352,
+     "predicted_n": 32,
+     "predicted_ms": 12573.811,
+     "decode_tps": 2.465,
+     "wall_s": 495.6,
+     "mem": "VmHWM:\t 2551996 kB MemAvail_kB 5814116"
+    }
+   ]
+  },
+  {
+   "len": 16384,
+   "prompt_n": 16384,
+   "prompt_ms": 1277777.731,
+   "tps": 12.822,
+   "decode_tps": 1.751,
+   "reps": [
+    {
+     "t_start": "2026-11-01T22:16:25",
+     "t_end": "2026-11-01T22:38:12",
+     "load_s": 20.1,
+     "prompt_n": 16384,
+     "prompt_ms": 1277777.731,
+     "tps": 12.822,
+     "predicted_n": 32,
+     "predicted_ms": 17701.818,
+     "decode_tps": 1.751,
+     "wall_s": 1306.7,
+     "mem": "VmHWM:\t 2555836 kB MemAvail_kB 5807464"
+    }
+   ]
+  },
+  {
+   "len": 32768,
+   "prompt_n": 32768,
+   "prompt_ms": 3900962.043,
+   "tps": 8.4,
+   "decode_tps": 1.177,
+   "reps": [
+    {
+     "t_start": "2026-11-01T22:38:34",
+     "t_end": "2026-11-01T23:44:39",
+     "load_s": 20.2,
+     "prompt_n": 32768,
+     "prompt_ms": 3900962.043,
+     "tps": 8.4,
+     "predicted_n": 32,
+     "predicted_ms": 26339.009,
+     "decode_tps": 1.177,
+     "wall_s": 3965.2,
+     "mem": "VmHWM:\t 2564248 kB MemAvail_kB 5801456"
+    }
+   ]
+  }
+ ],
+ "decay": {
+  "4k_to_8k": -16.17,
+  "4k_to_16k": -38.06,
+  "4k_to_32k": -59.42
+ },
+ "verdict": {
+  "4k_tps": 20.7,
+  "8k_tps": 17.352,
+  "16k_tps": 12.822,
+  "32k_tps": 8.4,
+  "text": "chunk16 交付构建、116 单板、固定 -c 36864：预填 4K 20.700 / 8K 17.352 / 16K 12.822 / 32K 8.400 t/s；4K→8K -16.17%、→16K -38.06%、→32K -59.42%，全程单调、无悬崖。对旧构建 717a8ad8（C23 跨板）分别 +28.02 / +26.42 / +19.45 / +12.62（%）。注：旧表每档 -c=目标长度且 n_predict=1，本曲线固定 -c 36864 且同请求带 32 token decode，只作量级参考。",
+  "vs_old_build_717a8ad8": {
+   "old_tps": {
+    "4096": 16.169,
+    "8192": 13.726,
+    "16384": 10.734,
+    "32768": 7.459
+   },
+   "note": "old C23 table was cross-board (113/114/120, 32K from 123) with per-tier -c=target and n_predict=1; this curve is single board 116, fixed -c 36864, with 32-token decode in the same request. Compare magnitude only, not as a same-condition A/B.",
+   "delta_pct_new_vs_old": {
+    "4096": 28.02,
+    "8192": 26.42,
+    "16384": 19.45,
+    "32768": 12.62
+   }
+  },
+  "stage": "final",
+  "finalized_at": "2026-11-01T23:44:45"
+ },
+ "failures": [
+  "无失败项：4 档全部 ok，prompt_n 与目标完全一致（4096/8192/16384/32768）。",
+  "4K/8K 各只跑 1 次冷启动（协议允许 2 次，时间盒内没补第 2 次）→ 这两档没有重复值，不做中位/IQR。",
+  "decode 是每档预填后同请求的 32 token（-t 8 口径），窗口很短、首 token 开销摊不掉，数值低于 C86 的 -t 7 连续 decode，不能与 C86 直接相减。"
+ ]
+}

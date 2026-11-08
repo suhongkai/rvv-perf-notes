@@ -1,0 +1,38 @@
+{
+ "task": "ctx-server",
+ "tag": "ctx2b-32k-fix",
+ "method": "llama-server 单遍，/tokenize 裁剪提示，/completion n_predict=1；取 timings.prompt_per_second",
+ "build": {
+  "bin": "build-final",
+  "libggml_cpu_sha256": "717a8ad8..."
+ },
+ "corpus": "06_素材库/src/ppl-corpus-zh.txt（重复拼接）",
+ "wall_s": 4416.2,
+ "summary": {
+  "2b@32768": {
+   "n": 1,
+   "median": 7.459,
+   "min": 7.459,
+   "max": 7.459
+  }
+ },
+ "runs": [
+  {
+   "host": "10.65.21.123",
+   "model": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+   "model_key": "2b",
+   "ctx": 32768,
+   "ok": true,
+   "t_start": "2026-10-29T00:37:59",
+   "load_s": 26.0,
+   "calib": "TOKENS 32663",
+   "prompt_n": 32663,
+   "prompt_ms": 4379055.641,
+   "prompt_tps": 7.458914130751051,
+   "predicted_ms": 0.001,
+   "wall_s": 4387.2,
+   "mem": "VmHWM:\t 2537280 kB VmRSS:\t 2537280 kB MemAvailable_kB 5838808",
+   "t_end": "2026-10-29T01:51:35"
+  }
+ ]
+}

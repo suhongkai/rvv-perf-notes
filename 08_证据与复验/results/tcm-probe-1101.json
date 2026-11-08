@@ -1,0 +1,87 @@
+{
+ "id": "tcm-probe-1101",
+ "task": "K1 上 /dev/tcm_sync_mem 缺失勘察：是不是配置问题、能不能修、修了有没有收益",
+ "date": "2026-11-01",
+ "report": "09_汇报文档/TCM共享内存勘察_1101.md",
+ "probe_method": "LD_PRELOAD 厂商 libggml-cpu.so.0.26.0 后跑 /bin/true：告警来自全局对象静态初始化，进程一加载库就打印，0.3 s 可复现/验证，不需要加载模型或跑 llama-* 二进制",
+ "kernel": "6.6.63-cloud（Bianbu）",
+ "source": {
+  "file": "ggml/src/ggml-cpu/spacemit/spine_mem_pool.cpp",
+  "dev_path": "/dev/tcm_sync_mem",
+  "dev_path_line": 30,
+  "hardcoded": true,
+  "env_or_cmake_override": false,
+  "open_line": 582,
+  "open_flags": "O_RDWR | O_SYNC",
+  "mmap_line": 589,
+  "mmap_size_bytes": 524288,
+  "mmap_size_note": "SPINE_SHARE_MEM_POOL_CHUNK_SIZE = 512 KB，MAP_SHARED、offset 0；源码里没有 ioctl",
+  "barrier_bytes_used": 3072,
+  "barrier_note": "sizeof(spine_barrier_t) × 16 ≈ 3 KB（ime_env.cpp:293-302）；alloc_shared() 全仓无调用点"
+ },
+ "survey": {
+  "boards": 17,
+  "excluded": ["10.65.21.113（跑 4B 四臂）", "10.65.21.123（队友专用）", "10.65.21.127（队友专用）"],
+  "list": ["10.65.21.111", "10.65.21.112", "10.65.21.114", "10.65.21.115", "10.65.21.116", "10.65.21.117", "10.65.21.118", "10.65.21.119", "10.65.21.120", "10.65.21.121", "10.65.21.122", "10.65.21.124", "10.65.21.125", "10.65.21.126", "10.65.21.128", "10.65.21.129", "10.65.21.130"],
+  "has_dev_tcm": 17,
+  "has_dev_tcm_sync_mem": 0,
+  "proc_misc_tcm": 17,
+  "kernel_symbols_tcm_sync": 0,
+  "libspine_tcm_present": 0,
+  "systemd_spert_or_tcm_units": 0,
+  "dmesg_tcm_init_records": 0,
+  "dev_tcm": {
+   "node": "crw------- root root 10, 122",
+   "proc_misc": "122 tcm",
+   "sysfs": "/sys/dev/char/10:122 -> ../../devices/virtual/misc/tcm",
+   "device_tree": "soc/tcm@0xd8000000",
+   "compatible": "spacemit,k1-x-tcm",
+   "reg": "0xd8000000, 0x80000 (512 KB = 4 × 128 KB, core0—core3)",
+   "config": "CONFIG_SPACEMIT_TCM=y",
+   "driver_symbols": ["tcm_probe", "tcm_mmap", "tcm_ioctl", "tcm_poll", "tcm_vma_open", "tcm_vma_close", "tcm_remove"]
+  },
+  "not_usb_f_tcm": "dmesg 里的 f_tcm: UAS support multiple cmds 是 USB gadget（usb_f_tcm.ko），不实现 mmap，与本问题无关"
+ },
+ "experiments": {
+  "baseline_heap_fallback": {
+   "probe": "3 行：num_cores + open(/dev/tcm_sync_mem) failed, errno=2 + falling back to heap",
+   "pp8": 13.72,
+   "tg1": 2.85,
+   "pp512": 17.30,
+   "pp512_sd": 0.09,
+   "board": "10.65.21.118",
+   "model": "SpacemiT-Qwen3.5-2B-Q4_1-official.gguf",
+   "args": "-p 512 -n 0 -t 4 -fa 0 -r 2"
+  },
+  "bind_to_dev_tcm": {
+   "cmd": "sudo mknod /dev/tcm_sync_mem c 10 122 && chmod 666",
+   "warning_gone": true,
+   "result": "SIGSEGV",
+   "rc": 139,
+   "repro": "2/2（加 taskset -c 0-3 同样崩）",
+   "dmesg": "cause: 0000000000000007 (Store/AMO access fault)，badaddr 落在 TCM 映射内，记录在 CPU 0/2/3",
+   "root_cause": "TCM 是片上 SRAM，不支持 AMO 原子指令；spine_barrier.h:17 的 --b->pending_ 编译成 amoadd.d"
+  },
+  "atomic_control": {
+   "heap_mapping": "__atomic_fetch_add_4 -> AMO OK old=0",
+   "tcm_mapping": "__atomic_fetch_add_4 -> 立即 SIGSEGV，dmesg 同一 cause=7，badaddr 为 TCM 映射基址"
+  },
+  "tcm_semantics": {
+   "rw_stress": "8 线程 pin 0—3，对 4 个子块 3 s 读写压测：每线程 7.2—11.3 万次写，0 错误（TCM 本体可正常读写）",
+   "visibility": "core0—3 共享同一 512 KB 窗口、互相可见；core4—7 读到全 0xFF、写被丢弃；第二次 512 KB mmap 返回 EINVAL(22)（独占映射）"
+  },
+  "tmpfs_substitute": {
+   "cmd": "truncate -s 512K /dev/shm/tcm_sync_mem; chmod 666; ln -s /dev/shm/tcm_sync_mem /dev/tcm_sync_mem",
+   "warning_gone": true,
+   "rc": 0,
+   "pp512": 17.06,
+   "pp512_sd": 0.01,
+   "args": "-p 512 -n 0 -t 4 -fa 0 -r 2"
+  },
+  "delta_pct": -1.39,
+  "delta_note": "± 是 llama-bench 对 2 次重复给出的标准差，不等于轮间方差；1.4% 只能读作「无提升」，不能读作「确定变慢」"
+ },
+ "verdict": "该告警是厂商新内核的 /dev/tcm_sync_mem 驱动未下放到 Bianbu 2.3 / 6.6.63-cloud 所致，在当前固件上不可修复；且这块共享内存只服务 3 KB 的 16 个 barrier，回退到堆分配对 prefill 无可测影响（有/无共享内存 17.30 vs 17.06 t/s）。故本项目所有 MEE 数字均为「无 TCM 共享内存」条件下的实测值，未因 fallback 吃亏，也未做性能夸大。",
+ "applies_to": {"2b": true, "4b": true, "note": "节点存在与否是板级属性；2B 历史数据 A2/A3 各 16/16 含告警、A1（我方 build-final）库内无该字符串故 16/16 不含；4B 四臂 mee 臂 stderr 与 2B 逐字相同"},
+ "cleanup": "118 板已复位：/dev/tcm_sync_mem 与 /dev/shm/tcm_sync_mem 已删，/dev/tcm 权限未改，无残留 llama 进程"
+}

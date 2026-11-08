@@ -1,0 +1,855 @@
+{
+ "id": "repack-ablation-1028",
+ "title": "关闭 repack 内核后的 requant 增益消融（118/119 双板 ABBA 四组配对）",
+ "task": "repack-ablation",
+ "created": "2026-10-28T22:30:00",
+ "purpose": "回答“requant 的 +39.7% 是不是文件布局/量化配方带来的运气”——把 repack 内核整体关掉（--repack 0）再测同一对文件：若增益塌回个位数，说明收益来自 repack 覆盖，而不是文件排布。",
+ "boards": [
+  "10.65.21.118",
+  "10.65.21.119"
+ ],
+ "binary": {
+  "build": "build/bin-concat（= 上游 + Q4_1 repack 内核 + CONCAT 转置快速路径）",
+  "libggml_cpu_sha256": "98a9357e31594ca39dc15d2bb84bbb261366448dde285b87d954c7c036ccb8af"
+ },
+ "command_template": "LD_LIBRARY_PATH=. ./llama-bench -m <model> -p 512 -n 0 -t 8 -r 1 [--repack 0]",
+ "models": {
+  "S": {
+   "file": "Qwen3.5-2B-Q4_0.gguf",
+   "role": "现役（unsloth 公开发布的 Q4_0，第三方）",
+   "sha256": "cd70221bebaee0503e0f6717e174250cd7825aa88438b3aabec9ad55731d9bb1"
+  },
+  "A": {
+   "file": "oh-2b-AQ6K.gguf",
+   "role": "requant 产物（与交付的 Qwen3.5-2B-Q4_0-requant.gguf 同 SHA256）",
+   "sha256": "c24d72c563ff3ad474e71fa40418d9337c42f1abb7b249cc0cb577c50a0fcf10"
+  }
+ },
+ "design": {
+  "arms": {
+   "S": "现役文件 Qwen3.5-2B-Q4_0.gguf（186 Q4_0 + 133 F32 + 1 Q6_K，但混入 57 个慢路径张量）",
+   "A": "requant 产物 oh-2b-AQ6K.gguf（输出头 Q6_K，其余全部拉回 Q4_0）"
+  },
+  "rounds_per_board_per_arm": 2,
+  "order": "ABBA（每块板按 A→S→S→A 顺序各两轮）",
+  "estimator": "同一 (条件, 臂) 下全部样本的中位数"
+ },
+ "provenance": [
+  {
+   "file": "08_实验数据/_oh_progress/118.jsonl",
+   "lines": null,
+   "mtime": "2026-10-28T19:14:03",
+   "sha256": "efdc1f63d8b8ca7cf52ba9d529370d65126b5aeafd29f70c47bada8503467fbc"
+  },
+  {
+   "file": "08_实验数据/_oh_progress/119.jsonl",
+   "lines": null,
+   "mtime": "2026-10-28T19:14:02",
+   "sha256": "e4d790e521b0f7556d470fa17cce88c38bf6a9b130b41dc59474d0c0ed01c388"
+  }
+ ],
+ "runs": [
+  {
+   "board": "10.65.21.118",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 22.418907,
+   "ttft_ms": 22837.9,
+   "wall_s": 91.8,
+   "std": 0.063252,
+   "extra": "-p 512 -n 0 -t 8 -r 2",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 9
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 2",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 91.8,
+    "pp_tok_s": 22.418907,
+    "pp_ttft_ms": 22837.9,
+    "pp_std": 0.063252
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 21.371583,
+   "ttft_ms": 23957.0,
+   "wall_s": 66.1,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 10
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 66.1,
+    "pp_tok_s": 21.371583,
+    "pp_ttft_ms": 23957.0,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "on",
+   "arm": "S",
+   "model": "Qwen3.5-2B-Q4_0.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/Qwen3.5-2B-Q4_0.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 15.009313,
+   "ttft_ms": 34112.2,
+   "wall_s": 91.8,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 14
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "S",
+    "file": "Qwen3.5-2B-Q4_0.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BS-pp512",
+    "model": "Qwen3.5-2B-Q4_0.gguf",
+    "wall_s": 91.8,
+    "pp_tok_s": 15.009313,
+    "pp_ttft_ms": 34112.2,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "on",
+   "arm": "S",
+   "model": "Qwen3.5-2B-Q4_0.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/Qwen3.5-2B-Q4_0.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 14.838893,
+   "ttft_ms": 34503.9,
+   "wall_s": 87.7,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 16
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "S",
+    "file": "Qwen3.5-2B-Q4_0.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BS-pp512",
+    "model": "Qwen3.5-2B-Q4_0.gguf",
+    "wall_s": 87.7,
+    "pp_tok_s": 14.838893,
+    "pp_ttft_ms": 34503.9,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 20.945164,
+   "ttft_ms": 24444.8,
+   "wall_s": 67.7,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 20
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 67.7,
+    "pp_tok_s": 20.945164,
+    "pp_ttft_ms": 24444.8,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 22.039193,
+   "ttft_ms": 23231.3,
+   "wall_s": 59.8,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 22
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 59.8,
+    "pp_tok_s": 22.039193,
+    "pp_ttft_ms": 23231.3,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 22.229881,
+   "ttft_ms": 23032.1,
+   "wall_s": 59.6,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 28
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 59.6,
+    "pp_tok_s": 22.229881,
+    "pp_ttft_ms": 23032.1,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "off",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1 --repack 0",
+   "pp_tok_s": 5.647889,
+   "ttft_ms": 90653.3,
+   "wall_s": 191.8,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 50
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512_repack0",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+    "prewarm": false,
+    "supplement": "repack",
+    "tag": "2BA-pp512_repack0",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 191.8,
+    "pp_tok_s": 5.647889,
+    "pp_ttft_ms": 90653.3,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "off",
+   "arm": "S",
+   "model": "Qwen3.5-2B-Q4_0.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/Qwen3.5-2B-Q4_0.gguf -p 512 -n 0 -t 8 -r 1 --repack 0",
+   "pp_tok_s": 5.324057,
+   "ttft_ms": 96167.3,
+   "wall_s": 203.2,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 51
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512_repack0",
+    "size": "2B",
+    "arm": "S",
+    "file": "Qwen3.5-2B-Q4_0.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+    "prewarm": false,
+    "supplement": "repack",
+    "tag": "2BS-pp512_repack0",
+    "model": "Qwen3.5-2B-Q4_0.gguf",
+    "wall_s": 203.2,
+    "pp_tok_s": 5.324057,
+    "pp_ttft_ms": 96167.3,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "off",
+   "arm": "S",
+   "model": "Qwen3.5-2B-Q4_0.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/Qwen3.5-2B-Q4_0.gguf -p 512 -n 0 -t 8 -r 1 --repack 0",
+   "pp_tok_s": 5.320315,
+   "ttft_ms": 96234.9,
+   "wall_s": 198.3,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 52
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512_repack0",
+    "size": "2B",
+    "arm": "S",
+    "file": "Qwen3.5-2B-Q4_0.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+    "prewarm": false,
+    "supplement": "repack",
+    "tag": "2BS-pp512_repack0",
+    "model": "Qwen3.5-2B-Q4_0.gguf",
+    "wall_s": 198.3,
+    "pp_tok_s": 5.320315,
+    "pp_ttft_ms": 96234.9,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "off",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1 --repack 0",
+   "pp_tok_s": 5.665228,
+   "ttft_ms": 90375.9,
+   "wall_s": 186.8,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 53
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512_repack0",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+    "prewarm": false,
+    "supplement": "repack",
+    "tag": "2BA-pp512_repack0",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 186.8,
+    "pp_tok_s": 5.665228,
+    "pp_ttft_ms": 90375.9,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.118",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 21.071058,
+   "ttft_ms": 24298.7,
+   "wall_s": 61.6,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/118.jsonl",
+    "line": 59
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "prewarm": false,
+    "host": "10.65.21.118",
+    "supplement": "q4_1",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 61.6,
+    "pp_tok_s": 21.071058,
+    "pp_ttft_ms": 24298.7,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 21.965407,
+   "ttft_ms": 23309.4,
+   "wall_s": 93.4,
+   "std": 0.220318,
+   "extra": "-p 512 -n 0 -t 8 -r 2",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 9
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 2",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 93.4,
+    "pp_tok_s": 21.965407,
+    "pp_ttft_ms": 23309.4,
+    "pp_std": 0.220318
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 20.819281,
+   "ttft_ms": 24592.6,
+   "wall_s": 67.8,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 10
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 67.8,
+    "pp_tok_s": 20.819281,
+    "pp_ttft_ms": 24592.6,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "on",
+   "arm": "S",
+   "model": "Qwen3.5-2B-Q4_0.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/Qwen3.5-2B-Q4_0.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 15.029188,
+   "ttft_ms": 34067.0,
+   "wall_s": 91.3,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 14
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "S",
+    "file": "Qwen3.5-2B-Q4_0.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BS-pp512",
+    "model": "Qwen3.5-2B-Q4_0.gguf",
+    "wall_s": 91.3,
+    "pp_tok_s": 15.029188,
+    "pp_ttft_ms": 34067.0,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "on",
+   "arm": "S",
+   "model": "Qwen3.5-2B-Q4_0.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/Qwen3.5-2B-Q4_0.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 14.951868,
+   "ttft_ms": 34243.2,
+   "wall_s": 87.1,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 16
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "S",
+    "file": "Qwen3.5-2B-Q4_0.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BS-pp512",
+    "model": "Qwen3.5-2B-Q4_0.gguf",
+    "wall_s": 87.1,
+    "pp_tok_s": 14.951868,
+    "pp_ttft_ms": 34243.2,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 21.999837,
+   "ttft_ms": 23272.9,
+   "wall_s": 66.1,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 20
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 66.1,
+    "pp_tok_s": 21.999837,
+    "pp_ttft_ms": 23272.9,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 21.967008,
+   "ttft_ms": 23307.7,
+   "wall_s": 60.0,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 22
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 60.0,
+    "pp_tok_s": 21.967008,
+    "pp_ttft_ms": 23307.7,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 21.131884,
+   "ttft_ms": 24228.8,
+   "wall_s": 62.1,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 28
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 62.1,
+    "pp_tok_s": 21.131884,
+    "pp_ttft_ms": 24228.8,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "off",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1 --repack 0",
+   "pp_tok_s": 5.683949,
+   "ttft_ms": 90078.2,
+   "wall_s": 190.9,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 49
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512_repack0",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+    "prewarm": false,
+    "supplement": "repack",
+    "tag": "2BA-pp512_repack0",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 190.9,
+    "pp_tok_s": 5.683949,
+    "pp_ttft_ms": 90078.2,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "off",
+   "arm": "S",
+   "model": "Qwen3.5-2B-Q4_0.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/Qwen3.5-2B-Q4_0.gguf -p 512 -n 0 -t 8 -r 1 --repack 0",
+   "pp_tok_s": 5.331951,
+   "ttft_ms": 96024.9,
+   "wall_s": 203.1,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 50
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512_repack0",
+    "size": "2B",
+    "arm": "S",
+    "file": "Qwen3.5-2B-Q4_0.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+    "prewarm": false,
+    "supplement": "repack",
+    "tag": "2BS-pp512_repack0",
+    "model": "Qwen3.5-2B-Q4_0.gguf",
+    "wall_s": 203.1,
+    "pp_tok_s": 5.331951,
+    "pp_ttft_ms": 96024.9,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "off",
+   "arm": "S",
+   "model": "Qwen3.5-2B-Q4_0.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/Qwen3.5-2B-Q4_0.gguf -p 512 -n 0 -t 8 -r 1 --repack 0",
+   "pp_tok_s": 5.34049,
+   "ttft_ms": 95871.4,
+   "wall_s": 198.4,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 51
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512_repack0",
+    "size": "2B",
+    "arm": "S",
+    "file": "Qwen3.5-2B-Q4_0.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+    "prewarm": false,
+    "supplement": "repack",
+    "tag": "2BS-pp512_repack0",
+    "model": "Qwen3.5-2B-Q4_0.gguf",
+    "wall_s": 198.4,
+    "pp_tok_s": 5.34049,
+    "pp_ttft_ms": 95871.4,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "off",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1 --repack 0",
+   "pp_tok_s": 5.714682,
+   "ttft_ms": 89593.8,
+   "wall_s": 185.7,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 52
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512_repack0",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1 --repack 0",
+    "prewarm": false,
+    "supplement": "repack",
+    "tag": "2BA-pp512_repack0",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 185.7,
+    "pp_tok_s": 5.714682,
+    "pp_ttft_ms": 89593.8,
+    "pp_std": 0.0
+   }
+  },
+  {
+   "board": "10.65.21.119",
+   "condition": "on",
+   "arm": "A",
+   "model": "oh-2b-AQ6K.gguf",
+   "cmd": "LD_LIBRARY_PATH=. ./llama-bench -m ~/labdeploy/models/oh-2b-AQ6K.gguf -p 512 -n 0 -t 8 -r 1",
+   "pp_tok_s": 22.318051,
+   "ttft_ms": 22941.1,
+   "wall_s": 59.2,
+   "std": 0.0,
+   "extra": "-p 512 -n 0 -t 8 -r 1",
+   "provenance": {
+    "source": "_oh_progress/119.jsonl",
+    "line": 58
+   },
+   "raw": {
+    "phase": "bench",
+    "key": "pp512",
+    "size": "2B",
+    "arm": "A",
+    "file": "oh-2b-AQ6K.gguf",
+    "extra": "-p 512 -n 0 -t 8 -r 1",
+    "prewarm": false,
+    "host": "10.65.21.119",
+    "supplement": "q4_1",
+    "tag": "2BA-pp512",
+    "model": "oh-2b-AQ6K.gguf",
+    "wall_s": 59.2,
+    "pp_tok_s": 22.318051,
+    "pp_ttft_ms": 22941.1,
+    "pp_std": 0.0
+   }
+  }
+ ],
+ "summary": {
+  "repack_off": {
+   "label": "repack 关闭（--repack 0）",
+   "current_q4_0": {
+    "n": 4,
+    "values": [
+     5.324057,
+     5.320315,
+     5.331951,
+     5.34049
+    ],
+    "median": 5.328
+   },
+   "requant": {
+    "n": 4,
+    "values": [
+     5.647889,
+     5.665228,
+     5.683949,
+     5.714682
+    ],
+    "median": 5.675
+   },
+   "gain_pct": 6.5
+  },
+  "repack_on": {
+   "label": "repack 开启（默认）",
+   "current_q4_0": {
+    "n": 4,
+    "values": [
+     15.009313,
+     14.838893,
+     15.029188,
+     14.951868
+    ],
+    "median": 14.981
+   },
+   "requant": {
+    "n": 12,
+    "values": [
+     22.418907,
+     21.371583,
+     20.945164,
+     22.039193,
+     22.229881,
+     21.071058,
+     21.965407,
+     20.819281,
+     21.999837,
+     21.967008,
+     21.131884,
+     22.318051
+    ],
+    "median": 21.966
+   },
+   "gain_pct": 46.6
+  },
+  "collapse_pct_points": 40.1
+ },
+ "conclusion": "关掉 repack 内核后，requant 的增益从 +46.6% 塌回 +6.5%：两臂的差别只在“57 个慢路径张量是否回到 repack 快路径”，与文件大小、张量排布、量化配方都无关。"
+}

@@ -1,0 +1,89 @@
+{
+ "task": "same-board five-arm incl chunk16",
+ "host": "10.65.21.113",
+ "model": "SpacemiT-Qwen3.5-2B-Q4_1-official.gguf",
+ "protocol": "pp512+tg128 -t 8 -ub 128 -r 3 -fa 0；两轮 ABBA±顺序",
+ "summary": {
+  "stock": {
+   "label": "fork 默认构建（无补丁/无 MEE）",
+   "prefill": 5.051,
+   "prefill_raw": [
+    5.037,
+    5.064
+   ],
+   "decode": 2.798,
+   "lib16": "eb79a850972b25c2"
+  },
+  "vm_legacy": {
+   "label": "官方工具链·旧 in-CPU MEE",
+   "prefill": 19.163,
+   "prefill_raw": [
+    19.039,
+    19.286
+   ],
+   "decode": 2.809,
+   "lib16": "f20686b3b486a2de"
+  },
+  "chunk16": {
+   "label": "我方 chunk16 交付",
+   "prefill": 19.384,
+   "prefill_raw": [
+    19.067,
+    19.701
+   ],
+   "decode": 3.987,
+   "lib16": "4436a9f45bcc298b"
+  },
+  "delta_vs_mee_pct": 1.15
+ },
+ "cells": [
+  {
+   "arm": "stock",
+   "label": "fork 默认构建（无补丁/无 MEE）",
+   "round": 1,
+   "prefill": 5.037233,
+   "decode": 2.719287,
+   "lib16": "eb79a850972b25c2"
+  },
+  {
+   "arm": "vm_legacy",
+   "label": "官方工具链·旧 in-CPU MEE",
+   "round": 1,
+   "prefill": 19.039441,
+   "decode": 2.815969,
+   "lib16": "f20686b3b486a2de"
+  },
+  {
+   "arm": "chunk16",
+   "label": "我方 chunk16 交付",
+   "round": 1,
+   "prefill": 19.06704,
+   "decode": 3.961858,
+   "lib16": "4436a9f45bcc298b"
+  },
+  {
+   "arm": "chunk16",
+   "label": "我方 chunk16 交付",
+   "round": 2,
+   "prefill": 19.700546,
+   "decode": 4.012012,
+   "lib16": "4436a9f45bcc298b"
+  },
+  {
+   "arm": "vm_legacy",
+   "label": "官方工具链·旧 in-CPU MEE",
+   "round": 2,
+   "prefill": 19.286103,
+   "decode": 2.801954,
+   "lib16": "f20686b3b486a2de"
+  },
+  {
+   "arm": "stock",
+   "label": "fork 默认构建（无补丁/无 MEE）",
+   "round": 2,
+   "prefill": 5.063944,
+   "decode": 2.876263,
+   "lib16": "eb79a850972b25c2"
+  }
+ ]
+}

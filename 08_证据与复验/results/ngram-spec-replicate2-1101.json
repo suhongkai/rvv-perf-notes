@@ -1,0 +1,84 @@
+{
+ "task": "独立复核 n-gram 投机（/completion 原生补全，冷启动 3 轮）",
+ "date": "2026-11-01",
+ "host": "10.65.21.112",
+ "build": {
+  "bin": "~/chunk16-build/bin",
+  "lib16": "4436a9f45bcc298b"
+ },
+ "protocol": "llama-server -c 4096 -t 7 --threads-batch 8 -np 1 + /completion n_predict=128 temperature=0 top_k=1 cache_prompt=false；每格重起 server（冷）；两臂交替 3 轮",
+ "cells": [
+  {
+   "tag": "base-r1",
+   "tps": 4.17,
+   "prompt_ms": 17428.461,
+   "predicted_n": 128,
+   "content_sha": "9c0d1b79580d6aa9",
+   "content_head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类字段在量化过程中没有经过特殊处理，直接量化，误差累积严重。补救手段有：对",
+   "spec": false
+  },
+  {
+   "tag": "k4v-r1",
+   "tps": 4.843,
+   "prompt_ms": 17351.548,
+   "predicted_n": 128,
+   "content_sha": "2d57b967bcf42aff",
+   "content_head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类数据本身就包含大量信息，量化后信息量损失大。补救手段：对敏感层保留更高位",
+   "spec": true
+  },
+  {
+   "tag": "base-r2",
+   "tps": 4.14,
+   "prompt_ms": 17157.721,
+   "predicted_n": 128,
+   "content_sha": "9c0d1b79580d6aa9",
+   "content_head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类字段在量化过程中没有经过特殊处理，直接量化，误差累积严重。补救手段有：对",
+   "spec": false
+  },
+  {
+   "tag": "k4v-r2",
+   "tps": 4.828,
+   "prompt_ms": 17626.222,
+   "predicted_n": 128,
+   "content_sha": "2d57b967bcf42aff",
+   "content_head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类数据本身就包含大量信息，量化后信息量损失大。补救手段：对敏感层保留更高位",
+   "spec": true
+  },
+  {
+   "tag": "base-r3",
+   "tps": 4.119,
+   "prompt_ms": 17249.656,
+   "predicted_n": 128,
+   "content_sha": "9c0d1b79580d6aa9",
+   "content_head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类字段在量化过程中没有经过特殊处理，直接量化，误差累积严重。补救手段有：对",
+   "spec": false
+  },
+  {
+   "tag": "k4v-r3",
+   "tps": 4.874,
+   "prompt_ms": 17145.445,
+   "predicted_n": 128,
+   "content_sha": "2d57b967bcf42aff",
+   "content_head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类数据本身就包含大量信息，量化后信息量损失大。补救手段：对敏感层保留更高位",
+   "spec": true
+  }
+ ],
+ "summary": {
+  "baseline_tps": [
+   4.17,
+   4.14,
+   4.119
+  ],
+  "baseline_median": 4.14,
+  "k4v_tps": [
+   4.843,
+   4.828,
+   4.874
+  ],
+  "k4v_median": 4.843,
+  "gain_pct": 16.98,
+  "baseline_deterministic": true,
+  "k4v_deterministic": true,
+  "outputs_identical_across_arms": false
+ }
+}

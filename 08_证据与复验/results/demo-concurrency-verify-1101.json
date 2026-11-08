@@ -1,0 +1,52 @@
+{
+ "task": "并发 demo 复测（对齐 C70 的每路 token 数）",
+ "date": "2026-11-01",
+ "host": "10.65.21.111",
+ "build": {
+  "bin": "~/chunk16-build/bin",
+  "lib16": "4436a9f45bcc298b"
+ },
+ "protocol": "llama-server -np 4 --slots；每路 prompt 相同、max_tokens 见 cells；enable_thinking=false；聚合 = 总生成 token / 墙钟",
+ "cells": [
+  {
+   "tag": "串行-单路",
+   "parallel": 1,
+   "max_tokens": 128,
+   "wall_s": 31.77,
+   "total_tokens": 128,
+   "aggregate_tps": 4.03,
+   "per_stream_tps": [
+    4.35
+   ]
+  },
+  {
+   "tag": "4 路并发",
+   "parallel": 4,
+   "max_tokens": 128,
+   "wall_s": 98.57,
+   "total_tokens": 512,
+   "aggregate_tps": 5.19,
+   "per_stream_tps": [
+    1.4,
+    1.41,
+    1.41,
+    1.41
+   ]
+  },
+  {
+   "tag": "4 路并发-48tok",
+   "parallel": 4,
+   "max_tokens": 48,
+   "wall_s": 34.7,
+   "total_tokens": 192,
+   "aggregate_tps": 5.53,
+   "per_stream_tps": [
+    1.42,
+    1.42,
+    1.42,
+    1.42
+   ]
+  }
+ ],
+ "verdict": "比较单路与 4 路的聚合吞吐，看是否复现 C70 的 +24%（48 token 臂）"
+}

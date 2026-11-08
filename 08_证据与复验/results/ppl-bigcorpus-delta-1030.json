@@ -1,0 +1,19 @@
+{
+ "task": "PPL big corpus: selfmade vs third-party",
+ "corpus": "06_素材库/src/ppl-corpus-zh.txt, -c 512 --chunks 20 (~10,240 token)",
+ "build": "chunk16 lib 4436a9f4",
+ "hosts": {
+  "2b": "123",
+  "4b": "128"
+ },
+ "2b": {
+  "selfmade": 20.1617,
+  "unsloth": 19.3755,
+  "delta_pct": 4.06
+ },
+ "4b": {
+  "selfmade": 16.8886,
+  "unsloth": 15.9983,
+  "delta_pct": 5.56
+ }
+}

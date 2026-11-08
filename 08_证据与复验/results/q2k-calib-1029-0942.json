@@ -1,0 +1,247 @@
+{
+ "task": "fleet-final",
+ "generated": "2026-10-29T09:42:22",
+ "model": "Qwen3.5-2B-Q2_K.gguf",
+ "boards": [
+  "10.65.21.115"
+ ],
+ "build": {
+  "bin": "build-final",
+  "libggml_cpu_sha256": "717a8ad8..."
+ },
+ "protocol": [
+  "-p 512 -n 128 -t 8 -ub 128 -r 2 -fa 0",
+  "-p 0 -n 128 -t 7 -ub 128 -r 2 -fa 0"
+ ],
+ "wall_s": 261.0,
+ "aggregate": {
+  "t8_combined.prefill": {
+   "n": 1,
+   "median": 14.026,
+   "min": 14.026,
+   "max": 14.026,
+   "q1": null,
+   "q3": null,
+   "iqr": null,
+   "ci95": [
+    14.026,
+    14.026
+   ],
+   "raw": [
+    14.026
+   ]
+  },
+  "t8_combined.decode": {
+   "n": 1,
+   "median": 4.012,
+   "min": 4.012,
+   "max": 4.012,
+   "q1": null,
+   "q3": null,
+   "iqr": null,
+   "ci95": [
+    4.012,
+    4.012
+   ],
+   "raw": [
+    4.012
+   ]
+  },
+  "t7_gen.decode": {
+   "n": 1,
+   "median": 4.141,
+   "min": 4.141,
+   "max": 4.141,
+   "q1": null,
+   "q3": null,
+   "iqr": null,
+   "ci95": [
+    4.141,
+    4.141
+   ],
+   "raw": [
+    4.141
+   ]
+  }
+ },
+ "per_board": [
+  {
+   "host": "10.65.21.115",
+   "ok": true,
+   "cells": [
+    {
+     "label": "t8_combined",
+     "ok": true,
+     "prefill": 14.025691,
+     "decode": 4.011741,
+     "raw": [
+      {
+       "build_commit": "unknown",
+       "build_number": 0,
+       "cpu_info": "Spacemit(R) X60",
+       "gpu_info": "",
+       "backends": "CPU",
+       "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-2B-Q2_K.gguf",
+       "model_type": "qwen35 2B Q2_K - Medium",
+       "model_size": 957580544,
+       "model_n_params": 1881825088,
+       "n_batch": 2048,
+       "n_ubatch": 128,
+       "n_threads": 8,
+       "cpu_mask": "0x0",
+       "cpu_strict": false,
+       "poll": 50,
+       "type_k": "f16",
+       "type_v": "f16",
+       "n_gpu_layers": -1,
+       "n_cpu_moe": 0,
+       "split_mode": "layer",
+       "main_gpu": 0,
+       "no_kv_offload": false,
+       "flash_attn": 0,
+       "devices": "auto",
+       "tensor_split": "0.00",
+       "tensor_buft_overrides": "none",
+       "load_mode": "auto",
+       "lazy_mode": "auto",
+       "embeddings": false,
+       "no_op_offload": 0,
+       "no_host": false,
+       "repack": true,
+       "fit_target": 0,
+       "fit_min_ctx": 0,
+       "n_prompt": 512,
+       "n_gen": 0,
+       "n_depth": 0,
+       "test_time": "2026-09-10T23:26:19Z",
+       "avg_ns": 36504828725,
+       "stddev_ns": 168166295,
+       "avg_ts": 14.025691,
+       "stddev_ts": 0.064612,
+       "samples_ns": [
+        36385917351,
+        36623740100
+       ],
+       "samples_ts": [
+        14.0714,
+        13.98
+       ]
+      },
+      {
+       "build_commit": "unknown",
+       "build_number": 0,
+       "cpu_info": "Spacemit(R) X60",
+       "gpu_info": "",
+       "backends": "CPU",
+       "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-2B-Q2_K.gguf",
+       "model_type": "qwen35 2B Q2_K - Medium",
+       "model_size": 957580544,
+       "model_n_params": 1881825088,
+       "n_batch": 2048,
+       "n_ubatch": 128,
+       "n_threads": 8,
+       "cpu_mask": "0x0",
+       "cpu_strict": false,
+       "poll": 50,
+       "type_k": "f16",
+       "type_v": "f16",
+       "n_gpu_layers": -1,
+       "n_cpu_moe": 0,
+       "split_mode": "layer",
+       "main_gpu": 0,
+       "no_kv_offload": false,
+       "flash_attn": 0,
+       "devices": "auto",
+       "tensor_split": "0.00",
+       "tensor_buft_overrides": "none",
+       "load_mode": "auto",
+       "lazy_mode": "auto",
+       "embeddings": false,
+       "no_op_offload": 0,
+       "no_host": false,
+       "repack": true,
+       "fit_target": 0,
+       "fit_min_ctx": 0,
+       "n_prompt": 0,
+       "n_gen": 128,
+       "n_depth": 0,
+       "test_time": "2026-09-10T23:28:08Z",
+       "avg_ns": 31909106452,
+       "stddev_ns": 419634923,
+       "avg_ts": 4.011741,
+       "stddev_ts": 0.052758,
+       "samples_ns": [
+        31612379806,
+        32205833099
+       ],
+       "samples_ts": [
+        4.04905,
+        3.97444
+       ]
+      }
+     ]
+    },
+    {
+     "label": "t7_gen",
+     "ok": true,
+     "prefill": null,
+     "decode": 4.141205,
+     "raw": [
+      {
+       "build_commit": "unknown",
+       "build_number": 0,
+       "cpu_info": "Spacemit(R) X60",
+       "gpu_info": "",
+       "backends": "CPU",
+       "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-2B-Q2_K.gguf",
+       "model_type": "qwen35 2B Q2_K - Medium",
+       "model_size": 957580544,
+       "model_n_params": 1881825088,
+       "n_batch": 2048,
+       "n_ubatch": 128,
+       "n_threads": 7,
+       "cpu_mask": "0x0",
+       "cpu_strict": false,
+       "poll": 50,
+       "type_k": "f16",
+       "type_v": "f16",
+       "n_gpu_layers": -1,
+       "n_cpu_moe": 0,
+       "split_mode": "layer",
+       "main_gpu": 0,
+       "no_kv_offload": false,
+       "flash_attn": 0,
+       "devices": "auto",
+       "tensor_split": "0.00",
+       "tensor_buft_overrides": "none",
+       "load_mode": "auto",
+       "lazy_mode": "auto",
+       "embeddings": false,
+       "no_op_offload": 0,
+       "no_host": false,
+       "repack": true,
+       "fit_target": 0,
+       "fit_min_ctx": 0,
+       "n_prompt": 0,
+       "n_gen": 128,
+       "n_depth": 0,
+       "test_time": "2026-09-10T23:29:22Z",
+       "avg_ns": 30910279931,
+       "stddev_ns": 294300127,
+       "avg_ts": 4.141205,
+       "stddev_ts": 0.039429,
+       "samples_ns": [
+        30702178390,
+        31118381473
+       ],
+       "samples_ts": [
+        4.16909,
+        4.11332
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

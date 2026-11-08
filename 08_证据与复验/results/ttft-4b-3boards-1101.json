@@ -1,0 +1,636 @@
+{
+ "task": "4B 首 token 3 板中位（chunk16）",
+ "date": "2026-11-01",
+ "generated": "2026-11-01T01:03:48",
+ "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+ "model_bytes": 2543899168,
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "lib_sha256": "4436a9f45bcc298b6768d79fc2becff6570be7afa8a2076bfdf37092b0647730",
+  "llama_server16": "adf5c445c416e31c",
+  "dir": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin",
+  "deploy_note": "125/126 原无 chunk16 构建（只有 build/build-concat/build-final）；本次从 128 的 ~/chunk16-fleet/bin（= ~/chunk16/arm2，26 文件 17,172,119 B）打包经 Windows 中转部署到 3 板规范路径 chunk16-build/bin，三板 libggml-cpu.so.0.26.0 全 SHA256 逐字节一致",
+  "per_board_verified": {
+   "10.65.21.125": {
+    "lib16": "4436a9f45bcc298b",
+    "lib_sha256": "4436a9f45bcc298b6768d79fc2becff6570be7afa8a2076bfdf37092b0647730",
+    "server16": "adf5c445c416e31c",
+    "model_bytes": 2543899168
+   },
+   "10.65.21.126": {
+    "lib16": "4436a9f45bcc298b",
+    "lib_sha256": "4436a9f45bcc298b6768d79fc2becff6570be7afa8a2076bfdf37092b0647730",
+    "server16": "adf5c445c416e31c",
+    "model_bytes": 2543899168
+   },
+   "10.65.21.128": {
+    "lib16": "4436a9f45bcc298b",
+    "lib_sha256": "4436a9f45bcc298b6768d79fc2becff6570be7afa8a2076bfdf37092b0647730",
+    "server16": "adf5c445c416e31c",
+    "model_bytes": 2543899168
+   }
+  }
+ },
+ "protocol": "llama-server -c 4096 -t 8 -ub 128 -b 2048 --host 127.0.0.1 --port 8097 -np 1（逐字复刻 C40：05_参考源码/work/_chunk16/p26_ttft.py 的 server_args）；prompt = ppl-corpus-zh.txt×8，/tokenize 二分字符前缀校准到恰好 L token（add_special 默认 false，同 C40）；每个长度冷启动 3 次，每次冷启动都先 pkill + 重启 server（保证 KV 空、无跨次复用）；每次冷启动 = 首个 /completion（cache_prompt=true，空缓存），紧接着同一 payload 再发一次 = 缓存命中；指标 = 响应体 timings.prompt_ms（server 端 prefill 耗时），另记 curl time_total 墙钟；3 板并行、每板内部串行、单板同时只 1 个 server；跑前/跑后 pkill -x llama-server；测量前 cat 模型预热 page cache（C40 的板在测 new 臂前已跑过 ref 臂，模型同样常驻 page cache）；第 2、3 次冷启动复用第 1 次校准出的同一份 prompt 正文（三次输入逐字节相同，变异只来自机器）",
+ "server_args": "-m <4B> -c 4096 -t 8 -ub 128 -b 2048 --host 127.0.0.1 --port 8097 -np 1",
+ "metric": "timings.prompt_ms（server 端 prefill），另附 curl wall",
+ "lengths": [
+  128,
+  512,
+  1024
+ ],
+ "reps_per_length": 3,
+ "baseline_c40": {
+  "host_note": "C40 原数据落在 10.65.21.130（claims 写 128）",
+  "128": 12.9,
+  "512": 49.98,
+  "1024": 100.84,
+  "evidence": "08_实验数据/chunk16-delivery-ttft-4b-1029-2131.json",
+  "new_build_same_args": true
+ },
+ "boards": [
+  {
+   "host": "10.65.21.125",
+   "ok": true,
+   "pins": {
+    "lib16": "4436a9f45bcc298b",
+    "lib_sha256": "4436a9f45bcc298b6768d79fc2becff6570be7afa8a2076bfdf37092b0647730",
+    "server16": "adf5c445c416e31c",
+    "model_bytes": 2543899168
+   },
+   "hostname": "k1",
+   "pagecache_warm_s": 1.4,
+   "env_start": {
+    "loadavg": [
+     "2.21",
+     "2.27",
+     "2.25"
+    ],
+    "mem_available_kb": 7185348,
+    "temps_c": {
+     "top_thermal": 36.0,
+     "gpu_thermal": 36.0,
+     "cluster0_thermal": 36.0,
+     "cluster1_thermal": 35.0
+    },
+    "cpufreq": 1600000
+   },
+   "env_end": {
+    "loadavg": [
+     "8.41",
+     "7.64",
+     "5.40"
+    ],
+    "mem_available_kb": 7184452,
+    "temps_c": {
+     "top_thermal": 47.0,
+     "gpu_thermal": 47.0,
+     "cluster0_thermal": 47.0,
+     "cluster1_thermal": 47.0
+    },
+    "cpufreq": 1600000
+   },
+   "clean_after": "CLEAN",
+   "128": {
+    "cold_s": [
+     12.502,
+     12.784,
+     12.845
+    ],
+    "cold_median": 12.784,
+    "warm_s": 1.114,
+    "cold_ms": [
+     12501.9,
+     12783.6,
+     12844.9
+    ],
+    "warm_s_raw": [
+     1.117,
+     0.934,
+     1.114
+    ],
+    "cold_prompt_n": [
+     128,
+     128,
+     128
+    ],
+    "cold_n": 3,
+    "warm_n": 3,
+    "cold_wall_s": [
+     12.546,
+     12.821,
+     12.883
+    ],
+    "server_load_s": [
+     30.4,
+     30.4,
+     30.4
+    ],
+    "cluster0_temp_c_after": [
+     57.0,
+     55.0,
+     55.0
+    ],
+    "cold_speedup_vs_warm": 11.5
+   },
+   "512": {
+    "cold_s": [
+     50.036,
+     50.093,
+     49.897
+    ],
+    "cold_median": 50.036,
+    "warm_s": 1.126,
+    "cold_ms": [
+     50035.8,
+     50093.5,
+     49897.2
+    ],
+    "warm_s_raw": [
+     1.126,
+     1.134,
+     1.035
+    ],
+    "cold_prompt_n": [
+     512,
+     512,
+     512
+    ],
+    "cold_n": 3,
+    "warm_n": 3,
+    "cold_wall_s": [
+     50.077,
+     50.135,
+     49.941
+    ],
+    "server_load_s": [
+     30.39,
+     30.41,
+     30.4
+    ],
+    "cluster0_temp_c_after": [
+     59.0,
+     59.0,
+     61.0
+    ],
+    "cold_speedup_vs_warm": 44.5
+   },
+   "1024": {
+    "cold_s": [
+     100.215,
+     100.993,
+     101.066
+    ],
+    "cold_median": 100.993,
+    "warm_s": 1.195,
+    "cold_ms": [
+     100214.6,
+     100993.0,
+     101065.5
+    ],
+    "warm_s_raw": [
+     1.195,
+     1.206,
+     1.105
+    ],
+    "cold_prompt_n": [
+     1024,
+     1024,
+     1024
+    ],
+    "cold_n": 3,
+    "warm_n": 3,
+    "cold_wall_s": [
+     100.261,
+     101.041,
+     101.115
+    ],
+    "server_load_s": [
+     30.4,
+     30.39,
+     30.39
+    ],
+    "cluster0_temp_c_after": [
+     65.0,
+     66.0,
+     65.0
+    ],
+    "cold_speedup_vs_warm": 84.5
+   }
+  },
+  {
+   "host": "10.65.21.126",
+   "ok": true,
+   "pins": {
+    "lib16": "4436a9f45bcc298b",
+    "lib_sha256": "4436a9f45bcc298b6768d79fc2becff6570be7afa8a2076bfdf37092b0647730",
+    "server16": "adf5c445c416e31c",
+    "model_bytes": 2543899168
+   },
+   "hostname": "k1",
+   "pagecache_warm_s": 1.4,
+   "env_start": {
+    "loadavg": [
+     "2.31",
+     "2.26",
+     "2.23"
+    ],
+    "mem_available_kb": 7191496,
+    "temps_c": {
+     "top_thermal": 33.0,
+     "gpu_thermal": 31.0,
+     "cluster0_thermal": 33.0,
+     "cluster1_thermal": 33.0
+    },
+    "cpufreq": 1600000
+   },
+   "env_end": {
+    "loadavg": [
+     "8.37",
+     "7.60",
+     "5.33"
+    ],
+    "mem_available_kb": 7186076,
+    "temps_c": {
+     "top_thermal": 37.0,
+     "gpu_thermal": 36.0,
+     "cluster0_thermal": 37.0,
+     "cluster1_thermal": 37.0
+    },
+    "cpufreq": 1600000
+   },
+   "clean_after": "CLEAN",
+   "128": {
+    "cold_s": [
+     12.154,
+     12.3,
+     12.824
+    ],
+    "cold_median": 12.3,
+    "warm_s": 1.034,
+    "cold_ms": [
+     12153.8,
+     12300.4,
+     12824.0
+    ],
+    "warm_s_raw": [
+     0.91,
+     1.034,
+     1.076
+    ],
+    "cold_prompt_n": [
+     128,
+     128,
+     128
+    ],
+    "cold_n": 3,
+    "warm_n": 3,
+    "cold_wall_s": [
+     12.192,
+     12.338,
+     12.861
+    ],
+    "server_load_s": [
+     30.38,
+     30.4,
+     30.4
+    ],
+    "cluster0_temp_c_after": [
+     52.0,
+     50.0,
+     50.0
+    ],
+    "cold_speedup_vs_warm": 11.9
+   },
+   "512": {
+    "cold_s": [
+     49.633,
+     50.031,
+     50.012
+    ],
+    "cold_median": 50.012,
+    "warm_s": 1.02,
+    "cold_ms": [
+     49632.6,
+     50031.5,
+     50011.5
+    ],
+    "warm_s_raw": [
+     1.015,
+     1.147,
+     1.02
+    ],
+    "cold_prompt_n": [
+     512,
+     512,
+     512
+    ],
+    "cold_n": 3,
+    "warm_n": 3,
+    "cold_wall_s": [
+     49.675,
+     50.075,
+     50.053
+    ],
+    "server_load_s": [
+     30.39,
+     30.69,
+     30.69
+    ],
+    "cluster0_temp_c_after": [
+     53.0,
+     54.0,
+     55.0
+    ],
+    "cold_speedup_vs_warm": 49.0
+   },
+   "1024": {
+    "cold_s": [
+     101.414,
+     99.858,
+     101.354
+    ],
+    "cold_median": 101.354,
+    "warm_s": 1.185,
+    "cold_ms": [
+     101413.9,
+     99858.2,
+     101354.2
+    ],
+    "warm_s_raw": [
+     1.185,
+     1.204,
+     1.172
+    ],
+    "cold_prompt_n": [
+     1024,
+     1024,
+     1024
+    ],
+    "cold_n": 3,
+    "warm_n": 3,
+    "cold_wall_s": [
+     101.459,
+     99.905,
+     101.4
+    ],
+    "server_load_s": [
+     30.7,
+     30.38,
+     30.69
+    ],
+    "cluster0_temp_c_after": [
+     57.0,
+     54.0,
+     55.0
+    ],
+    "cold_speedup_vs_warm": 85.5
+   }
+  },
+  {
+   "host": "10.65.21.128",
+   "ok": true,
+   "pins": {
+    "lib16": "4436a9f45bcc298b",
+    "lib_sha256": "4436a9f45bcc298b6768d79fc2becff6570be7afa8a2076bfdf37092b0647730",
+    "server16": "adf5c445c416e31c",
+    "model_bytes": 2543899168
+   },
+   "hostname": "k1",
+   "pagecache_warm_s": 1.3,
+   "env_start": {
+    "loadavg": [
+     "3.01",
+     "2.65",
+     "2.40"
+    ],
+    "mem_available_kb": 7186404,
+    "temps_c": {
+     "top_thermal": 35.0,
+     "gpu_thermal": 34.0,
+     "cluster0_thermal": 34.0,
+     "cluster1_thermal": 35.0
+    },
+    "cpufreq": 1600000
+   },
+   "env_end": {
+    "loadavg": [
+     "8.94",
+     "7.62",
+     "5.41"
+    ],
+    "mem_available_kb": 7187344,
+    "temps_c": {
+     "top_thermal": 40.0,
+     "gpu_thermal": 40.0,
+     "cluster0_thermal": 41.0,
+     "cluster1_thermal": 41.0
+    },
+    "cpufreq": 1600000
+   },
+   "clean_after": "CLEAN",
+   "128": {
+    "cold_s": [
+     12.454,
+     12.292,
+     12.326
+    ],
+    "cold_median": 12.326,
+    "warm_s": 1.012,
+    "cold_ms": [
+     12454.2,
+     12292.4,
+     12325.6
+    ],
+    "warm_s_raw": [
+     1.028,
+     1.002,
+     1.012
+    ],
+    "cold_prompt_n": [
+     128,
+     128,
+     128
+    ],
+    "cold_n": 3,
+    "warm_n": 3,
+    "cold_wall_s": [
+     12.492,
+     12.33,
+     12.363
+    ],
+    "server_load_s": [
+     30.39,
+     30.4,
+     30.11
+    ],
+    "cluster0_temp_c_after": [
+     54.0,
+     54.0,
+     55.0
+    ],
+    "cold_speedup_vs_warm": 12.2
+   },
+   "512": {
+    "cold_s": [
+     49.889,
+     49.245,
+     49.511
+    ],
+    "cold_median": 49.511,
+    "warm_s": 1.137,
+    "cold_ms": [
+     49888.7,
+     49245.2,
+     49510.9
+    ],
+    "warm_s_raw": [
+     1.137,
+     1.117,
+     1.24
+    ],
+    "cold_prompt_n": [
+     512,
+     512,
+     512
+    ],
+    "cold_n": 3,
+    "warm_n": 3,
+    "cold_wall_s": [
+     49.932,
+     49.291,
+     49.553
+    ],
+    "server_load_s": [
+     30.09,
+     30.39,
+     30.7
+    ],
+    "cluster0_temp_c_after": [
+     55.0,
+     57.0,
+     58.0
+    ],
+    "cold_speedup_vs_warm": 43.6
+   },
+   "1024": {
+    "cold_s": [
+     101.362,
+     102.151,
+     102.035
+    ],
+    "cold_median": 102.035,
+    "warm_s": 1.198,
+    "cold_ms": [
+     101362.4,
+     102150.9,
+     102034.6
+    ],
+    "warm_s_raw": [
+     1.198,
+     1.139,
+     1.304
+    ],
+    "cold_prompt_n": [
+     1024,
+     1024,
+     1024
+    ],
+    "cold_n": 3,
+    "warm_n": 3,
+    "cold_wall_s": [
+     101.41,
+     102.198,
+     102.081
+    ],
+    "server_load_s": [
+     30.69,
+     30.39,
+     30.69
+    ],
+    "cluster0_temp_c_after": [
+     60.0,
+     59.0,
+     56.0
+    ],
+    "cold_speedup_vs_warm": 85.2
+   }
+  }
+ ],
+ "aggregate": {
+  "128": {
+   "median": 12.454,
+   "min": 12.154,
+   "max": 12.845,
+   "n": 9,
+   "unit": "s",
+   "board_medians": [
+    12.784,
+    12.3,
+    12.326
+   ],
+   "median_of_board_medians": 12.326,
+   "raw_cold_s": [
+    12.154,
+    12.292,
+    12.3,
+    12.326,
+    12.454,
+    12.502,
+    12.784,
+    12.824,
+    12.845
+   ]
+  },
+  "512": {
+   "median": 49.897,
+   "min": 49.245,
+   "max": 50.093,
+   "n": 9,
+   "unit": "s",
+   "board_medians": [
+    50.036,
+    50.012,
+    49.511
+   ],
+   "median_of_board_medians": 50.012,
+   "raw_cold_s": [
+    49.245,
+    49.511,
+    49.633,
+    49.889,
+    49.897,
+    50.012,
+    50.031,
+    50.036,
+    50.093
+   ]
+  },
+  "1024": {
+   "median": 101.354,
+   "min": 99.858,
+   "max": 102.151,
+   "n": 9,
+   "unit": "s",
+   "board_medians": [
+    100.993,
+    101.354,
+    102.035
+   ],
+   "median_of_board_medians": 101.354,
+   "raw_cold_s": [
+    99.858,
+    100.215,
+    100.993,
+    101.066,
+    101.354,
+    101.362,
+    101.414,
+    102.035,
+    102.151
+   ]
+  }
+ },
+ "aggregate_note": "median/min/max 为 3 板 × 3 次 = 9 个冷启动 prompt_ms 的汇总；median_of_board_medians 为『先每板取中位、再对 3 个板中位取中位』的另一口径",
+ "failures": []
+}

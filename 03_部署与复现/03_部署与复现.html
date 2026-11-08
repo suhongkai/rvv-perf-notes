@@ -1,0 +1,325 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>03_部署与复现</title><style>
+@page { size: A4; margin: 17mm 16mm 18mm 16mm; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Microsoft YaHei","Segoe UI",sans-serif;
+       font-size: 10.2pt; line-height: 1.72; color: #1a1d23; }
+h1 { font-size: 21pt; line-height: 1.3; margin: 0 0 8pt; }
+h2 { font-size: 15pt; margin: 20pt 0 8pt; padding-bottom: 4pt;
+     border-bottom: 1.5px solid #dbe2ef; page-break-after: avoid; break-after: avoid-page; }
+h3 { font-size: 12pt; margin: 14pt 0 6pt; color: #1e3a8a; page-break-after: avoid; break-after: avoid-page; }
+table, pre { break-before: avoid-page; }
+p { margin: 5pt 0; text-align: justify; orphans: 3; widows: 3; }
+strong { color: #0f172a; }
+code { font-family: "Cascadia Mono","Consolas",monospace; font-size: 8.6pt;
+       background: #f2f5fa; padding: .5pt 3pt; border-radius: 3px; color: #0b3d91; }
+pre { background: #f6f8fa; border: 1px solid #e3e8f0; border-radius: 5px;
+      padding: 7pt 9pt; overflow-wrap: anywhere; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: 8.2pt; color: #1a1d23; }
+blockquote { margin: 7pt 0; padding: 5pt 10pt; border-left: 3px solid #9db4e8;
+             background: #f7f9fe; color: #26303f; }
+blockquote p { margin: 3pt 0; }
+table { width: 100%; border-collapse: collapse; margin: 8pt 0; font-size: 8.9pt; }
+th, td { border: 1px solid #d5dce8; padding: 3.5pt 5pt; vertical-align: top; }
+th { background: #eef2f9; font-weight: 700; }
+tr:nth-child(even) td { background: #fbfcfe; }
+tr { page-break-inside: avoid; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 14pt 0; }
+img { display: block; width: 92%; height: auto; margin: 10pt auto 4pt; }
+ul, ol { margin: 5pt 0 5pt 16pt; padding: 0; }
+li { margin: 2.5pt 0; }
+</style></head><body><h1>部署与复现指南</h1>
+<p>本文给出从裸板到可运行服务的完整步骤，以及验证结果的方法。全部脚本位于 <code>scripts/</code>，补丁位于 <code>patches/</code>。</p>
+<hr>
+<h2>1 环境要求</h2>
+<p><strong>表 1 环境要求</strong></p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>硬件</td>
+<td>MUSE Pi Pro（SpacemiT K1，8 核，8 GB 内存）</td>
+</tr>
+<tr>
+<td>系统</td>
+<td>Bianbu Linux（riscv64），内核与固件为出厂版本</td>
+</tr>
+<tr>
+<td>编译工具链</td>
+<td>出厂镜像自带 GCC 13.2；从源码编译需 <code>apt install gcc-14 g++-14 cmake</code>（板端源已含 14.2 与 cmake 3.28）</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>3.10 及以上（仅量化脚本使用）</td>
+</tr>
+<tr>
+<td>磁盘</td>
+<td>至少 12 GB 可用（源码、f16 中间文件与量化产物）</td>
+</tr>
+<tr>
+<td>网络</td>
+<td>部署阶段不需要外网；模型与源码包可离线拷贝</td>
+</tr>
+</tbody>
+</table>
+<h2>2 交付物</h2>
+<p><strong>表 2 交付物清单</strong></p>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th style="text-align:right">体积</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>../07_源码与二进制/llama-src-final-717a8ad8.tar.gz</code></td>
+<td style="text-align:right">38,596,499 B</td>
+<td>源码包，含 01—03 补丁（已合入），可重编</td>
+</tr>
+<tr>
+<td><code>../07_源码与二进制/llama-bin-chunk16-4436a9f4.tar.gz</code></td>
+<td style="text-align:right">7,174,113 B</td>
+<td>预编译二进制与库，可直接部署（deploy.sh 会自动解包）</td>
+</tr>
+<tr>
+<td><code>scripts/build.sh</code></td>
+<td style="text-align:right">4,001 B</td>
+<td>编译脚本，自动应用 07 号补丁</td>
+</tr>
+<tr>
+<td><code>scripts/quantize.sh</code></td>
+<td style="text-align:right">1,835 B</td>
+<td>量化脚本，从官方权重生成 Q4_0</td>
+</tr>
+<tr>
+<td><code>scripts/deploy.sh</code></td>
+<td style="text-align:right">见 MANIFEST</td>
+<td>部署脚本：解包交付二进制、推模型、<strong>校验 SHA256（不符即停止）</strong>、起服务</td>
+</tr>
+<tr>
+<td><code>scripts/verify.sh</code></td>
+<td style="text-align:right">见 MANIFEST</td>
+<td>验证脚本，运行基准并核对预期区间</td>
+</tr>
+<tr>
+<td><code>patches/01—07</code></td>
+<td style="text-align:right">共 131 KB</td>
+<td>7 个补丁：<strong>01—03 已合入源码包</strong>；04—06 是 K-quant 变体的重排补丁（扩展实验用，交付构建不含）；<strong>07 由 <code>build.sh</code> 自动应用</strong></td>
+</tr>
+</tbody>
+</table>
+<p>源码包与二进制的 SHA256 见 <code>MANIFEST.md</code>；交付模型与测试集的 SHA256 见 <code>../05_模型与测试集/05_模型与测试集.md</code>。</p>
+<blockquote>
+<p><strong>模型本体不随包</strong>（体积原因）：百度网盘 <code>模型_网盘交付_2026-11-08.7z</code><br>
+<code>https://pan.baidu.com/s/1ya0FF80mw-qsCm6SydcUgA?pwd=qcnw</code> 提取码 <code>qcnw</code>；解压后放到 <code>../05_模型与测试集/models/</code> 下<br>
+（<code>deploy.sh</code> 默认从那里取），或用 <code>MODELS_DIR=&lt;目录&gt;</code> 指定。详见 <code>05_模型与测试集.md</code> §2。</p>
+</blockquote>
+<h2>3 编译</h2>
+<pre><code class="language-bash">tar xzf ../07_源码与二进制/llama-src-final-717a8ad8.tar.gz
+cd spacemit-llama
+bash ../scripts/build.sh . build
+</code></pre>
+<p><code>build.sh</code> 依次完成：解包检查、补丁应用（若源码包未合入）、CMake 配置、编译、四项自检（Q4_1 repack、CONCAT、GQA、chunk16）。编译约 35 分钟，产物位于 <code>build/bin/</code>。</p>
+<p>自检项与预期：</p>
+<p><strong>表 3 编译自检</strong></p>
+<table>
+<thead>
+<tr>
+<th>检查项</th>
+<th>预期</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q4_1 repack 符号</td>
+<td>编译产物中存在对应 kernel</td>
+</tr>
+<tr>
+<td>CONCAT 快速路径</td>
+<td>源码 <code>ops.cpp</code> 含 fast path 分支</td>
+</tr>
+<tr>
+<td>GQA 折叠</td>
+<td>源码含折叠函数</td>
+</tr>
+<tr>
+<td>chunk16</td>
+<td><code>GGML_CPU_CHUNK_MULT</code> 默认值为 16</td>
+</tr>
+</tbody>
+</table>
+<h2>4 量化</h2>
+<pre><code class="language-bash">python convert_hf_to_gguf.py Qwen3.5-2B/ --outtype f16 --no-mtp --outfile 2b-f16.gguf
+./build/bin/llama-quantize \
+    --output-tensor-type Q6_K --token-embedding-type Q6_K \
+    2b-f16.gguf Qwen3.5-2B-Q4_0-selfmade.gguf Q4_0 8
+</code></pre>
+<p>4B 模型将路径替换为 <code>Qwen3.5-4B/</code> 与对应文件名。量化参数必须保留 <code>--output-tensor-type Q6_K</code> 与 <code>--token-embedding-type Q6_K</code>，否则输出头精度下降。</p>
+<p>产物校验值：</p>
+<p><strong>表 4 交付模型</strong></p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>文件</th>
+<th style="text-align:right">字节数</th>
+<th>SHA256</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2B</td>
+<td><code>Qwen3.5-2B-Q4_0-selfmade.gguf</code></td>
+<td style="text-align:right">1,202,487,136</td>
+<td><code>27a683603a6ae7165bb2e393b4f57bbdec24aaf5e11ee1c58c7d01ea23bb19df</code></td>
+</tr>
+<tr>
+<td>4B</td>
+<td><code>Qwen3.5-4B-Q4_0-selfmade.gguf</code></td>
+<td style="text-align:right">2,543,899,168</td>
+<td><code>36a685821380dd641907fe35d7bbf70dff624d2d86f61ddb9104108d0931c09c</code></td>
+</tr>
+</tbody>
+</table>
+<h2>5 部署</h2>
+<pre><code class="language-bash"># 先下载模型到 ../05_模型与测试集/models/（见 05_模型与测试集.md 的链接）
+# 首次使用先给脚本执行权限（压缩包在 Windows 上打包，解包后可能丢可执行位）
+chmod +x scripts/*.sh 2&gt;/dev/null || true
+MODELS_DIR=../05_模型与测试集/models bash scripts/deploy.sh &lt;板IP&gt; Qwen3.5-2B-Q4_0-selfmade.gguf
+</code></pre>
+<p><code>deploy.sh</code> 完成四步：解包交付二进制并推送、<strong>校验 SHA256（本地或板端不符即停止，不会起服务）</strong>、启动 <code>llama-server</code>、发送冒烟请求。单板部署约 5 分钟。</p>
+<p>服务启动参数：</p>
+<pre><code class="language-bash"># deploy.sh 用的就是这一组（端口 8097，-fa 0 与报告/verify.sh 同口径）
+llama-server -m &lt;model&gt; -c 4096 -t 7 --threads-batch 8 -ub 128 -b 2048 -fa 0 --port 8097 -np 1
+</code></pre>
+<blockquote>
+<p><strong><code>-fa 0</code> 必须显式写</strong>：该构建的 <code>-fa</code> 默认是 <code>auto</code>，而 auto 在本平台会解析成「开启」并走通用回退路径，<br>
+长上下文会慢 15%—31%。<code>deploy.sh</code>、<code>verify.sh</code>、README 与报告都用 <code>-fa 0</code>，请保持一致。</p>
+</blockquote>
+<p>长上下文场景将 <code>-c</code> 提升至 36864；并发场景将 <code>-np</code> 设为 4。参数含义与选型依据见技术报告 2.4 节。</p>
+<h2>6 验证</h2>
+<h3>6.1 三分钟抽样（不想等全量时用这一条）</h3>
+<pre><code class="language-bash"># 单点：4K 预填。2B 期望 ≈22.7 t/s（约 180 s），4B ≈9.0 t/s（约 450 s）
+cd build/bin &amp;&amp; LD_LIBRARY_PATH=. ./llama-bench -m &lt;模型gguf&gt; -p 4096 -n 0 -r 1 -t 8 -ub 128 -fa 0
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>档位</th>
+<th style="text-align:right">2B 期望</th>
+<th style="text-align:right">大致耗时</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-p 512</code></td>
+<td style="text-align:right">25.2 t/s</td>
+<td style="text-align:right">20 s</td>
+</tr>
+<tr>
+<td><strong><code>-p 4096</code>（推荐抽样）</strong></td>
+<td><strong>22.7 t/s</strong></td>
+<td><strong>3 分钟</strong></td>
+</tr>
+<tr>
+<td><code>-p 8192</code></td>
+<td style="text-align:right">20.4 t/s</td>
+<td style="text-align:right">6.7 分钟</td>
+</tr>
+<tr>
+<td><code>-p 32768</code></td>
+<td style="text-align:right">10.7 t/s</td>
+<td style="text-align:right">51 分钟</td>
+</tr>
+</tbody>
+</table>
+<p>32K 那档不建议现场跑（要 51 分钟）——它的作用是&quot;压力数据&quot;，不是时延承诺。</p>
+<blockquote>
+<p><strong>口径提醒</strong>：本表是 <strong><code>-fa 0</code></strong> 口径（与 <code>deploy.sh</code>/<code>verify.sh</code> 一致）。<br>
+技术报告 5.4 的长上下文表是 <strong><code>-fa auto</code></strong> 口径（2B 为 20.70/17.35/12.82/8.40），两者不可混读；<br>
+4K 差 10%（22.7 vs 20.70）、32K 差 28%（10.7 vs 8.40），差异全部来自 <code>-fa</code> 这个开关。<br>
+首 token 时延的绝对值可用 <code>05_模型与测试集/prompts/</code> 里的三份固定 prompt 复算（见该目录说明）。</p>
+</blockquote>
+<h3>6.2 完整验证</h3>
+<pre><code class="language-bash"># 用法：bash scripts/verify.sh &lt;模型gguf&gt; [板端 llama.cpp 目录]
+bash scripts/verify.sh Qwen3.5-2B-Q4_0-selfmade.gguf
+</code></pre>
+<p><code>verify.sh</code> 运行两组基准：</p>
+<p><strong>表 5 验证基准与预期区间</strong></p>
+<table>
+<thead>
+<tr>
+<th>基准</th>
+<th>参数</th>
+<th>2B 预期</th>
+<th>4B 预期</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>预填</td>
+<td><code>-p 512 -n 128 -t 8 -ub 128 -r 3 -fa 0</code></td>
+<td>24.4—26.9 t/s</td>
+<td>9.4—10.5 t/s</td>
+</tr>
+<tr>
+<td>生成</td>
+<td><code>-p 0 -n 128 -t 7 -ub 128 -r 4 -fa 0</code></td>
+<td>4.2—4.5 t/s</td>
+<td>1.9—2.1 t/s</td>
+</tr>
+</tbody>
+</table>
+<p>首 token 验证（服务端）：</p>
+<pre><code class="language-bash"># 128 token 提示，冷启动（prompt 直接用包内固定文件，见 05_模型与测试集/prompts/ttft_128.txt）
+python3 - &lt;&lt;'PY'
+import json, urllib.request
+p = open('../05_模型与测试集/prompts/ttft_128.txt', encoding='utf-8').read()
+req = urllib.request.Request('http://127.0.0.1:8097/completion',
+    data=json.dumps({'prompt': p, 'n_predict': 1, 'temperature': 0, 'cache_prompt': False}).encode(),
+    headers={'Content-Type': 'application/json'})
+t = json.load(urllib.request.urlopen(req, timeout=600))['timings']
+print('prompt_n=%d  TTFT=%.2f s' % (t['prompt_n'], t['prompt_ms'] / 1000))
+PY
+</code></pre>
+<p>2B 预期 <strong>4.8—5.4 s</strong>（本包实测 5.02 / 5.20 / 5.27 s），4B 预期 12.0—13.5 s。<br>
+口径与 <code>deploy.sh</code> 一致（<code>-t 7 --threads-batch 8 -ub 128 -b 2048 -fa 0</code>）。</p>
+<h2>7 证据复验</h2>
+<p>在提交包 <code>08_证据与复验/</code> 目录下执行：</p>
+<pre><code class="language-bash">cd 08_证据与复验
+python tools/verify_claims.py    # 97 条 claim 逐条重算并校验证据 SHA256
+</code></pre>
+<p>预期输出 <code>97/97 通过</code>。登记表、证据文件与脚本均在本包内，不依赖外部仓库。</p>
+<h2>8 常见问题</h2>
+<p><strong>编译失败</strong>。先确认已装 <code>gcc-14 g++-14 cmake</code>（出厂镜像只有 GCC 13.2、无 cmake）；编译须用 <code>gcc-14/g++-14</code>。若补丁应用失败，检查源码包是否为 <code>717a8ad8</code> 版本。</p>
+<p><strong>内存不足</strong>。4B 模型加载约需 2.8 GB 常驻内存；并发数超过 4 或上下文超过 16K 时需降低 <code>-c</code> 或 <code>-np</code>。</p>
+<p><strong>首 token 偏慢</strong>。确认 <code>-ub 128</code> 已设置；未设置时默认 512，首 token 时延约高出 10%—15%。</p>
+<p><strong>生成速度偏低</strong>。确认 <code>-t 7</code>（生成线程数）而非 8；8 线程在生成阶段会因缓存争用变慢。</p>
+<p><strong>模型文件名</strong>。赛题文本写作 <code>Qwen3.5-2B-Instruct</code>，官方模型包文件名为 <code>Qwen3.5-2B</code>（即指令微调版），本仓库沿用官方文件名。</p>
+<h2>9 目录结构</h2>
+<pre><code>03_部署与复现/
+├── 03_部署与复现.md
+├── MANIFEST.md
+├── scripts/
+│   ├── build.sh
+│   ├── quantize.sh
+│   ├── deploy.sh
+│   └── verify.sh
+└── patches/
+    ├── 01-q4_1-repack.patch
+    ├── 02-concat-fastpath.patch
+    ├── 03-gqa-fold.patch
+    ├── 04-q5k-repack.patch
+    ├── 05-q6k-repack.patch
+    ├── 06-q3k-repack.patch
+    └── 07-chunk16-chunkmult.patch
+</code></pre>
+<hr>
+<p><em>脚本与本文不一致时，以脚本内的实际参数为准；本文只描述预期行为与校验区间。</em></p>
+</body></html>

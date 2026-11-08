@@ -1,0 +1,505 @@
+{
+ "task": "输出头 Q6_K vs Q4_0（chunk16）取舍验证",
+ "date": "2026-11-01",
+ "kind": "验证，不改交付配方",
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "lib": "libggml-cpu.so",
+  "bin_dir": {
+   "10.65.21.111/112": "/home/bianbu/chunk16-build/bin",
+   "10.65.21.125/126": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin"
+  },
+  "note": "chunk16-build/bin 不含 llama-quantize；变体用 build-final 的 llama-quantize 生成（GGUF 格式同构），测量全部用 chunk16 的 llama-bench / llama-perplexity"
+ },
+ "hosts": {
+  "2b": "10.65.21.125",
+  "4b": "10.65.21.126"
+ },
+ "env_notes": [
+  "构建指纹 4436a9f45bcc298b 对应的是 libggml-cpu.so（不是 libllama.so，后者是 acb5fca4…）；libggml-cpu.so.0.26.0 的 sha256 前 16 位 = 4436a9f45bcc298b。",
+  "chunk16 构建目录因板而异：10.65.21.111/112 在 /home/bianbu/chunk16-build/bin，10.65.21.125/126 在 /home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin。找不到 chunk16-build 时先查这两个位置，不要断定板上没有。",
+  "chunk16 构建**没有编译 llama-quantize**（只有 llama-bench / llama-perplexity / llama-cli / llama-server），所以变体是用 build-final 的 llama-quantize 造的；GGUF 与量化类型布局跨构建同构，测量全部用 chunk16 二进制。",
+  "本轮原定 10.65.21.111(2B)/112(4B)，因另一任务占用其跑跨域 PPL，改用 125/126；两尺寸各自在同一块板上跑完 ABBA+PPL，板间不混。"
+ ],
+ "evidence_isolation": {
+  "method": "解析两文件 GGUF 张量表 + 逐张量数据段 sha1（前 16 位）",
+  "2b": {
+   "tensors": 320,
+   "A_hist": "F32 133 / Q4_0 186 / Q6_K 1",
+   "B_hist": "F32 133 / Q4_0 187",
+   "type_diff": [
+    "token_embd.weight"
+   ],
+   "data_diff": [
+    "token_embd.weight"
+   ],
+   "identical_others": 319
+  },
+  "4b": {
+   "tensors": 426,
+   "A_hist": "F32 177 / Q4_0 248 / Q6_K 1",
+   "B_hist": "F32 177 / Q4_0 249",
+   "type_diff": [
+    "token_embd.weight"
+   ],
+   "data_diff": [
+    "token_embd.weight"
+   ],
+   "identical_others": 425
+  },
+  "conclusion": "变体与交付模型之间只有一个张量（token_embd.weight，绑定式输出头）的类型与数据发生变化，其余张量逐字节相同 → A/B 差异可完全归因于输出头位宽，不存在 requant 把其它小张量一并降级的混淆。"
+ },
+ "models": {
+  "2b": {
+   "q6_head": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+   "q4_head": "Qwen3.5-2B-Q4_0-headq4_0-variant.gguf",
+   "bytes": {
+    "q6_head": 1202487136,
+    "q4_head": 1071374176
+   }
+  },
+  "4b": {
+   "q6_head": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "q4_head": "Qwen3.5-4B-Q4_0-headq4_0-variant.gguf",
+   "bytes": {
+    "q6_head": 2543899168,
+    "q4_head": 2380007968
+   }
+  }
+ },
+ "sha256_check_q6_head": {
+  "2b": "27a683603a6ae7165bb2e393b4f57bbdec24aaf5e11ee1c58c7d01ea23bb19df",
+  "4b": "36a685821380dd641907fe35d7bbf70dff624d2d86f61ddb9104108d0931c09c",
+  "note": "与交付文档记录的 27a68360… / 36a68582… 一致，证明测的就是交付模型本身"
+ },
+ "protocol": "llama-bench -p 512 -n 128 -t 8 -ub 128 -r 3 -fa 0；PPL -f ~/labdeploy/ppl-corpus-zh.txt -c 512 --chunks 20 -t 8 -fa 0",
+ "corpus": {
+  "file": "ppl-corpus-zh.txt",
+  "bytes": 65473,
+  "sha256": "38b05e576179c29a83bcfbbc2649b92e269a9a791c8b3cfc7076500562340c19",
+  "chunks": 20,
+  "tokens": 10240,
+  "note": "与 C63（ppl-bigcorpus-delta-1030）同口径；两臂逐字节同一份语料"
+ },
+ "design": {
+  "arms": "A=交付配方（输出头 Q6_K）；B=仅把 token_embd.weight 降为 Q4_0 的变体",
+  "variant_recipe": "llama-quantize --allow-requantize --output-tensor-type Q4_0 --token-embedding-type Q4_0 <交付模型> <变体> Q4_0 8",
+  "isolation": "变体与交付模型逐张量对比：320/426 个张量中只有 token_embd.weight 类型与数据都变，其余 319/425 个张量数据哈希逐字节相同",
+  "order": "ABBA（A,B,B,A），每次调用 -r 3，池化 6 个 decode 样本取中位",
+  "warmup": "每次调用前 cat 模型进 page cache（消除 eMMC 冷读差异）"
+ },
+ "cells": [
+  {
+   "model": "2b",
+   "arm": "q6_head",
+   "file": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+   "bytes": 1202487136,
+   "prefill": 25.0352,
+   "prefill_samples_n": 6,
+   "prefill_per_call": [
+    25.0862,
+    24.8713
+   ],
+   "decode": 3.8076,
+   "decode_samples_n": 6,
+   "decode_per_call": [
+    3.8141,
+    3.7973
+   ],
+   "decode_stddev": 0.0133,
+   "ppl": 20.1669,
+   "ppl_se": 0.93401,
+   "ppl_chunks": 20,
+   "ppl_tokens": 10240,
+   "ppl_secs": 721.6,
+   "bench_secs": 421.0
+  },
+  {
+   "model": "2b",
+   "arm": "q4_head",
+   "file": "Qwen3.5-2B-Q4_0-headq4_0-variant.gguf",
+   "bytes": 1071374176,
+   "prefill": 25.2261,
+   "prefill_samples_n": 6,
+   "prefill_per_call": [
+    25.3416,
+    25.0963
+   ],
+   "decode": 4.0987,
+   "decode_samples_n": 6,
+   "decode_per_call": [
+    4.1103,
+    4.0977
+   ],
+   "decode_stddev": 0.0202,
+   "ppl": 20.5732,
+   "ppl_se": 0.95552,
+   "ppl_chunks": 20,
+   "ppl_tokens": 10240,
+   "ppl_secs": 561.1,
+   "bench_secs": 391.0
+  },
+  {
+   "model": "4b",
+   "arm": "q6_head",
+   "file": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "bytes": 2543899168,
+   "prefill": 10.3145,
+   "prefill_samples_n": 6,
+   "prefill_per_call": [
+    10.221,
+    10.4091
+   ],
+   "decode": 1.7322,
+   "decode_samples_n": 6,
+   "decode_per_call": [
+    1.7288,
+    1.7381
+   ],
+   "decode_stddev": 0.0074,
+   "ppl": 16.8624,
+   "ppl_se": 0.77632,
+   "ppl_chunks": 20,
+   "ppl_tokens": 10240,
+   "ppl_secs": 1462.8,
+   "bench_secs": 917.1
+  },
+  {
+   "model": "4b",
+   "arm": "q4_head",
+   "file": "Qwen3.5-4B-Q4_0-headq4_0-variant.gguf",
+   "bytes": 2380007968,
+   "prefill": 10.0933,
+   "prefill_samples_n": 6,
+   "prefill_per_call": [
+    10.0671,
+    10.1171
+   ],
+   "decode": 1.787,
+   "decode_samples_n": 6,
+   "decode_per_call": [
+    1.7775,
+    1.7971
+   ],
+   "decode_stddev": 0.0112,
+   "ppl": 17.0592,
+   "ppl_se": 0.79129,
+   "ppl_chunks": 20,
+   "ppl_tokens": 10240,
+   "ppl_secs": 1242.6,
+   "bench_secs": 917.0
+  }
+ ],
+ "delta": {
+  "2b": {
+   "decode_pct": 7.645,
+   "prefill_pct": 0.763,
+   "ppl_pct": 2.015,
+   "ppl_pct_paired_mean": 1.66,
+   "ppl_abs": 0.4063,
+   "bytes_delta_mb": -131.1,
+   "decode_gain_per_pt": 0.764,
+   "ppl_cost_per_pt": 0.403
+  },
+  "4b": {
+   "decode_pct": 3.164,
+   "prefill_pct": -2.145,
+   "ppl_pct": 1.167,
+   "ppl_pct_paired_mean": 1.696,
+   "ppl_abs": 0.1968,
+   "bytes_delta_mb": -163.9,
+   "decode_gain_per_pt": 0.316,
+   "ppl_cost_per_pt": 0.233
+  }
+ },
+ "decision_matrix": "2B decode +7.64%（10 分项）↔ PPL +2.02%（5 分项）= 每分 +0.76pp vs −0.40pp，收益/代价 1.90:1 → 值；4B decode +3.16%（10 分项）↔ PPL +1.17%（5 分项）= 每分 +0.32pp vs −0.23pp，收益/代价 1.36:1 → 临界。按评分表权重（decode 10 分 / 量化质量 5 分）：2B 用 PPL +2.02% 换 decode +7.64%，单位权重收益约为代价的 2 倍 → **建议采纳**（前提：业务侧 20 条真实提示抽样无感）；4B 只有 decode +3.16%、PPL +1.17%，收益/代价约 1.3:1 → **临界，不建议单纯为速度改**（除非为省 164 MB 存储/OTA 体积）。注意：若沿用旧的「PPL 恶化 <1.5%」单门槛，2B 会被判不通过；本矩阵的作用正是把这个绝对门槛换成按评分表权重的相对权衡。",
+ "caveats": [
+  "变体模型只用于验证，未进交付配方；交付文件未改动。",
+  "变体由 build-final 的 llama-quantize 生成（chunk16 未编该工具），测量二进制全部为 chunk16（libggml-cpu 4436a9f4）。",
+  "逐张量校验：变体相对交付模型只有 token_embd.weight 一个张量不同，因此 A/B 差异可完全归因于输出头位宽。",
+  "thread 口径为 -t 8（任务指定）。历史结论是 decode 在 t7 达峰、t8 低 7—8%，故 decode 绝对值偏低；本实验只比较两臂比值，不受该口径影响，但绝对值不可与其他口径混用。",
+  "PPL 用中文技术文档语料（65,473 B，与 C63 同口径 20×512=10,240 token）；PPL 的 SE 是 llama-perplexity 自报值，两臂语料完全相同。",
+  "另一任务在测量期间占用 10.65.21.111/112 跑 llama-perplexity（/tmp/crossdomain.txt），本测量改到 10.65.21.125(2B)/126(4B) 完成，两尺寸各自同板配对；换板前的半程格未采用。",
+  "PPL 主口径是 llama-perplexity 的最终累计值（2B +2.02% / 4B +1.17%）；配对逐块均值（2B +1.66% / 4B +1.70%）是另一种统计量，用于验证方向与显著性（两尺寸均 20/20 块同号），两者不可混用。",
+  "输出头降为 Q4_0 会改变生成文本（first_divergence_token 见 gen_divergence），这是质量代价的定性证据，但仍需业务侧抽样确认可感知退化。"
+ ],
+ "old_build_reference": {
+  "note": "旧构建 717a8ad8 的历史实测，仅作对照；本文件结论一律以 chunk16 为准",
+  "2b": {
+   "decode_pct": 7.4,
+   "ppl_pct": 1.644,
+   "prefill_pct": -1.8,
+   "src": "outhead-final-1028-1915"
+  },
+  "4b": {
+   "decode_pct": 2.657,
+   "ppl_pct": 1.263,
+   "prefill_pct": -0.974,
+   "src": "outhead-final-1028-1915"
+  }
+ },
+ "generated_at": "2026-11-01T03:02:47",
+ "per_size_detail": {
+  "2b": {
+   "cells": {
+    "q6_head": {
+     "model": "2b",
+     "arm": "q6_head",
+     "file": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+     "bytes": 1202487136,
+     "prefill": 25.0352,
+     "prefill_samples_n": 6,
+     "prefill_per_call": [
+      25.0862,
+      24.8713
+     ],
+     "decode": 3.8076,
+     "decode_samples_n": 6,
+     "decode_per_call": [
+      3.8141,
+      3.7973
+     ],
+     "decode_stddev": 0.0133,
+     "ppl": 20.1669,
+     "ppl_se": 0.93401,
+     "ppl_chunks": 20,
+     "ppl_tokens": 10240,
+     "ppl_secs": 721.6,
+     "bench_secs": 421.0
+    },
+    "q4_head": {
+     "model": "2b",
+     "arm": "q4_head",
+     "file": "Qwen3.5-2B-Q4_0-headq4_0-variant.gguf",
+     "bytes": 1071374176,
+     "prefill": 25.2261,
+     "prefill_samples_n": 6,
+     "prefill_per_call": [
+      25.3416,
+      25.0963
+     ],
+     "decode": 4.0987,
+     "decode_samples_n": 6,
+     "decode_per_call": [
+      4.1103,
+      4.0977
+     ],
+     "decode_stddev": 0.0202,
+     "ppl": 20.5732,
+     "ppl_se": 0.95552,
+     "ppl_chunks": 20,
+     "ppl_tokens": 10240,
+     "ppl_secs": 561.1,
+     "bench_secs": 391.0
+    }
+   },
+   "delta": {
+    "decode_pct": 7.645,
+    "prefill_pct": 0.763,
+    "ppl_pct": 2.015,
+    "ppl_pct_paired_mean": 1.66,
+    "ppl_abs": 0.4063,
+    "bytes_delta_mb": -131.1,
+    "decode_gain_per_pt": 0.764,
+    "ppl_cost_per_pt": 0.403
+   },
+   "paired_ppl": {
+    "n_chunks": 20,
+    "mean_pct": 1.66,
+    "median_pct": 1.8,
+    "sd_pct": 0.405,
+    "se_pct": 0.091,
+    "same_sign": "20/20",
+    "final_pct": 2.015
+   },
+   "bench_replication": {
+    "note": "同一块板的第一次 ABBA（板刚上电/刚跑完 PPL，首格落在低频档）",
+    "decode_A_per_call": [
+     3.7862,
+     4.1786
+    ],
+    "decode_B_per_call": [
+     4.3812,
+     4.246
+    ],
+    "prefill_A_per_call": [
+     25.3412,
+     26.4803
+    ],
+    "prefill_B_per_call": [
+     25.2627,
+     25.7728
+    ],
+    "decode_pct": 9.073,
+    "prefill_pct": -1.405
+   },
+   "gen_divergence": {
+    "identical": false,
+    "first_divergence_token": 34,
+    "chars_common_before_divergence": 132,
+    "prompt": "列出三个提升 RISC-V 端侧大模型解码速度的方法：",
+    "decoding": "greedy --temp 0, seed 42, -t 8, -fa 0, -st；已剥离 llama-cli 横幅",
+    "samples": [
+     {
+      "n": 1,
+      "same": true,
+      "a": "Here",
+      "b": "Here"
+     },
+     {
+      "n": 2,
+      "same": true,
+      "a": "Here's",
+      "b": "Here's"
+     },
+     {
+      "n": 3,
+      "same": true,
+      "a": "Here's a",
+      "b": "Here's a"
+     },
+     {
+      "n": 4,
+      "same": true,
+      "a": "Here's a thinking",
+      "b": "Here's a thinking"
+     },
+     {
+      "n": 16,
+      "same": true,
+      "a": "Here's a thinking process that leads to the suggested respon",
+      "b": "Here's a thinking process that leads to the suggested respon"
+     }
+    ],
+    "samples_dropped": null,
+    "text_q6": "Here's a thinking process that leads to the suggested response:\n\n1.  **Analyze the Request:**\n    *   **Topic:** RISC-V architecture.",
+    "text_q4": "Here's a thinking process that leads to the suggested response:\n\n1.  **Analyze the Request:**\n    *   **Topic:** RISC-V architecture for"
+   },
+   "verify": {
+    "A": "{'F32': 133, 'Q6_K': 1, 'Q4_0': 186}",
+    "B": "{'F32': 133, 'Q4_0': 187}"
+   },
+   "verify_type_diff": 1,
+   "verify_data_diff": 1,
+   "wait_before_start_s": 180.1,
+   "stage_secs": {
+    "quant": 30.5,
+    "verify": 27.1,
+    "bench": 812.3,
+    "ppl": 1282.8,
+    "gen": 60.6
+   },
+   "old_build_ref": {
+    "decode_pct": 7.4,
+    "ppl_pct": 1.644,
+    "prefill_pct": -1.8,
+    "src": "outhead-final-1028-1915"
+   }
+  },
+  "4b": {
+   "cells": {
+    "q6_head": {
+     "model": "4b",
+     "arm": "q6_head",
+     "file": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+     "bytes": 2543899168,
+     "prefill": 10.3145,
+     "prefill_samples_n": 6,
+     "prefill_per_call": [
+      10.221,
+      10.4091
+     ],
+     "decode": 1.7322,
+     "decode_samples_n": 6,
+     "decode_per_call": [
+      1.7288,
+      1.7381
+     ],
+     "decode_stddev": 0.0074,
+     "ppl": 16.8624,
+     "ppl_se": 0.77632,
+     "ppl_chunks": 20,
+     "ppl_tokens": 10240,
+     "ppl_secs": 1462.8,
+     "bench_secs": 917.1
+    },
+    "q4_head": {
+     "model": "4b",
+     "arm": "q4_head",
+     "file": "Qwen3.5-4B-Q4_0-headq4_0-variant.gguf",
+     "bytes": 2380007968,
+     "prefill": 10.0933,
+     "prefill_samples_n": 6,
+     "prefill_per_call": [
+      10.0671,
+      10.1171
+     ],
+     "decode": 1.787,
+     "decode_samples_n": 6,
+     "decode_per_call": [
+      1.7775,
+      1.7971
+     ],
+     "decode_stddev": 0.0112,
+     "ppl": 17.0592,
+     "ppl_se": 0.79129,
+     "ppl_chunks": 20,
+     "ppl_tokens": 10240,
+     "ppl_secs": 1242.6,
+     "bench_secs": 917.0
+    }
+   },
+   "delta": {
+    "decode_pct": 3.164,
+    "prefill_pct": -2.145,
+    "ppl_pct": 1.167,
+    "ppl_pct_paired_mean": 1.696,
+    "ppl_abs": 0.1968,
+    "bytes_delta_mb": -163.9,
+    "decode_gain_per_pt": 0.316,
+    "ppl_cost_per_pt": 0.233
+   },
+   "paired_ppl": {
+    "n_chunks": 20,
+    "mean_pct": 1.696,
+    "median_pct": 1.444,
+    "sd_pct": 0.521,
+    "se_pct": 0.116,
+    "same_sign": "20/20",
+    "final_pct": 1.167
+   },
+   "bench_replication": null,
+   "gen_divergence": {
+    "identical": false,
+    "first_divergence_token": 18,
+    "chars_common_before_divergence": 88,
+    "prompt": "列出三个提升 RISC-V 端侧大模型解码速度的方法：",
+    "decoding": "greedy --temp 0, seed 42, -t 8, -fa 0, -st；已剥离 llama-cli 横幅",
+    "samples": [],
+    "samples_dropped": "旧解析把 llama-cli 横幅（含模型路径/大小）计入正文，在 n=1 误报分歧，与二分结果矛盾，已剔除",
+    "text_q6": "Here's a thinking process that leads to the suggested methods for improving RISC-V edge model",
+    "text_q4": "Here's a thinking process that leads to the suggested methods for improving RISC-V edge large"
+   },
+   "verify": {
+    "A": "{'F32': 177, 'Q6_K': 1, 'Q4_0': 248}",
+    "B": "{'F32': 177, 'Q4_0': 249}"
+   },
+   "verify_type_diff": 1,
+   "verify_data_diff": 1,
+   "wait_before_start_s": null,
+   "stage_secs": {
+    "quant": 30.6,
+    "verify": 60.5,
+    "bench": 1834.5,
+    "ppl": 2705.6,
+    "gen": 115.9
+   },
+   "old_build_ref": {
+    "decode_pct": 2.657,
+    "ppl_pct": 1.263,
+    "prefill_pct": -0.974,
+    "src": "outhead-final-1028-1915"
+   }
+  }
+ }
+}

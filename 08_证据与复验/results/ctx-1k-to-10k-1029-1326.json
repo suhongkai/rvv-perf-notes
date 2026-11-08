@@ -1,0 +1,164 @@
+{
+ "task": "ctx-series",
+ "tag": "ctx-1k-to-10k",
+ "method": "llama-server 单遍，/tokenize 标定，/completion n_predict=1；取 timings.prompt_per_second",
+ "build": {
+  "bin": "build-final",
+  "libggml_cpu_sha256": "717a8ad8..."
+ },
+ "corpus": "06_素材库/src/ppl-corpus-zh.txt（重复拼接，按 ctx 截断）",
+ "summary": {
+  "2b@1024": {
+   "n": 1,
+   "median": 21.026,
+   "min": 21.026,
+   "max": 21.026
+  },
+  "2b@2048": {
+   "n": 1,
+   "median": 17.702,
+   "min": 17.702,
+   "max": 17.702
+  },
+  "2b@4096": {
+   "n": 1,
+   "median": 15.326,
+   "min": 15.326,
+   "max": 15.326
+  },
+  "2b@8192": {
+   "n": 1,
+   "median": 13.572,
+   "min": 13.572,
+   "max": 13.572
+  },
+  "2b@10240": {
+   "n": 1,
+   "median": 13.041,
+   "min": 13.041,
+   "max": 13.041
+  },
+  "4b@1024": {
+   "n": 1,
+   "median": 6.469,
+   "min": 6.469,
+   "max": 6.469
+  },
+  "4b@2048": {
+   "n": 1,
+   "median": 6.456,
+   "min": 6.456,
+   "max": 6.456
+  },
+  "4b@4096": {
+   "n": 1,
+   "median": 6.094,
+   "min": 6.094,
+   "max": 6.094
+  },
+  "4b@8192": {
+   "n": 1,
+   "median": 5.524,
+   "min": 5.524,
+   "max": 5.524
+  },
+  "4b@10240": {
+   "n": 1,
+   "median": 5.282,
+   "min": 5.282,
+   "max": 5.282
+  }
+ },
+ "runs": [
+  {
+   "host": "10.65.21.112",
+   "model_key": "2b",
+   "ctx": 1024,
+   "ok": true,
+   "prompt_n": 960,
+   "prompt_ms": 45657.212,
+   "prompt_tps": 21.026251011559793
+  },
+  {
+   "host": "10.65.21.113",
+   "model_key": "2b",
+   "ctx": 2048,
+   "ok": true,
+   "prompt_n": 1984,
+   "prompt_ms": 112079.344,
+   "prompt_tps": 17.701745292156602
+  },
+  {
+   "host": "10.65.21.114",
+   "model_key": "2b",
+   "ctx": 4096,
+   "ok": true,
+   "prompt_n": 3990,
+   "prompt_ms": 260345.047,
+   "prompt_tps": 15.325814898256928
+  },
+  {
+   "host": "10.65.21.115",
+   "model_key": "2b",
+   "ctx": 8192,
+   "ok": true,
+   "prompt_n": 8092,
+   "prompt_ms": 596230.779,
+   "prompt_tps": 13.571925980694802
+  },
+  {
+   "host": "10.65.21.116",
+   "model_key": "2b",
+   "ctx": 10240,
+   "ok": true,
+   "prompt_n": 10138,
+   "prompt_ms": 777403.254,
+   "prompt_tps": 13.04085099700393
+  },
+  {
+   "host": "10.65.21.121",
+   "model_key": "4b",
+   "ctx": 1024,
+   "ok": true,
+   "prompt_n": 960,
+   "prompt_ms": 148391.109,
+   "prompt_tps": 6.469390292109752
+  },
+  {
+   "host": "10.65.21.122",
+   "model_key": "4b",
+   "ctx": 2048,
+   "ok": true,
+   "prompt_n": 1984,
+   "prompt_ms": 307302.702,
+   "prompt_tps": 6.456174928133239
+  },
+  {
+   "host": "10.65.21.124",
+   "model_key": "4b",
+   "ctx": 4096,
+   "ok": true,
+   "prompt_n": 3990,
+   "prompt_ms": 654725.35,
+   "prompt_tps": 6.094158413142244
+  },
+  {
+   "host": "10.65.21.125",
+   "model_key": "4b",
+   "ctx": 8192,
+   "ok": true,
+   "prompt_n": 8092,
+   "prompt_ms": 1464975.142,
+   "prompt_tps": 5.523643212780193
+  },
+  {
+   "host": "10.65.21.126",
+   "model_key": "4b",
+   "ctx": 10240,
+   "ok": true,
+   "prompt_n": 10138,
+   "prompt_ms": 1919216.05,
+   "prompt_tps": 5.282365161546039
+  }
+ ]
+}

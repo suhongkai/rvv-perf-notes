@@ -1,0 +1,58 @@
+{
+ "task": "ttft-4b-selfmade",
+ "host": "10.65.21.114",
+ "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+ "build": {
+  "bin": "build-final",
+  "libggml_cpu_sha256": "717a8ad8..."
+ },
+ "protocol": "每长度重启 server；/tokenize 校准；冷=首次请求，热=同 payload 再发",
+ "summary": {
+  "256": {
+   "cold_ms": 33495.4,
+   "cold_s": 33.5,
+   "warm_ms": 982.4,
+   "prompt_n": 256,
+   "speedup": 34.1
+  },
+  "448": {
+   "cold_ms": 59610.8,
+   "cold_s": 59.61,
+   "warm_ms": 1260.7,
+   "prompt_n": 448,
+   "speedup": 47.3
+  }
+ },
+ "runs": [
+  {
+   "length": 256,
+   "ok": true,
+   "calib": "FINAL_TOKENS 256 TARGET 256",
+   "cold": {
+    "prompt_n": 256,
+    "prompt_ms": 33495.374,
+    "prompt_tps": 7.642846442019127
+   },
+   "warm": {
+    "prompt_n": 4,
+    "prompt_ms": 982.408,
+    "prompt_tps": 4.07162808120455
+   }
+  },
+  {
+   "length": 448,
+   "ok": true,
+   "calib": "FINAL_TOKENS 448 TARGET 448",
+   "cold": {
+    "prompt_n": 448,
+    "prompt_ms": 59610.847,
+    "prompt_tps": 7.515410743954033
+   },
+   "warm": {
+    "prompt_n": 4,
+    "prompt_ms": 1260.721,
+    "prompt_tps": 3.1727876350120288
+   }
+  }
+ ]
+}

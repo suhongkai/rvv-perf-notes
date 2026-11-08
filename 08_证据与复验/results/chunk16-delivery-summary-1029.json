@@ -1,0 +1,586 @@
+{
+ "task": "chunk16 并入交付：新交付构建全量重测（2B/4B，Q4_0 selfmade）",
+ "date": "2026-10-29 22:12",
+ "build": {
+  "bin": "/home/bianbu/chunk16-build/bin",
+  "libggml_cpu_sha256": "4436a9f45bcc298b6768d79fc2becff6570be7afa8a2076bfdf37092b0647730",
+  "binaries": {
+   "llama-bench": "92b787e9bf04009c...",
+   "llama-cli": "c5fa2f224cd54347...",
+   "llama-server": "adf5c445c416e31c...",
+   "llama-perplexity": "949b97299544a607..."
+  },
+  "compare": "build-final lib 717a8ad8 (copy at ~/chunk16/ref2)"
+ },
+ "texteq": {
+  "identical": true,
+  "2b": "b67d893d41f2befd",
+  "4b": "3d2f615aca482d00",
+  "n_predict": 32
+ },
+ "bench_2b": {
+  "host": "10.65.21.114",
+  "pp512": {
+   "args": {
+    "p": 512,
+    "n": 0,
+    "reps": 1,
+    "t": 8
+   },
+   "kind": "prefill",
+   "ref2": {
+    "raw": [
+     21.32,
+     20.779,
+     20.581
+    ],
+    "median": 20.779
+   },
+   "new": {
+    "raw": [
+     23.331,
+     25.099,
+     25.185
+    ],
+    "median": 25.099
+   },
+   "delta_pct": 20.79
+  },
+  "pp2048": {
+   "args": {
+    "p": 2048,
+    "n": 0,
+    "reps": 1,
+    "t": 8
+   },
+   "kind": "prefill",
+   "ref2": {
+    "raw": [
+     20.848,
+     19.7,
+     19.562
+    ],
+    "median": 19.7
+   },
+   "new": {
+    "raw": [
+     23.699,
+     23.466,
+     23.756
+    ],
+    "median": 23.699
+   },
+   "delta_pct": 20.3
+  },
+  "tg128_t8_p0": {
+   "args": {
+    "p": 0,
+    "n": 128,
+    "reps": 4,
+    "t": 8
+   },
+   "kind": "decode",
+   "ref2": {
+    "raw": [
+     3.738
+    ],
+    "median": 3.738
+   },
+   "new": {
+    "raw": [
+     3.801
+    ],
+    "median": 3.801
+   },
+   "delta_pct": 1.69
+  },
+  "tg128_t7_p0": {
+   "args": {
+    "p": 0,
+    "n": 128,
+    "reps": 4,
+    "t": 7
+   },
+   "kind": "decode",
+   "ref2": {
+    "raw": [
+     4.322
+    ],
+    "median": 4.322
+   },
+   "new": {
+    "raw": [
+     4.369
+    ],
+    "median": 4.369
+   },
+   "delta_pct": 1.09
+  },
+  "tg128_t8_p512": {
+   "args": {
+    "p": 512,
+    "n": 128,
+    "reps": 4,
+    "t": 8
+   },
+   "kind": "decode",
+   "ref2": {
+    "raw": [
+     3.724
+    ],
+    "median": 3.724
+   },
+   "new": {
+    "raw": [
+     3.777
+    ],
+    "median": 3.777
+   },
+   "delta_pct": 1.42
+  }
+ },
+ "bench_4b": {
+  "host": "10.65.21.128",
+  "pp512": {
+   "args": {
+    "p": 512,
+    "n": 0,
+    "reps": 1,
+    "t": 8
+   },
+   "kind": "prefill",
+   "ref2": {
+    "raw": [
+     7.291,
+     7.266,
+     7.315
+    ],
+    "median": 7.291
+   },
+   "new": {
+    "raw": [
+     9.951,
+     9.969,
+     10.497
+    ],
+    "median": 9.969
+   },
+   "delta_pct": 36.73
+  },
+  "pp2048": {
+   "args": {
+    "p": 2048,
+    "n": 0,
+    "reps": 1,
+    "t": 8
+   },
+   "kind": "prefill",
+   "ref2": {
+    "raw": [
+     7.031,
+     7.039,
+     7.005
+    ],
+    "median": 7.031
+   },
+   "new": {
+    "raw": [
+     9.865,
+     9.743,
+     9.754
+    ],
+    "median": 9.754
+   },
+   "delta_pct": 38.73
+  },
+  "tg128_t8_p0": {
+   "args": {},
+   "kind": "decode (recovered from cells)",
+   "ref2": {
+    "raw": [
+     1.676
+    ],
+    "median": 1.676
+   },
+   "new": {
+    "raw": [
+     1.717
+    ],
+    "median": 1.717
+   },
+   "delta_pct": 2.45
+  },
+  "tg128_t7_p0": {
+   "args": {},
+   "kind": "decode (recovered from cells)",
+   "ref2": {
+    "raw": [
+     1.96
+    ],
+    "median": 1.96
+   },
+   "new": {
+    "raw": [
+     2.006
+    ],
+    "median": 2.006
+   },
+   "delta_pct": 2.35
+  },
+  "tg128_t8_p512": {
+   "args": {
+    "p": 512,
+    "n": 128,
+    "reps": 4,
+    "t": 8
+   },
+   "kind": "decode",
+   "ref2": {
+    "raw": [
+     1.683
+    ],
+    "median": 1.683
+   },
+   "new": {
+    "raw": [
+     1.769
+    ],
+    "median": 1.769
+   },
+   "delta_pct": 5.11
+  }
+ },
+ "ctx_2b": {
+  "host": "10.65.21.123",
+  "new": {
+   "1024": {
+    "n": 2,
+    "median": 25.365,
+    "min": 25.285,
+    "max": 25.445,
+    "raw": [
+     25.285,
+     25.445
+    ]
+   },
+   "2048": {
+    "n": 2,
+    "median": 23.217,
+    "min": 23.21,
+    "max": 23.223,
+    "raw": [
+     23.21,
+     23.223
+    ]
+   },
+   "4096": {
+    "n": 2,
+    "median": 20.874,
+    "min": 20.83,
+    "max": 20.918,
+    "raw": [
+     20.918,
+     20.83
+    ]
+   },
+   "8192": {
+    "n": 1,
+    "median": 17.814,
+    "min": 17.814,
+    "max": 17.814,
+    "raw": [
+     17.814
+    ]
+   },
+   "10240": {
+    "n": 1,
+    "median": 16.343,
+    "min": 16.343,
+    "max": 16.343,
+    "raw": [
+     16.343
+    ]
+   }
+  },
+  "ref_same_board": {
+   "1024": {
+    "n": 2,
+    "median": 17.717,
+    "min": 17.377,
+    "max": 18.056,
+    "raw": [
+     17.377,
+     18.056
+    ]
+   },
+   "2048": {
+    "n": 2,
+    "median": 17.565,
+    "min": 17.203,
+    "max": 17.928,
+    "raw": [
+     17.203,
+     17.928
+    ]
+   },
+   "4096": {
+    "n": 1,
+    "median": 15.646,
+    "min": 15.646,
+    "max": 15.646,
+    "raw": [
+     15.646
+    ]
+   },
+   "8192": {
+    "n": 1,
+    "median": 14.299,
+    "min": 14.299,
+    "max": 14.299,
+    "raw": [
+     14.299
+    ]
+   },
+   "10240": {
+    "n": 1,
+    "median": 13.046,
+    "min": 13.046,
+    "max": 13.046,
+    "raw": [
+     13.046
+    ]
+   }
+  }
+ },
+ "ctx_4b": {
+  "host": "10.65.21.130",
+  "new": {
+   "1024": {
+    "n": 2,
+    "median": 10.26,
+    "min": 10.126,
+    "max": 10.393,
+    "raw": [
+     10.393,
+     10.126
+    ]
+   },
+   "2048": {
+    "n": 2,
+    "median": 9.724,
+    "min": 9.669,
+    "max": 9.778,
+    "raw": [
+     9.778,
+     9.669
+    ]
+   },
+   "4096": {
+    "n": 2,
+    "median": 9.0,
+    "min": 8.988,
+    "max": 9.012,
+    "raw": [
+     9.012,
+     8.988
+    ]
+   },
+   "8192": {
+    "n": 1,
+    "median": 8.009,
+    "min": 8.009,
+    "max": 8.009,
+    "raw": [
+     8.009
+    ]
+   },
+   "10240": {
+    "n": 1,
+    "median": 7.405,
+    "min": 7.405,
+    "max": 7.405,
+    "raw": [
+     7.405
+    ]
+   }
+  },
+  "ref_same_board": {
+   "1024": {
+    "n": 1,
+    "median": 6.645,
+    "min": 6.645,
+    "max": 6.645,
+    "raw": [
+     6.645
+    ]
+   },
+   "2048": {
+    "n": 1,
+    "median": 6.614,
+    "min": 6.614,
+    "max": 6.614,
+    "raw": [
+     6.614
+    ]
+   },
+   "4096": {
+    "n": 1,
+    "median": 6.225,
+    "min": 6.225,
+    "max": 6.225,
+    "raw": [
+     6.225
+    ]
+   }
+  }
+ },
+ "ttft_2b": {
+  "host": "10.65.21.114",
+  "ref": {
+   "128": {
+    "cold_ms": 6207.5,
+    "cold_s": 6.21,
+    "warm_ms": 505.0,
+    "prompt_n": 128
+   },
+   "512": {
+    "cold_ms": 24310.6,
+    "cold_s": 24.31,
+    "warm_ms": 524.4,
+    "prompt_n": 512
+   },
+   "1024": {
+    "cold_ms": 49311.2,
+    "cold_s": 49.31,
+    "warm_ms": 597.3,
+    "prompt_n": 1024
+   }
+  },
+  "new": {
+   "128": {
+    "cold_ms": 5297.3,
+    "cold_s": 5.3,
+    "warm_ms": 501.0,
+    "prompt_n": 128
+   },
+   "512": {
+    "cold_ms": 20680.9,
+    "cold_s": 20.68,
+    "warm_ms": 385.7,
+    "prompt_n": 512
+   },
+   "1024": {
+    "cold_ms": 42106.7,
+    "cold_s": 42.11,
+    "warm_ms": 412.5,
+    "prompt_n": 1024
+   }
+  }
+ },
+ "ttft_4b": {
+  "host": "10.65.21.130",
+  "ref": {
+   "128": {
+    "cold_ms": 16036.5,
+    "cold_s": 16.04,
+    "warm_ms": 1062.9,
+    "prompt_n": 128
+   },
+   "512": {
+    "cold_ms": 66506.8,
+    "cold_s": 66.51,
+    "warm_ms": 1115.2,
+    "prompt_n": 512
+   },
+   "1024": {
+    "cold_ms": 134847.6,
+    "cold_s": 134.85,
+    "warm_ms": 1257.8,
+    "prompt_n": 1024
+   }
+  },
+  "new": {
+   "128": {
+    "cold_ms": 12904.0,
+    "cold_s": 12.9,
+    "warm_ms": 1016.3,
+    "prompt_n": 128
+   },
+   "512": {
+    "cold_ms": 49983.5,
+    "cold_s": 49.98,
+    "warm_ms": 1014.4,
+    "prompt_n": 512
+   },
+   "1024": {
+    "cold_ms": 100835.5,
+    "cold_s": 100.84,
+    "warm_ms": 1142.6,
+    "prompt_n": 1024
+   }
+  }
+ },
+ "published_old": {
+  "2b": {
+   "pp512": 20.928,
+   "pp512_src": "9 板中位 C32/fleet-2b-final-1029-0139",
+   "pp2048": 19.623,
+   "pp2048_src": "114 ABBA chunk16-ab2048-1029-1926",
+   "decode_t8_512": 3.763,
+   "decode_t7_0": 4.32,
+   "ctx": [
+    17.803,
+    17.383,
+    15.585,
+    13.431,
+    12.927
+   ],
+   "ctx_src": "113 同板 C45 / ctx-2b-113-1029-1916",
+   "ttft": [
+    6.179,
+    24.186,
+    49.038
+   ],
+   "ttft_src": "C30 / ttft-final-1029"
+  },
+  "4b": {
+   "pp512": 7.457,
+   "pp512_src": "C41 / fleet4b",
+   "decode_t8_512": 1.72,
+   "decode_t7_0": 1.958,
+   "ctx": [
+    6.328,
+    6.676,
+    6.033,
+    5.74,
+    5.309
+   ],
+   "ctx_src": "128 同板 C46 / ctx-4b-sameboard-1029-1821",
+   "ttft": [
+    16.82,
+    65.87,
+    134.54
+   ],
+   "ttft_src": "C40 / ttft-4b-selfmade-v2-0349"
+  }
+ },
+ "files": [
+  "chunk16-delivery-ctx-2b-1029-2042.json",
+  "chunk16-delivery-ctx-2b-ref-1029-2137.json",
+  "chunk16-delivery-ctx-4b-1029-2120.json",
+  "chunk16-delivery-ctx-4b-ref-1029-2151.json",
+  "chunk16-delivery-deliv2b-bench-1029-2058.json",
+  "chunk16-delivery-deliv2b-decode-1029-2113.json",
+  "chunk16-delivery-deliv4b-bench-1029-2158.json",
+  "chunk16-delivery-summary-1029.json",
+  "chunk16-delivery-texteq-1029-2014.json",
+  "chunk16-delivery-ttft-2b-1029-2103.json",
+  "chunk16-delivery-ttft-4b-1029-2131.json"
+ ],
+ "headline": {
+  "2b_pp512_pct": 20.79,
+  "2b_pp2048_pct": 20.3,
+  "4b_pp512_pct": 36.73,
+  "4b_pp2048_pct": 38.73
+ }
+}

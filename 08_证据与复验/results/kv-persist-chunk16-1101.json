@@ -1,0 +1,205 @@
+{
+ "task": "KV 存盘/恢复（chunk16 重测）",
+ "date": "2026-11-01",
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "dir": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin"
+ },
+ "host": "10.65.21.124",
+ "model": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+ "model_sha16": "27a683603a6ae716",
+ "ctx": 8192,
+ "threads": 8,
+ "prompt_chars": 8219,
+ "protocol": "llama-server -c 8192 -np 1 -t 8 --slot-save-path；每轮=冷预填(8192 字符提示，实测 6077 token)→save doc.bin→杀进程重启→restore→同提示 cache_prompt=true 再问；共 3 轮，每轮都是新冷启动；冷/恢复后均取 server timings.prompt_ms",
+ "stages": {
+  "cold": {
+   "prompt_ms": 276197.6,
+   "prompt_s": 276.2,
+   "prompt_n": 6077,
+   "runs_prompt_ms": [
+    276197.6,
+    275706.1,
+    280665.5
+   ]
+  },
+  "save": {
+   "ms": 827.3,
+   "bytes": 135635148,
+   "n_saved": [
+    6092,
+    6092,
+    6092
+   ],
+   "runs_ms": [
+    388.7,
+    827.3,
+    844.4
+   ]
+  },
+  "restore": {
+   "ms": 240.7,
+   "n_restored": [
+    6092,
+    6092,
+    6092
+   ],
+   "runs_ms": [
+    257.6,
+    239.3,
+    240.7
+   ]
+  },
+  "after_restore": {
+   "prompt_ms": 698.2,
+   "runs_prompt_ms": [
+    624.3,
+    698.2,
+    757.3
+   ]
+  }
+ },
+ "speedup_prompt": 395.6,
+ "speedup_per_run": [
+  442.4,
+  394.9,
+  370.6
+ ],
+ "e2e_s": 6.81,
+ "e2e_runs_s": [
+  6.28,
+  14.34,
+  6.81
+ ],
+ "n_restored": 6092,
+ "runs": 3,
+ "runs_attempted": 3,
+ "note": "速度比按 prompt 口径（冷预填 prompt_ms 中位 / 恢复后 prompt_ms 中位）；端到端另记（恢复后同提示 16 token 的 HTTP 墙钟）；save/restore 的 ms 为 HTTP 墙钟，server 内部 save_ms/restore_ms 见 runs_detail。与 C52 旧构建（cold 576207/907.7ms=634.8×）相比，冷预填快了约 2×，恢复后耗时基本不变，故加速比数值下降——这是分母变小的诚实结果",
+ "runs_detail": [
+  {
+   "run": 1,
+   "cold": {
+    "prompt_n": 6077,
+    "prompt_ms": 276197.6,
+    "wall_ms": 281808.8,
+    "predicted_n": 16
+   },
+   "save": {
+    "ms": 388.7,
+    "bytes": 135635148,
+    "files": [
+     "doc.bin"
+    ],
+    "resp": "{\"id_slot\":0,\"filename\":\"doc.bin\",\"n_saved\":6092,\"n_written\":135635148,\"timings\":{\"save_ms\":384.794}}",
+    "save_ms_srv": 384.794,
+    "n_saved": 6092,
+    "n_written": 135635148
+   },
+   "restore": {
+    "ms": 257.6,
+    "resp": "{\"id_slot\":0,\"filename\":\"doc.bin\",\"n_restored\":6092,\"n_read\":135635148,\"timings\":{\"restore_ms\":253.495}}",
+    "restore_ms_srv": 253.495,
+    "n_restored": 6092,
+    "n_read": 135635148
+   },
+   "after_restore": {
+    "prompt_n": 4,
+    "prompt_ms": 624.3,
+    "wall_ms": 6275.1,
+    "predicted_n": 16,
+    "predicted_ms": 5585.4
+   },
+   "speedup_prompt": 442.4,
+   "e2e_s": 6.28,
+   "startup_cold_s": 16.3,
+   "startup_restart_s": 16.1,
+   "prompt_tokens_full": 6077
+  },
+  {
+   "run": 2,
+   "cold": {
+    "prompt_n": 6077,
+    "prompt_ms": 275706.1,
+    "wall_ms": 281780.3,
+    "predicted_n": 16
+   },
+   "save": {
+    "ms": 827.3,
+    "bytes": 135635148,
+    "files": [
+     "doc.bin"
+    ],
+    "resp": "{\"id_slot\":0,\"filename\":\"doc.bin\",\"n_saved\":6092,\"n_written\":135635148,\"timings\":{\"save_ms\":823.388}}",
+    "save_ms_srv": 823.388,
+    "n_saved": 6092,
+    "n_written": 135635148
+   },
+   "restore": {
+    "ms": 239.3,
+    "resp": "{\"id_slot\":0,\"filename\":\"doc.bin\",\"n_restored\":6092,\"n_read\":135635148,\"timings\":{\"restore_ms\":235.559}}",
+    "restore_ms_srv": 235.559,
+    "n_restored": 6092,
+    "n_read": 135635148
+   },
+   "after_restore": {
+    "prompt_n": 4,
+    "prompt_ms": 698.2,
+    "wall_ms": 14339.1,
+    "predicted_n": 16,
+    "predicted_ms": 13575.7
+   },
+   "speedup_prompt": 394.9,
+   "e2e_s": 14.34,
+   "startup_cold_s": 17.1,
+   "startup_restart_s": 16.1,
+   "prompt_tokens_full": 6077
+  },
+  {
+   "run": 3,
+   "cold": {
+    "prompt_n": 6077,
+    "prompt_ms": 280665.5,
+    "wall_ms": 286769.8,
+    "predicted_n": 16
+   },
+   "save": {
+    "ms": 844.4,
+    "bytes": 135635148,
+    "files": [
+     "doc.bin"
+    ],
+    "resp": "{\"id_slot\":0,\"filename\":\"doc.bin\",\"n_saved\":6092,\"n_written\":135635148,\"timings\":{\"save_ms\":840.934}}",
+    "save_ms_srv": 840.934,
+    "n_saved": 6092,
+    "n_written": 135635148
+   },
+   "restore": {
+    "ms": 240.7,
+    "resp": "{\"id_slot\":0,\"filename\":\"doc.bin\",\"n_restored\":6092,\"n_read\":135635148,\"timings\":{\"restore_ms\":237.135}}",
+    "restore_ms_srv": 237.135,
+    "n_restored": 6092,
+    "n_read": 135635148
+   },
+   "after_restore": {
+    "prompt_n": 4,
+    "prompt_ms": 757.3,
+    "wall_ms": 6808.8,
+    "predicted_n": 16,
+    "predicted_ms": 5982.4
+   },
+   "speedup_prompt": 370.6,
+   "e2e_s": 6.81,
+   "startup_cold_s": 18.1,
+   "startup_restart_s": 16.1,
+   "prompt_tokens_full": 6077
+  }
+ ],
+ "raw": {
+  "kv_out": "04_升级开发/_scratch/2026-11-01/raw/kv.out"
+ },
+ "notes_detail": {
+  "clock": "板载时钟在测量期间被 NTP 从 2026-09-13 校正到 2026-11-01，raw 日志行首是板端时间；所有耗时用 perf_counter（monotonic），不受影响",
+  "save_io": "save/restore 是纯 I/O（135.6 MB 写/读 /tmp），与计算构建无关；三次 save 388.7/827.3/844.4 ms 抖动来自 page cache 回写，故取中位并在 runs_detail 保留全部",
+  "e2e": "e2e 三次 6.28/14.34/6.81 s，第 2 次为异常值（16 token 解码被拖慢），中位 6.81 s"
+ }
+}

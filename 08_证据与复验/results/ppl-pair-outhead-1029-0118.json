@@ -1,0 +1,66 @@
+{
+ "task": "ppl-pair",
+ "generated": "2026-10-29T01:18:10",
+ "build": {
+  "bin": "build-final",
+  "libggml_cpu_sha256": "717a8ad8..."
+ },
+ "corpus": {
+  "file": "ppl-corpus-outhead-zh.txt",
+  "bytes": 22158
+ },
+ "protocol": "llama-perplexity -c 512 --chunks <按尺寸>",
+ "note": "selfmade = 我方从官方 f16 量化；unsloth = 公开第三方 Q4_0",
+ "runs": [
+  {
+   "host": "10.65.21.119",
+   "size": "2b",
+   "chunks": 9,
+   "cells": [
+    {
+     "tag": "selfmade",
+     "file": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+     "sec": 368.4,
+     "ok": true,
+     "ppl": 38.5085,
+     "out": "EXIT=0 ELAPSED=366\n6.04.324.238 I Final estimate: PPL = 38.5085 +/- 2.60611"
+    },
+    {
+     "tag": "unsloth",
+     "file": "Qwen3.5-2B-Q4_0.gguf",
+     "sec": 453.0,
+     "ok": true,
+     "ppl": 36.8719,
+     "out": "EXIT=0 ELAPSED=452\n7.30.181.863 I Final estimate: PPL = 36.8719 +/- 2.48840"
+    }
+   ],
+   "ok": true,
+   "delta_pct": 4.439
+  },
+  {
+   "host": "10.65.21.124",
+   "size": "4b",
+   "chunks": 5,
+   "cells": [
+    {
+     "tag": "selfmade",
+     "file": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+     "sec": 483.0,
+     "ok": true,
+     "ppl": 20.9262,
+     "out": "EXIT=0 ELAPSED=481\n7.58.204.482 I Final estimate: PPL = 20.9262 +/- 1.80377"
+    },
+    {
+     "tag": "unsloth",
+     "file": "Qwen3.5-4B-Q4_0.gguf",
+     "sec": 644.5,
+     "ok": true,
+     "ppl": 20.2131,
+     "out": "EXIT=0 ELAPSED=644\n10.41.047.079 I Final estimate: PPL = 20.2131 +/- 1.73189"
+    }
+   ],
+   "ok": true,
+   "delta_pct": 3.528
+  }
+ ]
+}

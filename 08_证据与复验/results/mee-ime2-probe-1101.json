@@ -1,0 +1,154 @@
+{
+ "task": "MEE 的 IME2 能否打开（厂商默认 use_ime2=0）",
+ "date": "2026-11-01",
+ "host": "10.65.21.113",
+ "build": {
+  "dir": "~/labdeploy/legacy/bin",
+  "lib16": "f20686b3b486a2de"
+ },
+ "model": {
+  "file": "SpacemiT-Qwen3.5-2B-Q4_1-official.gguf",
+  "bytes": 1288281984
+ },
+ "protocol": "llama-bench -p 128 -n 16 -t 8 -r 1 -fa 0；只判 banner 与量级",
+ "hint_evidence": [
+  "ime2::gemm_kernel_i8i2k/i8i3k/i8i5/i8i4_hp 存在于二进制",
+  "日志 use_ime1=1 use_ime2=0",
+  "cpu0-3 的 isa 有 ime，cpu4-7 没有"
+ ],
+ "arms": [
+  {
+   "tag": "A-baseline",
+   "env": {},
+   "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+   "parsed": {
+    "num_cores": "8",
+    "num_perfer_cores": "4",
+    "use_ime1": "1",
+    "use_ime2": "0",
+    "mem_backend": "HPAGE",
+    "perfer_core_arch_id": "a03c",
+    "aicpu_id_offset": "0"
+   },
+   "prefill": 19.544,
+   "decode": 2.818,
+   "tcm_lines": [
+    "CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2"
+   ],
+   "error_tail": [],
+   "prefill_vs_base_pct": 0.0
+  },
+  {
+   "tag": "B-all8-preferred",
+   "env": {
+    "SPACEMIT_PERFER_CORE_ID": "0,1,2,3,4,5,6,7"
+   },
+   "banner": "",
+   "parsed": {},
+   "prefill": null,
+   "decode": null,
+   "tcm_lines": [],
+   "error_tail": [
+    "libggml-cpu.so.0(+0xba610)[0x3fb153a610]",
+    "libggml-cpu.so.0(+0xb8ee)[0x3fb148b8ee]",
+    "/lib/ld-linux-riscv64-lp64d.so.1(+0x3df2)[0x3fb1e78df2]",
+    "/lib/ld-linux-riscv64-lp64d.so.1(+0x3eb8)[0x3fb1e78eb8]",
+    "/lib/ld-linux-riscv64-lp64d.so.1(+0x10f22)[0x3fb1e85f22]",
+    "timeout: 被监视的命令已核心转储"
+   ]
+  },
+  {
+   "tag": "C-mem-posix",
+   "env": {
+    "SPACEMIT_MEM_BACKEND": "POSIX"
+   },
+   "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: POSIX, cpu_mask: f, aicpu_id_offset: 0",
+   "parsed": {
+    "num_cores": "8",
+    "num_perfer_cores": "4",
+    "use_ime1": "1",
+    "use_ime2": "0",
+    "mem_backend": "POSIX",
+    "perfer_core_arch_id": "a03c",
+    "aicpu_id_offset": "0"
+   },
+   "prefill": 19.308,
+   "decode": 2.823,
+   "tcm_lines": [
+    "CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2"
+   ],
+   "error_tail": [],
+   "prefill_vs_base_pct": -1.21
+  },
+  {
+   "tag": "D-disable-tcm",
+   "env": {
+    "SPACEMIT_DISABLE_TCM": "1"
+   },
+   "banner": "CPU_RISCV64_SPACEMIT: num_cores: 8, num_perfer_cores: 4, perfer_core_arch_id: a03c, exclude_main_thread: 0, use_ime1: 1, use_ime2: 0, mem_backend: HPAGE, cpu_mask: f, aicpu_id_offset: 0",
+   "parsed": {
+    "num_cores": "8",
+    "num_perfer_cores": "4",
+    "use_ime1": "1",
+    "use_ime2": "0",
+    "mem_backend": "HPAGE",
+    "perfer_core_arch_id": "a03c",
+    "aicpu_id_offset": "0"
+   },
+   "prefill": 19.144,
+   "decode": 2.821,
+   "tcm_lines": [
+    "CPU_RISCV64_SPACEMIT: alloc_chunk: open(/dev/tcm_sync_mem) failed, errno=2"
+   ],
+   "error_tail": [],
+   "prefill_vs_base_pct": -2.05
+  },
+  {
+   "tag": "E-bcd-combined",
+   "env": {
+    "SPACEMIT_PERFER_CORE_ID": "0,1,2,3,4,5,6,7",
+    "SPACEMIT_MEM_BACKEND": "POSIX",
+    "SPACEMIT_DISABLE_TCM": "1"
+   },
+   "banner": "",
+   "parsed": {},
+   "prefill": null,
+   "decode": null,
+   "tcm_lines": [],
+   "error_tail": [
+    "libggml-cpu.so.0(+0xba610)[0x3f8ee91610]",
+    "libggml-cpu.so.0(+0xb8ee)[0x3f8ede28ee]",
+    "/lib/ld-linux-riscv64-lp64d.so.1(+0x3df2)[0x3f8efd3df2]",
+    "/lib/ld-linux-riscv64-lp64d.so.1(+0x3eb8)[0x3f8efd3eb8]",
+    "/lib/ld-linux-riscv64-lp64d.so.1(+0x10f22)[0x3f8efe0f22]",
+    "timeout: 被监视的命令已核心转储"
+   ]
+  },
+  {
+   "tag": "F-cluster1-only",
+   "env": {
+    "SPACEMIT_PERFER_CORE_ID": "4,5,6,7"
+   },
+   "banner": "",
+   "parsed": {},
+   "prefill": null,
+   "decode": null,
+   "tcm_lines": [],
+   "error_tail": [
+    "libggml-cpu.so.0(+0xba610)[0x3fa373a610]",
+    "libggml-cpu.so.0(+0xb8ee)[0x3fa368b8ee]",
+    "/lib/ld-linux-riscv64-lp64d.so.1(+0x3df2)[0x3fa4098df2]",
+    "/lib/ld-linux-riscv64-lp64d.so.1(+0x3eb8)[0x3fa4098eb8]",
+    "/lib/ld-linux-riscv64-lp64d.so.1(+0x10f22)[0x3fa40a5f22]",
+    "timeout: 被监视的命令已核心转储"
+   ]
+  }
+ ],
+ "conclusion": {
+  "ime2_ever_on": false,
+  "best_arm": "A-baseline",
+  "best_prefill": 19.544,
+  "best_vs_base_pct": 0.0,
+  "verdict": "六个配置都没能打开 IME2；cpu4-7 很可能真的没有 IME 硬件，厂商的 num_perfer_cores=4 是硬件事实而不是配置疏漏"
+ }
+}

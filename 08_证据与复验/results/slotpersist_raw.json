@@ -1,0 +1,30 @@
+{
+ "tokens": 8192,
+ "ctx": 12288,
+ "stages": {
+  "cold": {
+   "prompt_n": 6077,
+   "prompt_ms": 576207.2,
+   "wall_ms": 582339.9
+  },
+  "save": {
+   "ms": 412.6,
+   "bytes": 135635148,
+   "files": [
+    "doc.bin"
+   ],
+   "resp": "{\"id_slot\":0,\"filename\":\"doc.bin\",\"n_saved\":6092,\"n_written\":135635148,\"timings\":{\"save_ms\":407.055}}"
+  },
+  "restore": {
+   "ms": 186.5,
+   "resp": "{\"id_slot\":0,\"filename\":\"doc.bin\",\"n_restored\":6092,\"n_read\":135635148,\"timings\":{\"restore_ms\":183.02}}"
+  },
+  "after_restore": {
+   "prompt_n": 4,
+   "prompt_ms": 907.7,
+   "wall_ms": 7312.3
+  }
+ },
+ "ok": true,
+ "speedup": 634.8
+}

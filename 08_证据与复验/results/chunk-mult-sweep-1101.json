@@ -1,0 +1,228 @@
+{
+ "task": "GGML_CPU_CHUNK_MULT 扫描（chunk16 构建，运行时环境变量）",
+ "date": "2026-11-01",
+ "host": "10.65.21.113",
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "dir": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin",
+  "note": "libggml-cpu.so.0.26.0 sha256 前 16 位；strings 内含 GGML_CPU_CHUNK_MULT，运行时不重编译即生效"
+ },
+ "protocol": "llama-bench -p 512 -n 128 -t 8 -ub 128 -r 3 -fa 0；每倍率 1 次（内部 3 重复）；跑前 pkill -x llama-bench；2b=Qwen3.5-2B-Q4_0-selfmade.gguf，4b=Qwen3.5-4B-Q4_0-selfmade.gguf（两块模型 113 上都在）",
+ "sweep": [
+  {
+   "mult": 4,
+   "model": "2b",
+   "prefill": 22.06911,
+   "prefill_sd": 0.301144,
+   "decode": 3.825954,
+   "decode_sd": 0.165946
+  },
+  {
+   "mult": 8,
+   "model": "2b",
+   "prefill": 25.133277,
+   "prefill_sd": 0.387599,
+   "decode": 4.003455,
+   "decode_sd": 0.116321
+  },
+  {
+   "mult": 12,
+   "model": "2b",
+   "prefill": 25.649023,
+   "prefill_sd": 0.19014,
+   "decode": 4.071564,
+   "decode_sd": 0.09948
+  },
+  {
+   "mult": 16,
+   "model": "2b",
+   "prefill": 26.29029,
+   "prefill_sd": 0.232777,
+   "decode": 4.153453,
+   "decode_sd": 0.019129
+  },
+  {
+   "mult": 24,
+   "model": "2b",
+   "prefill": 25.825682,
+   "prefill_sd": 0.007659,
+   "decode": 4.030859,
+   "decode_sd": 0.192113
+  },
+  {
+   "mult": 32,
+   "model": "2b",
+   "prefill": 25.527758,
+   "prefill_sd": 0.539762,
+   "decode": 3.800128,
+   "decode_sd": 0.006862
+  },
+  {
+   "mult": 48,
+   "model": "2b",
+   "prefill": 25.429581,
+   "prefill_sd": 0.317295,
+   "decode": 3.753453,
+   "decode_sd": 0.033402
+  },
+  {
+   "mult": 4,
+   "model": "4b",
+   "prefill": 7.390108,
+   "prefill_sd": 0.02208,
+   "decode": 1.71111,
+   "decode_sd": 0.01043
+  },
+  {
+   "mult": 8,
+   "model": "4b",
+   "prefill": 8.722597,
+   "prefill_sd": 0.023454,
+   "decode": 1.72113,
+   "decode_sd": 0.000756
+  },
+  {
+   "mult": 12,
+   "model": "4b",
+   "prefill": 9.641778,
+   "prefill_sd": 0.033922,
+   "decode": 1.701438,
+   "decode_sd": 0.021286
+  },
+  {
+   "mult": 16,
+   "model": "4b",
+   "prefill": 10.221611,
+   "prefill_sd": 0.170615,
+   "decode": 1.71124,
+   "decode_sd": 0.007257
+  },
+  {
+   "mult": 24,
+   "model": "4b",
+   "prefill": 10.328309,
+   "prefill_sd": 0.018517,
+   "decode": 1.719761,
+   "decode_sd": 0.004805
+  },
+  {
+   "mult": 32,
+   "model": "4b",
+   "prefill": 10.376942,
+   "prefill_sd": 0.091994,
+   "decode": 1.729231,
+   "decode_sd": 0.002603
+  },
+  {
+   "mult": 48,
+   "model": "4b",
+   "prefill": 10.419122,
+   "prefill_sd": 0.050967,
+   "decode": 1.600932,
+   "decode_sd": 0.178537
+  }
+ ],
+ "best": {
+  "model": "2b",
+  "mult": 16,
+  "prefill": 26.29029,
+  "prefill_sd": 0.232777,
+  "gain_vs_16_pct": 0.0
+ },
+ "best_4b": {
+  "model": "4b",
+  "mult": 48,
+  "prefill": 10.419122,
+  "prefill_sd": 0.050967,
+  "gain_vs_16_pct": 1.93
+ },
+ "probe_outside_range": {
+  "model": "4b",
+  "mult": 64,
+  "prefill": 10.473212,
+  "prefill_sd": 0.037785,
+  "gain_vs_16_pct": 2.46
+ },
+ "ppl_check": {
+  "16": 38.52,
+  "best": 38.52,
+  "best_mult": 24,
+  "ppl_sd": {
+   "16": 2.60713,
+   "best": 2.60713
+  },
+  "chunks": 9,
+  "chunks_requested": 20,
+  "chunks_identical": true,
+  "per_chunk": [
+   27.744,
+   30.7519,
+   32.3,
+   34.325,
+   35.8745,
+   39.2283,
+   37.2214,
+   37.7694,
+   38.52
+  ],
+  "corpus": "/tmp/corpus.txt（板上副本，源 /home/bianbu/ppl-corpus-outhead-zh.txt；指定的 /home/bianbu/labdeploy/ppl-corpus-zh.txt 与 /tmp/corpus.txt 原本都不存在）；语料只有 7724 字符 → --chunks 20 实际只够 9 个 chunk",
+  "protocol": "llama-perplexity -m 2B -f /tmp/corpus.txt -c 512 --chunks 20 -t 8 -fa 0",
+  "note": "最优倍率就是 16（默认），故数值检查取 16 与次优 24：PPL(16)=38.52 vs PPL(24)=38.52，差 +0.0000；9 个 chunk 的 PPL 逐位相同 → 倍率只改循环顺序"
+ },
+ "recheck": [
+  {
+   "mult": 24,
+   "model": "2b",
+   "prefill": 25.102235,
+   "prefill_sd": 0.270927,
+   "decode": 4.011124,
+   "decode_sd": 0.186236
+  },
+  {
+   "mult": 16,
+   "model": "2b",
+   "prefill": 26.163026,
+   "prefill_sd": 0.135673,
+   "decode": 4.141872,
+   "decode_sd": 0.064889
+  },
+  {
+   "mult": 4,
+   "model": "2b",
+   "prefill": 21.688167,
+   "prefill_sd": 0.609007,
+   "decode": 3.920345,
+   "decode_sd": 0.118321
+  },
+  {
+   "mult": 48,
+   "model": "4b",
+   "prefill": 6.996486,
+   "prefill_sd": 6.066678,
+   "decode": 1.726858,
+   "decode_sd": 0.013203,
+   "valid": false,
+   "why": "板端时钟在本次运行中跳变（NTP 校时 2025-09-26 → 2026-11-01T02:41），3 次重复中至少 1 次计时被污染：prefill sd=6.07（正常 ~0.05），该格作废；48 的可用值取主扫那一格"
+  },
+  {
+   "mult": 64,
+   "model": "4b",
+   "prefill": 10.473212,
+   "prefill_sd": 0.037785,
+   "decode": 1.729676,
+   "decode_sd": 0.004014
+  }
+ ],
+ "notes": [
+  "2b: 16 就是峰（26.290 t/s）；24/32/48 全部低于 16，最好的一格也只到 -1.77% —— chunk16 之后**没有**更优点，默认 16 已是最优",
+  "4b: 16 不是峰，16→48 仍 +1.93%（10.222→10.419 t/s），但 24→48 仅 +0.88%：是平台不是悬崖，默认 16 离最优不远",
+  "2b: 4→16 = +19.1%（本次复现），与交接里 +20.8% 吻合",
+  "4b: 4→16 = +38.3%（本次复现），与交接里 +36.7% 吻合",
+  "PPL：16 与 24 完全相同（38.52，9 chunks 逐位一致），±2.60713 是 chunk 间方差不是倍率差异 —— 数值没有肉眼可见变化",
+  "2b decode 全扫区间 3.753~4.153 t/s（10.7%），与 prefill 同峰同谷；倒序复跑（24→16→4）仍是 4: 3.920、16: 4.142、24: 4.011 —— decode 不是完全不变，但 4→16 只有 +8.6%/+5.7%（首轮/复跑），约为 prefill +19%/+21% 的 1/3~1/2，量级远小于 prefill；两轮顺序相反结论一致，所以不是顺序/热漂移",
+  "4b 补点（协议外）mult=64：10.473 t/s，比主扫 48 的 10.419 再 +0.52%，比 16 高 +2.46% —— 48~64 是平台，4B 若要继续挖需扫 64/96/128"
+ ],
+ "failures": [
+  "4b recheck mult=48: 板端时钟在本次运行中跳变（NTP 校时 2025-09-26 → 2026-11-01T02:41），3 次重复中至少 1 次计时被污染：prefill sd=6.07（正常 ~0.05），该格作废；48 的可用值取主扫那一格"
+ ]
+}

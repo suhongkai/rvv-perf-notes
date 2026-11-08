@@ -1,0 +1,28 @@
+{
+ "task": "FlashAttention 在 8K 长上下文下是否翻正（全项目一直固定 -fa 0，从未在长上下文下单独验过）",
+ "date": "2026-11-01",
+ "host": "10.65.21.121",
+ "build": {"bin": "~/c16/bin", "lib16": "4436a9f45bcc298b"},
+ "model": {"file": "Qwen3.5-2B-Q4_0-selfmade.gguf", "bytes": 1202487136},
+ "protocol": "llama-bench -p 0 -n 32 -d 8192 -t 7 -fa <0|1> -r 1 -o json；同板连续两格，跑前 pkill",
+ "motivation": "8K 深度下每 token 实测耗时远高于带宽下限（权重 1.2025 GB + KV ~0.20 GB，按峰值 8.17 GB/s 应为 ~172 ms）。假设：长上下文的额外开销来自未启用 FlashAttention，而本项目所有历史测量都固定 -fa 0，从未在长上下文下单独验证 FA。",
+ "cells": [
+  {"fa": 0, "depth": 8192, "n_gen": 32, "decode_tps": 3.276, "ms_per_token": 305.3,
+   "effective_bandwidth_gbs": 4.60, "pct_of_peak_8p17": 56.3},
+  {"fa": 1, "depth": 8192, "n_gen": 32, "decode_tps": 2.606, "ms_per_token": 383.7,
+   "effective_bandwidth_gbs": 3.66, "pct_of_peak_8p17": 44.8}
+ ],
+ "delta_pct": -20.45,
+ "verdict": "FA 在 8K 下仍然是负收益（−20.45%）→ 「长上下文衰减改不了」不是因为我们忘了开 FA，是这个实现在这块芯片上确实更慢。",
+ "correction": "本实验同时纠正了一个长期引用的数字：8K 深度的 decode 在 `-p 0 -n 32 -d 8192` 协议下是 **3.276 t/s（305 ms/token）**，不是材料里一直用的 2.37 t/s（那个数来自 C59 的另一套协议：`-p 0 -n 64 -d 8192`，n 更大且可能含不同的 warmup）。两者不可混用，今后引用需注明协议。",
+ "budget_check": {
+  "weights_gb": 1.2025,
+  "kv_gb_at_8k": 0.201,
+  "total_gb": 1.4035,
+  "bandwidth_floor_ms": 171.8,
+  "measured_ms_fa0": 305.3,
+  "unexplained_ms": 133.5,
+  "note": "剩余 133 ms 与 attention 计算、KV 随机访问、L2 竞争有关；有效带宽从 depth=0 的 64% 降到 8K 的 56%，属渐变而非结构性 bug。"
+ },
+ "failures": []
+}

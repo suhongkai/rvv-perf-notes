@@ -1,0 +1,104 @@
+{
+ "task": "8 板预填（chunk16）· 逐板构建与模型指纹验证版",
+ "date": "2026-11-01",
+ "purpose": "替换 10-29 那次 fleet：那一次 7/8 板的 lib_sha16 被 tar 告警覆盖，构建身份只被 1 块板证明（严格评委 2026-11-01 指出）",
+ "protocol": "llama-bench -p 512 -n 128 -t 8 -ub 128 -r 3 -fa 0；每板跑前校验 lib sha16 与模型字节数",
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "tarball": "llama-bin-chunk16-4436a9f4.tar.gz",
+  "srv": "http://10.63.3.2:8899"
+ },
+ "model": {
+  "file": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+  "bytes": 1202487136
+ },
+ "boards": [
+  {
+   "host": "10.65.21.112",
+   "ok": true,
+   "bin": "~/chunk16-build/bin",
+   "lib16": "4436a9f45bcc298b",
+   "model_bytes": 1202487136,
+   "prefill": 25.386,
+   "decode": 3.797
+  },
+  {
+   "host": "10.65.21.114",
+   "ok": true,
+   "bin": "~/c16/bin",
+   "lib16": "4436a9f45bcc298b",
+   "model_bytes": 1202487136,
+   "prefill": 24.831,
+   "decode": 3.748
+  },
+  {
+   "host": "10.65.21.115",
+   "ok": true,
+   "bin": "~/c16/bin",
+   "lib16": "4436a9f45bcc298b",
+   "model_bytes": 1202487136,
+   "prefill": 25.915,
+   "decode": 3.706
+  },
+  {
+   "host": "10.65.21.116",
+   "ok": true,
+   "bin": "~/c16/bin",
+   "lib16": "4436a9f45bcc298b",
+   "model_bytes": 1202487136,
+   "prefill": 25.201,
+   "decode": 3.774
+  },
+  {
+   "host": "10.65.21.117",
+   "ok": true,
+   "bin": "~/c16/bin",
+   "lib16": "4436a9f45bcc298b",
+   "model_bytes": 1202487136,
+   "prefill": 25.899,
+   "decode": 4.114
+  },
+  {
+   "host": "10.65.21.118",
+   "ok": true,
+   "bin": "~/c16/bin",
+   "lib16": "4436a9f45bcc298b",
+   "model_bytes": 1202487136,
+   "prefill": 25.429,
+   "decode": 3.748
+  },
+  {
+   "host": "10.65.21.119",
+   "ok": true,
+   "bin": "~/c16/bin",
+   "lib16": "4436a9f45bcc298b",
+   "model_bytes": 1202487136,
+   "prefill": 25.168,
+   "decode": 3.764
+  },
+  {
+   "host": "10.65.21.120",
+   "ok": true,
+   "bin": "~/c16/bin",
+   "lib16": "4436a9f45bcc298b",
+   "model_bytes": 1202487136,
+   "prefill": 24.966,
+   "decode": 3.798
+  }
+ ],
+ "aggregate": {
+  "boards_ok": 8,
+  "boards_planned": 8,
+  "prefill_median": 25.294,
+  "prefill_min": 24.831,
+  "prefill_max": 25.915,
+  "decode_median": 3.769,
+  "lib16_all_same": true,
+  "model_bytes_all_same": true,
+  "prefill_iqr": [
+   25.117,
+   25.546
+  ]
+ },
+ "failures": []
+}

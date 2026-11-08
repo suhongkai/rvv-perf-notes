@@ -1,0 +1,824 @@
+{
+ "task": "n-gram 投机：提示类型 × draft 参数",
+ "date": "2026-11-01",
+ "host": "10.65.21.118",
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "dir": "/home/bianbu/c16/bin",
+  "lib_file": "/home/bianbu/c16/bin/libggml-cpu.so.0.26.0",
+  "server_help": "--spec-ngram-mod-n-max 默认 64、--spec-ngram-mod-n-min 默认 48、--spec-ngram-mod-n-match 默认 24"
+ },
+ "model": {
+  "file": "~/labdeploy/models/Qwen3.5-2B-Q4_0-selfmade.gguf",
+  "bytes": 1202487136
+ },
+ "prompts": [
+  {
+   "kind": "general",
+   "file": "06_素材库/src/ngram-prompt-general-1101.txt",
+   "sha256_16": "dbc343e5b02f6afe",
+   "tokens": 448,
+   "note": "3 段非重复中文技术问答（泵故障征兆/边缘推理/量化），续写为散文"
+  },
+  {
+   "kind": "template",
+   "file": "06_素材库/src/ngram-prompt-template-1101.txt",
+   "sha256_16": "dee05cfcbc37ccd6",
+   "tokens": 862,
+   "note": "24 行工业巡检记录，每行只有设备编号与出口压力数值变化，其余句式逐字重复；每行约 36 token，其中 2 个可变槽位，最长连续固定片段约 26 token"
+  }
+ ],
+ "protocol": "llama-server /completion 原始补全；-n 128、temp=0、seed=0、ignore_eos、cache_prompt=false、-t 7 -tb 8、-c 4096 -np 1；t/s 取 timings.predicted_per_second（仅 decode）。每格 2 次，均为独立冷启动（一个 server 只测一次该提示），取中位；基线 = --spec-type none（同提示，全部 none 运行合并中位，每提示 4 次）。同一 server 内重复同提示会命中上次输出的 n-gram（warm cache），单独列出、不进中位。",
+ "baseline_tps": {
+  "general": {
+   "median": 4.167,
+   "raw": [
+    4.098,
+    4.127,
+    4.218,
+    4.208
+   ],
+   "ms_per_step": 238.4
+  },
+  "template": {
+   "median": 4.048,
+   "raw": [
+    4.037,
+    4.059,
+    4.059,
+    3.918
+   ],
+   "ms_per_step": 247.0
+  }
+ },
+ "cells": [
+  {
+   "prompt": "general",
+   "spec": "none",
+   "n_max": null,
+   "tps": 4.167,
+   "vs_baseline_pct": 0.0,
+   "accepted": null,
+   "drafted": null,
+   "accept_pct": null,
+   "draft_per_step": 0.0,
+   "batch_avg": 1.0,
+   "steps": 512,
+   "ms_per_step": 238.4,
+   "raw": [
+    4.098,
+    4.127,
+    4.218,
+    4.208
+   ],
+   "raw_drafted": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "raw_accepted": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "prompt_n": 448,
+   "gen_tokens": 512,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 200,
+    "len_chars": 200,
+    "head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类字段在量化时"
+   }
+  },
+  {
+   "prompt": "template",
+   "spec": "none",
+   "n_max": null,
+   "tps": 4.048,
+   "vs_baseline_pct": 0.0,
+   "accepted": null,
+   "drafted": null,
+   "accept_pct": null,
+   "draft_per_step": 0.0,
+   "batch_avg": 1.0,
+   "steps": 512,
+   "ms_per_step": 247.0,
+   "raw": [
+    4.037,
+    4.059,
+    4.059,
+    3.918
+   ],
+   "raw_drafted": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "raw_accepted": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "prompt_n": 862,
+   "gen_tokens": 512,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 182,
+    "len_chars": 182,
+    "head": "设备编号：PUMP-25，测点：出口压力，数值：0.85 MPa，状态：正常，处置建议：继续观察。\n设备编号：PUMP-26，测点：出口压力"
+   }
+  },
+  {
+   "prompt": "general",
+   "spec": "ngram-mod",
+   "n_max": 3,
+   "tps": 4.765,
+   "vs_baseline_pct": 14.3,
+   "accepted": 64,
+   "drafted": 64,
+   "accept_pct": 100.0,
+   "draft_per_step": 0.33,
+   "batch_avg": 1.33,
+   "steps": 192,
+   "ms_per_step": 277.6,
+   "raw": [
+    4.787,
+    4.743
+   ],
+   "raw_drafted": [
+    32,
+    32
+   ],
+   "raw_accepted": [
+    32,
+    32
+   ],
+   "prompt_n": 448,
+   "gen_tokens": 256,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 200,
+    "len_chars": 200,
+    "head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类字段在量化时"
+   },
+   "reps": 2,
+   "cold_source": [
+    "grid-first",
+    "cold2"
+   ]
+  },
+  {
+   "prompt": "general",
+   "spec": "ngram-mod",
+   "n_max": 5,
+   "tps": 4.847,
+   "vs_baseline_pct": 16.3,
+   "accepted": 70,
+   "drafted": 70,
+   "accept_pct": 100.0,
+   "draft_per_step": 0.38,
+   "batch_avg": 1.38,
+   "steps": 186,
+   "ms_per_step": 281.7,
+   "raw": [
+    4.86,
+    4.834
+   ],
+   "raw_drafted": [
+    35,
+    35
+   ],
+   "raw_accepted": [
+    35,
+    35
+   ],
+   "prompt_n": 448,
+   "gen_tokens": 256,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 200,
+    "len_chars": 200,
+    "head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类字段在量化时"
+   },
+   "reps": 2,
+   "cold_source": [
+    "grid-first",
+    "cold2"
+   ]
+  },
+  {
+   "prompt": "general",
+   "spec": "ngram-mod",
+   "n_max": 7,
+   "tps": 4.991,
+   "vs_baseline_pct": 19.8,
+   "accepted": 74,
+   "drafted": 74,
+   "accept_pct": 100.0,
+   "draft_per_step": 0.41,
+   "batch_avg": 1.41,
+   "steps": 182,
+   "ms_per_step": 279.6,
+   "raw": [
+    5.008,
+    4.974
+   ],
+   "raw_drafted": [
+    37,
+    37
+   ],
+   "raw_accepted": [
+    37,
+    37
+   ],
+   "prompt_n": 448,
+   "gen_tokens": 256,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 200,
+    "len_chars": 200,
+    "head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类字段在量化时"
+   },
+   "reps": 2,
+   "cold_source": [
+    "grid-first",
+    "cold2"
+   ]
+  },
+  {
+   "prompt": "general",
+   "spec": "ngram-mod",
+   "n_max": 11,
+   "tps": 5.006,
+   "vs_baseline_pct": 20.1,
+   "accepted": 78,
+   "drafted": 78,
+   "accept_pct": 100.0,
+   "draft_per_step": 0.44,
+   "batch_avg": 1.44,
+   "steps": 178,
+   "ms_per_step": 285.1,
+   "raw": [
+    5.047,
+    4.965
+   ],
+   "raw_drafted": [
+    39,
+    39
+   ],
+   "raw_accepted": [
+    39,
+    39
+   ],
+   "prompt_n": 448,
+   "gen_tokens": 256,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 200,
+    "len_chars": 200,
+    "head": "问：量化后，为什么会出现“长数字、单位、专有名词容易写错”的问题？\n答：量化后，量化误差累积在长数字、单位、专有名词上，因为这类字段在量化时"
+   },
+   "reps": 2,
+   "cold_source": [
+    "grid-first",
+    "cold2"
+   ]
+  },
+  {
+   "prompt": "template",
+   "spec": "ngram-mod",
+   "n_max": 3,
+   "tps": 4.263,
+   "vs_baseline_pct": 5.3,
+   "accepted": 56,
+   "drafted": 66,
+   "accept_pct": 84.8,
+   "draft_per_step": 0.33,
+   "batch_avg": 1.33,
+   "steps": 200,
+   "ms_per_step": 298.0,
+   "raw": [
+    4.337,
+    4.189
+   ],
+   "raw_drafted": [
+    33,
+    33
+   ],
+   "raw_accepted": [
+    28,
+    28
+   ],
+   "prompt_n": 862,
+   "gen_tokens": 256,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 182,
+    "len_chars": 182,
+    "head": "设备编号：PUMP-25，测点：出口压力，数值：0.85 MPa，状态：正常，处置建议：继续观察。\n设备编号：PUMP-26，测点：出口压力"
+   },
+   "reps": 2,
+   "cold_source": [
+    "grid-first",
+    "cold2"
+   ]
+  },
+  {
+   "prompt": "template",
+   "spec": "ngram-mod",
+   "n_max": 5,
+   "tps": 4.377,
+   "vs_baseline_pct": 8.1,
+   "accepted": 64,
+   "drafted": 70,
+   "accept_pct": 91.4,
+   "draft_per_step": 0.36,
+   "batch_avg": 1.36,
+   "steps": 192,
+   "ms_per_step": 302.2,
+   "raw": [
+    4.398,
+    4.356
+   ],
+   "raw_drafted": [
+    35,
+    35
+   ],
+   "raw_accepted": [
+    32,
+    32
+   ],
+   "prompt_n": 862,
+   "gen_tokens": 256,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 182,
+    "len_chars": 182,
+    "head": "设备编号：PUMP-25，测点：出口压力，数值：0.85 MPa，状态：正常，处置建议：继续观察。\n设备编号：PUMP-26，测点：出口压力"
+   },
+   "reps": 2,
+   "cold_source": [
+    "grid-first",
+    "cold2"
+   ]
+  },
+  {
+   "prompt": "template",
+   "spec": "ngram-mod",
+   "n_max": 7,
+   "tps": 4.064,
+   "vs_baseline_pct": 0.4,
+   "accepted": 64,
+   "drafted": 98,
+   "accept_pct": 65.3,
+   "draft_per_step": 0.51,
+   "batch_avg": 1.51,
+   "steps": 192,
+   "ms_per_step": 325.5,
+   "raw": [
+    4.047,
+    4.081
+   ],
+   "raw_drafted": [
+    49,
+    49
+   ],
+   "raw_accepted": [
+    32,
+    32
+   ],
+   "prompt_n": 862,
+   "gen_tokens": 256,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 182,
+    "len_chars": 182,
+    "head": "设备编号：PUMP-25，测点：出口压力，数值：0.85 MPa，状态：正常，处置建议：继续观察。\n设备编号：PUMP-26，测点：出口压力"
+   },
+   "reps": 2,
+   "cold_source": [
+    "grid-first",
+    "cold2"
+   ]
+  },
+  {
+   "prompt": "template",
+   "spec": "ngram-mod",
+   "n_max": 11,
+   "tps": 4.122,
+   "vs_baseline_pct": 1.8,
+   "accepted": 70,
+   "drafted": 88,
+   "accept_pct": 79.5,
+   "draft_per_step": 0.47,
+   "batch_avg": 1.47,
+   "steps": 186,
+   "ms_per_step": 331.3,
+   "raw": [
+    4.128,
+    4.116
+   ],
+   "raw_drafted": [
+    44,
+    44
+   ],
+   "raw_accepted": [
+    35,
+    35
+   ],
+   "prompt_n": 862,
+   "gen_tokens": 256,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 182,
+    "len_chars": 182,
+    "head": "设备编号：PUMP-25，测点：出口压力，数值：0.85 MPa，状态：正常，处置建议：继续观察。\n设备编号：PUMP-26，测点：出口压力"
+   },
+   "reps": 2,
+   "cold_source": [
+    "grid-first",
+    "cold2"
+   ]
+  }
+ ],
+ "warm_cache": {
+  "why": "同一 server 内第 2 次同提示请求，ngram 表里已含上一次生成的 token（greedy 输出确定），接受率与 t/s 同步跳升。这不是提示本身的性质，所以主表用冷启动口径。template 的 warm 运行输出仍与基线逐字节一致；general 的 warm 运行输出已漂移（lcp=4，退化成'（重复）'循环），所以 general 的 warm 行只作现象记录。",
+  "rows": [
+   {
+    "prompt": "template",
+    "n_max": 3,
+    "tps": 5.537,
+    "vs_baseline_pct": 36.8,
+    "drafted": 90,
+    "accepted": 83,
+    "accept_pct": 92.2,
+    "note": "同一 llama-server 内第 2 次同提示请求，表里已有上次生成的 n-gram"
+   },
+   {
+    "prompt": "template",
+    "n_max": 5,
+    "tps": 6.057,
+    "vs_baseline_pct": 49.6,
+    "drafted": 100,
+    "accepted": 96,
+    "accept_pct": 96.0,
+    "note": "同一 llama-server 内第 2 次同提示请求，表里已有上次生成的 n-gram"
+   },
+   {
+    "prompt": "template",
+    "n_max": 7,
+    "tps": 6.206,
+    "vs_baseline_pct": 53.3,
+    "drafted": 119,
+    "accepted": 100,
+    "accept_pct": 84.0,
+    "note": "同一 llama-server 内第 2 次同提示请求，表里已有上次生成的 n-gram"
+   },
+   {
+    "prompt": "template",
+    "n_max": 11,
+    "tps": 5.725,
+    "vs_baseline_pct": 41.4,
+    "drafted": 110,
+    "accepted": 99,
+    "accept_pct": 90.0,
+    "note": "同一 llama-server 内第 2 次同提示请求，表里已有上次生成的 n-gram"
+   },
+   {
+    "prompt": "general",
+    "n_max": 3,
+    "tps": 4.38,
+    "vs_baseline_pct": 5.1,
+    "drafted": 22,
+    "accepted": 20,
+    "accept_pct": 90.9,
+    "note": "同一 server 第 2 次 general 请求（ABBA 的第 4 次）"
+   },
+   {
+    "prompt": "general",
+    "n_max": 5,
+    "tps": 4.309,
+    "vs_baseline_pct": 3.4,
+    "drafted": 30,
+    "accepted": 22,
+    "accept_pct": 73.3,
+    "note": "同一 server 第 2 次 general 请求（ABBA 的第 4 次）"
+   },
+   {
+    "prompt": "general",
+    "n_max": 7,
+    "tps": 4.32,
+    "vs_baseline_pct": 3.7,
+    "drafted": 29,
+    "accepted": 23,
+    "accept_pct": 79.3,
+    "note": "同一 server 第 2 次 general 请求（ABBA 的第 4 次）"
+   },
+   {
+    "prompt": "general",
+    "n_max": 11,
+    "tps": 4.235,
+    "vs_baseline_pct": 1.6,
+    "drafted": 38,
+    "accepted": 24,
+    "accept_pct": 63.2,
+    "note": "同一 server 第 2 次 general 请求（ABBA 的第 4 次）"
+   }
+  ]
+ },
+ "n_match_sensitivity": [
+  {
+   "prompt": "template",
+   "spec": "ngram-mod",
+   "n_match": 16,
+   "n_max": 3,
+   "tps": 4.727,
+   "vs_baseline_pct": 16.8,
+   "drafted": 51,
+   "accepted": 49,
+   "accept_pct": 96.1,
+   "batch_avg": 1.65,
+   "ms_per_step": 340.1,
+   "quality": {
+    "identical_to_baseline": true,
+    "lcp_chars": 182,
+    "len_chars": 182,
+    "head": "设备编号：PUMP-25，测点：出口压力，数值：0.85 MPa，状态：正常，处置建议：继续观察。\n设备编号：PUMP-26，测点：出口压力，数值：0.79 MPa，状态：正常，处"
+   },
+   "reps": 1
+  },
+  {
+   "prompt": "template",
+   "spec": "ngram-mod",
+   "n_match": 8,
+   "n_max": 3,
+   "tps": 5.262,
+   "vs_baseline_pct": 30.0,
+   "drafted": 84,
+   "accepted": 75,
+   "accept_pct": 89.3,
+   "batch_avg": 2.58,
+   "ms_per_step": 455.4,
+   "quality": {
+    "identical_to_baseline": false,
+    "lcp_chars": 36,
+    "len_chars": 182,
+    "head": "设备编号：PUMP-25，测点：出口压力，数值：0.85 MPa，状态：重复，处置建议：继续观察。\n设备编号：PUMP-25，测点：出口压力，数值：0.85 MPa，状态：重复，重"
+   },
+   "reps": 1
+  },
+  {
+   "prompt": "template",
+   "spec": "ngram-mod",
+   "n_match": 4,
+   "n_max": 3,
+   "tps": 5.539,
+   "vs_baseline_pct": 36.8,
+   "drafted": 93,
+   "accepted": 84,
+   "accept_pct": 90.3,
+   "batch_avg": 3.11,
+   "ms_per_step": 521.1,
+   "quality": {
+    "identical_to_baseline": false,
+    "lcp_chars": 36,
+    "len_chars": 182,
+    "head": "设备编号：PUMP-25，测点：出口压力，数值：0.85 MPa，状态：重复，处置建议：继续观察。\n设备编号：PUMP-25，测点：出口压力，数值：0.85 MPa，状态：重复，重"
+   },
+   "reps": 1
+  }
+ ],
+ "batch_size_probe": {
+  "why": "主网格里 ngram-mod 的草稿长度由表命中决定（平均 1~3 token），验证批到不了 6/12，无法干净地检验「验证批必须是 4 的倍数」；ngram-map-k4v 的草稿长度 = size_m（确定值），把验证批精确钉在 4/6/8/12 再测每步耗时。",
+  "spec": "ngram-map-k4v, size_n=4, min-hits=1, size_m=3/5/7/11 ⇒ 验证批 = size_m+1",
+  "cells": [
+   {
+    "prompt": "template",
+    "spec": "ngram-map-k4v",
+    "n_max": 3,
+    "size_n": 4,
+    "min_hits": 1,
+    "verif_batch": 4,
+    "tps": 5.568,
+    "vs_baseline_pct": 37.6,
+    "drafted": 146,
+    "accepted": 146,
+    "accept_pct": 100.0,
+    "draft_per_step": 1.33,
+    "steps": 110,
+    "ms_per_step": 414.7,
+    "raw": [
+     5.604,
+     5.533
+    ],
+    "reps": 2,
+    "quality": {
+     "identical_to_baseline": true,
+     "lcp_chars": 182,
+     "len_chars": 182
+    }
+   },
+   {
+    "prompt": "template",
+    "spec": "ngram-map-k4v",
+    "n_max": 5,
+    "size_n": 4,
+    "min_hits": 1,
+    "verif_batch": 6,
+    "tps": 5.575,
+    "vs_baseline_pct": 37.7,
+    "drafted": 142,
+    "accepted": 142,
+    "accept_pct": 100.0,
+    "draft_per_step": 1.25,
+    "steps": 114,
+    "ms_per_step": 399.7,
+    "raw": [
+     5.613,
+     5.536
+    ],
+    "reps": 2,
+    "quality": {
+     "identical_to_baseline": true,
+     "lcp_chars": 182,
+     "len_chars": 182
+    }
+   },
+   {
+    "prompt": "template",
+    "spec": "ngram-map-k4v",
+    "n_max": 7,
+    "size_n": 4,
+    "min_hits": 1,
+    "verif_batch": 8,
+    "tps": 5.843,
+    "vs_baseline_pct": 44.3,
+    "drafted": 142,
+    "accepted": 142,
+    "accept_pct": 100.0,
+    "draft_per_step": 1.25,
+    "steps": 114,
+    "ms_per_step": 381.4,
+    "raw": [
+     5.915,
+     5.771
+    ],
+    "reps": 2,
+    "quality": {
+     "identical_to_baseline": true,
+     "lcp_chars": 182,
+     "len_chars": 182
+    }
+   },
+   {
+    "prompt": "template",
+    "spec": "ngram-map-k4v",
+    "n_max": 11,
+    "size_n": 4,
+    "min_hits": 1,
+    "verif_batch": 12,
+    "tps": 5.015,
+    "vs_baseline_pct": 23.9,
+    "drafted": 90,
+    "accepted": 90,
+    "accept_pct": 100.0,
+    "draft_per_step": 0.54,
+    "steps": 166,
+    "ms_per_step": 305.1,
+    "raw": [
+     4.991,
+     5.039
+    ],
+    "reps": 2,
+    "quality": {
+     "identical_to_baseline": true,
+     "lcp_chars": 182,
+     "len_chars": 182
+    }
+   }
+  ],
+  "rows": [
+   {
+    "verif_batch": 1,
+    "size_m": null,
+    "multiple_of_4": false,
+    "ms_per_step": 247.0,
+    "ms_per_token": 247.0,
+    "cost_x_vs_batch1_total": 1.0,
+    "cost_x_vs_batch1_per_token": 1.0,
+    "tps": 4.048,
+    "vs_baseline_pct": 0.0,
+    "accept_pct": null,
+    "note": "基线（无投机），batch=1"
+   },
+   {
+    "verif_batch": 4,
+    "size_m": 3,
+    "multiple_of_4": true,
+    "ms_per_step": 414.7,
+    "ms_per_token": 103.67,
+    "cost_x_vs_batch1_total": 1.68,
+    "cost_x_vs_batch1_per_token": 0.42,
+    "draft_per_step": 1.33,
+    "tps": 5.568,
+    "vs_baseline_pct": 37.6,
+    "accept_pct": 100.0
+   },
+   {
+    "verif_batch": 6,
+    "size_m": 5,
+    "multiple_of_4": false,
+    "ms_per_step": 399.7,
+    "ms_per_token": 66.62,
+    "cost_x_vs_batch1_total": 1.62,
+    "cost_x_vs_batch1_per_token": 0.27,
+    "draft_per_step": 1.25,
+    "tps": 5.575,
+    "vs_baseline_pct": 37.7,
+    "accept_pct": 100.0
+   },
+   {
+    "verif_batch": 8,
+    "size_m": 7,
+    "multiple_of_4": true,
+    "ms_per_step": 381.4,
+    "ms_per_token": 47.67,
+    "cost_x_vs_batch1_total": 1.54,
+    "cost_x_vs_batch1_per_token": 0.19,
+    "draft_per_step": 1.25,
+    "tps": 5.843,
+    "vs_baseline_pct": 44.3,
+    "accept_pct": 100.0
+   },
+   {
+    "verif_batch": 12,
+    "size_m": 11,
+    "multiple_of_4": true,
+    "ms_per_step": 305.1,
+    "ms_per_token": 25.43,
+    "cost_x_vs_batch1_total": 1.24,
+    "cost_x_vs_batch1_per_token": 0.1,
+    "draft_per_step": 0.54,
+    "tps": 5.015,
+    "vs_baseline_pct": 23.9,
+    "accept_pct": 100.0
+   }
+  ],
+  "verdict": "不支持",
+  "detail": "每 token 成本：batch4=103.67 ms、batch6=66.62 ms、batch8=47.67 ms；batch6 / mean(4,8) = 0.880；每步总耗时 4→6→8 为 414.7/399.7/381.4 ms（batch1 基线 247.0 ms）",
+  "caveat": "size_m=11 这一档实际草稿率只有 0.54 个/步（很多步根本没草稿），batch=12 只是名义值，不参与判定；判定用 4/6/8 三档（每档草稿满长度、100% 接受）。表里 draft_per_step 是『草稿数/步』；真正起草的步每步贡献 size_m 个草稿（如 size_m=3 时 73 个草稿 = 24 个起草步 × 3 + 1）。"
+ },
+ "noise_floor_pct": "±3.5%：同协议 baseline 4 次 template 为 3.918~4.059（−3.5%~+0.3%），因此 template n_max=7/11 的 +0.4%/+1.8% 视为噪声内，不算真收益。",
+ "default_config_probe": {
+  "why": "构建默认 --spec-ngram-mod-n-max=64 / n-min=48 / n-match=24，不显式覆盖就在这个默认格上跑。用它解释旧 -24.2% 是怎么来的。",
+  "cells": [
+   {
+    "prompt": "template",
+    "spec": "ngram-mod",
+    "n_max": 64,
+    "tps": 2.651,
+    "vs_baseline_pct": -34.5,
+    "drafted": 430,
+    "accepted": 70,
+    "accept_pct": 16.3,
+    "ms_per_step": 515.2,
+    "raw": [
+     2.645,
+     2.657
+    ],
+    "quality": {
+     "identical_to_baseline": true
+    }
+   }
+  ]
+ },
+ "notes": {
+  "n_max_default_trap": "构建默认 --spec-ngram-mod-n-max=64 / n-min=48，即每步验证 65 token，和旧 -24% 的 ngram-simple size_m=48 是同一类参数落错格。同一 template 提示，默认格 2.651 t/s（-34.5%），显式 n_max=3/5 则转正。",
+  "n_min_check": "p4 预实验：n_min=0 与 n_min=48 在 template 上结果逐位相同（draft=6, acc=4），说明本构建 ngram-mod 路径上 n_min 未改变行为，故未显式覆盖。",
+  "n_match": "主网格固定 --spec-ngram-mod-n-match 24（构建默认）；<16 会触发构建自带告警，且 B 阶段实测输出被污染（见 n_match_sensitivity.quality）。",
+  "why_general_beats_template": "general 的 n-gram 草稿都是 1 token 且 100% 接受（模型续写会复述提示里的Q&A 固定句式），拒绝次数为 0；template 的草稿被两个可变槽位打断，n_max 越大被拒越多（65~91% 接受），每次拒绝都要回滚，吃掉的收益比省下的还多。",
+  "lossless": "除 n_match=8/4 与 general 的 warm 运行外，所有投机单元输出与基线逐字节一致；但这不能外推成 bitwise 保证——general 的 warm 运行在同一组参数下漂移成了 '（重复）' 循环，说明近 tie 处批内 GEMM 的数值差异足以翻转 greedy 选择。"
+ },
+ "failures": [],
+ "verdict": {
+  "best": "general + ngram-mod n_max=11: 5.006 t/s (+20.1%)",
+  "is_any_positive": true,
+  "positive_cells": [
+   "general n_max=3 +14.3%",
+   "general n_max=5 +16.3%",
+   "general n_max=7 +19.8%",
+   "general n_max=11 +20.1%",
+   "template n_max=3 +5.3%",
+   "template n_max=5 +8.1%",
+   "template n_max=7 +0.4%",
+   "template n_max=11 +1.8%"
+  ],
+  "best_overall": "ngram-map-k4v size_m=7: 5.843 t/s (+44.3%)，接受率 100.0%，输出与基线一致",
+  "four_multiple_theory": "不支持",
+  "conclusion": "让 n-gram 投机转正的不是「提示词重复」本身，而是「草稿几乎全被接受 + 验证批 ≤8」：ngram-mod 在通用问答上就有 +14~20%（草稿 100% 接受），工业模板只有 +5~8%，n_max≥7 掉回 0 附近；把查表长度压到 4（map-k4v）后模板上 100% 接受、+37~44%，而 n_match<16 的 ngram-mod 虽快 30%+ 却写坏输出；构建默认 n_max=64 是 -34.5%，旧 -24.2% 就是这一格，不是提示词选错了。"
+ }
+}

@@ -1,0 +1,357 @@
+{
+ "task": "authoritative-ab",
+ "host": "10.65.21.115",
+ "when": "2026-10-28 17:15:04",
+ "cells": [
+  {
+   "model": "2B-Q4_0",
+   "variant": "A_baseline",
+   "round": 1,
+   "cfg": {
+    "p": 128,
+    "n": 128,
+    "t": 4,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp128+tg128 t4"
+   },
+   "prefill": 7.663489,
+   "decode": 2.901467,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 128,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:03:57Z\",\n    \"avg_ns\": 16702575695,\n    \"stddev_ns\": 1751021,\n    \"avg_ts\": 7.663489,\n    \"stddev_ts\": 0.000799,\n    \"samples_ns\": [ 16701344300, 16703807091 ],\n    \"samples_ts\": [ 7.66405, 7.66292 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:04:47Z\",\n    \"avg_ns\": 44115619979,\n    \"stddev_ns\": 31920771,\n    \"avg_ts\": 2.901467,\n    \"stddev_ts\": 0.002099,\n    \"samples_ns\": [ 44093049563, 44138190396 ],\n    \"samples_ts\": [ 2.90295, 2.89998 ]\n  }\n]"
+  },
+  {
+   "model": "2B-Q4_0",
+   "variant": "B_optimized",
+   "round": 1,
+   "cfg": {
+    "p": 128,
+    "n": 128,
+    "t": 4,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp128+tg128 t4"
+   },
+   "prefill": 9.090653,
+   "decode": 3.071285,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 128,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:06:32Z\",\n    \"avg_ns\": 14080417548,\n    \"stddev_ns\": 23838279,\n    \"avg_ts\": 9.090653,\n    \"stddev_ts\": 0.015390,\n    \"samples_ns\": [ 14063561757, 14097273340 ],\n    \"samples_ts\": [ 9.10154, 9.07977 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:07:14Z\",\n    \"avg_ns\": 41676371290,\n    \"stddev_ns\": 15724020,\n    \"avg_ts\": 3.071285,\n    \"stddev_ts\": 0.001159,\n    \"samples_ns\": [ 41687487978, 41665254603 ],\n    \"samples_ts\": [ 3.07047, 3.0721 ]\n  }\n]"
+  },
+  {
+   "model": "2B-Q4_0",
+   "variant": "B_optimized",
+   "round": 2,
+   "cfg": {
+    "p": 128,
+    "n": 128,
+    "t": 4,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp128+tg128 t4"
+   },
+   "prefill": 9.122128,
+   "decode": 3.065941,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 128,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:08:53Z\",\n    \"avg_ns\": 14031838194,\n    \"stddev_ns\": 26545878,\n    \"avg_ts\": 9.122128,\n    \"stddev_ts\": 0.017258,\n    \"samples_ns\": [ 14013067423, 14050608965 ],\n    \"samples_ts\": [ 9.13433, 9.10993 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:09:36Z\",\n    \"avg_ns\": 41750053186,\n    \"stddev_ns\": 295154525,\n    \"avg_ts\": 3.065941,\n    \"stddev_ts\": 0.021675,\n    \"samples_ns\": [ 41958758853, 41541347520 ],\n    \"samples_ts\": [ 3.05061, 3.08127 ]\n  }\n]"
+  },
+  {
+   "model": "2B-Q4_0",
+   "variant": "A_baseline",
+   "round": 2,
+   "cfg": {
+    "p": 128,
+    "n": 128,
+    "t": 4,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp128+tg128 t4"
+   },
+   "prefill": 7.924518,
+   "decode": 2.994891,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 128,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:11:15Z\",\n    \"avg_ns\": 16152435216,\n    \"stddev_ns\": 32994132,\n    \"avg_ts\": 7.924518,\n    \"stddev_ts\": 0.016187,\n    \"samples_ns\": [ 16175765591, 16129104841 ],\n    \"samples_ts\": [ 7.91307, 7.93596 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:12:04Z\",\n    \"avg_ns\": 42739484833,\n    \"stddev_ns\": 56457439,\n    \"avg_ts\": 2.994891,\n    \"stddev_ts\": 0.003956,\n    \"samples_ns\": [ 42779406271, 42699563395 ],\n    \"samples_ts\": [ 2.99209, 2.99769 ]\n  }\n]"
+  },
+  {
+   "model": "2B-Q4_0",
+   "variant": "A_baseline",
+   "round": 1,
+   "cfg": {
+    "p": 512,
+    "n": 128,
+    "t": 8,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp512+tg128 t8"
+   },
+   "prefill": 12.508849,
+   "decode": 3.4812,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 512,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:13:45Z\",\n    \"avg_ns\": 40931082415,\n    \"stddev_ns\": 69943551,\n    \"avg_ts\": 12.508849,\n    \"stddev_ts\": 0.021375,\n    \"samples_ns\": [ 40980539561, 40881625270 ],\n    \"samples_ts\": [ 12.4937, 12.524 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:15:48Z\",\n    \"avg_ns\": 36769273309,\n    \"stddev_ns\": 157705492,\n    \"avg_ts\": 3.481200,\n    \"stddev_ts\": 0.014931,\n    \"samples_ns\": [ 36880787768, 36657758851 ],\n    \"samples_ts\": [ 3.47064, 3.49176 ]\n  }\n]"
+  },
+  {
+   "model": "2B-Q4_0",
+   "variant": "B_optimized",
+   "round": 1,
+   "cfg": {
+    "p": 512,
+    "n": 128,
+    "t": 8,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp512+tg128 t8"
+   },
+   "prefill": 14.671458,
+   "decode": 3.461534,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 512,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:17:17Z\",\n    \"avg_ns\": 34897690225,\n    \"stddev_ns\": 7341536,\n    \"avg_ts\": 14.671458,\n    \"stddev_ts\": 0.003086,\n    \"samples_ns\": [ 34892498975, 34902881475 ],\n    \"samples_ts\": [ 14.6736, 14.6693 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:19:02Z\",\n    \"avg_ns\": 36978110267,\n    \"stddev_ns\": 145365322,\n    \"avg_ts\": 3.461534,\n    \"stddev_ts\": 0.013608,\n    \"samples_ns\": [ 36875321642, 37080898893 ],\n    \"samples_ts\": [ 3.47116, 3.45191 ]\n  }\n]"
+  },
+  {
+   "model": "2B-Q4_0",
+   "variant": "B_optimized",
+   "round": 2,
+   "cfg": {
+    "p": 512,
+    "n": 128,
+    "t": 8,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp512+tg128 t8"
+   },
+   "prefill": 14.526372,
+   "decode": 3.460599,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 512,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:20:32Z\",\n    \"avg_ns\": 35246243621,\n    \"stddev_ns\": 14830297,\n    \"avg_ts\": 14.526372,\n    \"stddev_ts\": 0.006112,\n    \"samples_ns\": [ 35235757017, 35256730225 ],\n    \"samples_ts\": [ 14.5307, 14.5221 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:22:18Z\",\n    \"avg_ns\": 36988226663,\n    \"stddev_ns\": 174683275,\n    \"avg_ts\": 3.460599,\n    \"stddev_ts\": 0.016343,\n    \"samples_ns\": [ 36864706934, 37111746392 ],\n    \"samples_ts\": [ 3.47216, 3.44904 ]\n  }\n]"
+  },
+  {
+   "model": "2B-Q4_0",
+   "variant": "A_baseline",
+   "round": 2,
+   "cfg": {
+    "p": 512,
+    "n": 128,
+    "t": 8,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp512+tg128 t8"
+   },
+   "prefill": 12.43118,
+   "decode": 3.734513,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 512,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:23:43Z\",\n    \"avg_ns\": 41186957186,\n    \"stddev_ns\": 127888393,\n    \"avg_ts\": 12.431180,\n    \"stddev_ts\": 0.038600,\n    \"samples_ns\": [ 41096526436, 41277387936 ],\n    \"samples_ts\": [ 12.4585, 12.4039 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/Qwen3.5-2B-Q4_0.gguf\",\n    \"model_type\": \"qwen35 2B Q4_0\",\n    \"model_size\": 1203911936,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:25:48Z\",\n    \"avg_ns\": 34278424391,\n    \"stddev_ns\": 492674598,\n    \"avg_ts\": 3.734513,\n    \"stddev_ts\": 0.053675,\n    \"samples_ns\": [ 34626797892, 33930050891 ],\n    \"samples_ts\": [ 3.69656, 3.77247 ]\n  }\n]"
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "variant": "A_baseline",
+   "round": 1,
+   "cfg": {
+    "p": 128,
+    "n": 128,
+    "t": 4,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp128+tg128 t4"
+   },
+   "prefill": 2.777497,
+   "decode": 1.875901,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 128,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:27:34Z\",\n    \"avg_ns\": 46084696230,\n    \"stddev_ns\": 58133782,\n    \"avg_ts\": 2.777497,\n    \"stddev_ts\": 0.003504,\n    \"samples_ns\": [ 46125803022, 46043589438 ],\n    \"samples_ts\": [ 2.77502, 2.77997 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:29:53Z\",\n    \"avg_ns\": 68234079199,\n    \"stddev_ns\": 165221096,\n    \"avg_ts\": 1.875901,\n    \"stddev_ts\": 0.004542,\n    \"samples_ns\": [ 68117250241, 68350908157 ],\n    \"samples_ts\": [ 1.87911, 1.87269 ]\n  }\n]"
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "variant": "B_optimized",
+   "round": 1,
+   "cfg": {
+    "p": 128,
+    "n": 128,
+    "t": 4,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp128+tg128 t4"
+   },
+   "prefill": 11.254226,
+   "decode": 3.470998,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 128,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:32:24Z\",\n    \"avg_ns\": 11373527547,\n    \"stddev_ns\": 22575123,\n    \"avg_ts\": 11.254226,\n    \"stddev_ts\": 0.022338,\n    \"samples_ns\": [ 11357564881, 11389490214 ],\n    \"samples_ts\": [ 11.27, 11.2384 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:32:58Z\",\n    \"avg_ns\": 36877000392,\n    \"stddev_ns\": 1893411,\n    \"avg_ts\": 3.470998,\n    \"stddev_ts\": 0.000176,\n    \"samples_ns\": [ 36875675392, 36878325393 ],\n    \"samples_ts\": [ 3.47112, 3.47087 ]\n  }\n]"
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "variant": "B_optimized",
+   "round": 2,
+   "cfg": {
+    "p": 128,
+    "n": 128,
+    "t": 4,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp128+tg128 t4"
+   },
+   "prefill": 11.325855,
+   "decode": 3.272377,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 128,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:34:26Z\",\n    \"avg_ns\": 11301577109,\n    \"stddev_ns\": 6389919,\n    \"avg_ts\": 11.325855,\n    \"stddev_ts\": 0.006402,\n    \"samples_ns\": [ 11297060005, 11306094214 ],\n    \"samples_ts\": [ 11.3304, 11.3213 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:35:00Z\",\n    \"avg_ns\": 39115297247,\n    \"stddev_ns\": 19143218,\n    \"avg_ts\": 3.272377,\n    \"stddev_ts\": 0.001601,\n    \"samples_ns\": [ 39128832102, 39101762393 ],\n    \"samples_ts\": [ 3.27125, 3.27351 ]\n  }\n]"
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "variant": "A_baseline",
+   "round": 2,
+   "cfg": {
+    "p": 128,
+    "n": 128,
+    "t": 4,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp128+tg128 t4"
+   },
+   "prefill": 2.794759,
+   "decode": 1.919919,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 128,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:36:24Z\",\n    \"avg_ns\": 45800034876,\n    \"stddev_ns\": 44728835,\n    \"avg_ts\": 2.794759,\n    \"stddev_ts\": 0.002729,\n    \"samples_ns\": [ 45768406813, 45831662939 ],\n    \"samples_ts\": [ 2.79669, 2.79283 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 4,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:38:42Z\",\n    \"avg_ns\": 66669466844,\n    \"stddev_ns\": 14093609,\n    \"avg_ts\": 1.919919,\n    \"stddev_ts\": 0.000406,\n    \"samples_ns\": [ 66659501157, 66679432531 ],\n    \"samples_ts\": [ 1.92021, 1.91963 ]\n  }\n]"
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "variant": "A_baseline",
+   "round": 1,
+   "cfg": {
+    "p": 512,
+    "n": 128,
+    "t": 8,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp512+tg128 t8"
+   },
+   "prefill": 5.023512,
+   "decode": 2.968425,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 512,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:41:01Z\",\n    \"avg_ns\": 101920775194,\n    \"stddev_ns\": 90971438,\n    \"avg_ts\": 5.023512,\n    \"stddev_ts\": 0.004484,\n    \"samples_ns\": [ 101985100923, 101856449466 ],\n    \"samples_ts\": [ 5.02034, 5.02668 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:46:07Z\",\n    \"avg_ns\": 43120529812,\n    \"stddev_ns\": 33384396,\n    \"avg_ts\": 2.968425,\n    \"stddev_ts\": 0.002298,\n    \"samples_ns\": [ 43096923479, 43144136145 ],\n    \"samples_ts\": [ 2.97005, 2.9668 ]\n  }\n]"
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "variant": "B_optimized",
+   "round": 1,
+   "cfg": {
+    "p": 512,
+    "n": 128,
+    "t": 8,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp512+tg128 t8"
+   },
+   "prefill": 18.60798,
+   "decode": 3.667955,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 512,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:47:48Z\",\n    \"avg_ns\": 27519543138,\n    \"stddev_ns\": 495802294,\n    \"avg_ts\": 18.607980,\n    \"stddev_ts\": 0.335248,\n    \"samples_ns\": [ 27168958013, 27870128264 ],\n    \"samples_ts\": [ 18.845, 18.3709 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:49:11Z\",\n    \"avg_ns\": 34896830891,\n    \"stddev_ns\": 9973999,\n    \"avg_ts\": 3.667955,\n    \"stddev_ts\": 0.001048,\n    \"samples_ns\": [ 34903881100, 34889780683 ],\n    \"samples_ts\": [ 3.66721, 3.6687 ]\n  }\n]"
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "variant": "B_optimized",
+   "round": 2,
+   "cfg": {
+    "p": 512,
+    "n": 128,
+    "t": 8,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp512+tg128 t8"
+   },
+   "prefill": 17.849869,
+   "decode": 3.624083,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 512,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:50:35Z\",\n    \"avg_ns\": 28700294118,\n    \"stddev_ns\": 976419861,\n    \"avg_ts\": 17.849869,\n    \"stddev_ts\": 0.607275,\n    \"samples_ns\": [ 29390727223, 28009861013 ],\n    \"samples_ts\": [ 17.4205, 18.2793 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:52:01Z\",\n    \"avg_ns\": 35319277475,\n    \"stddev_ns\": 7752267,\n    \"avg_ts\": 3.624083,\n    \"stddev_ts\": 0.000795,\n    \"samples_ns\": [ 35324755934, 35313799017 ],\n    \"samples_ts\": [ 3.62352, 3.62465 ]\n  }\n]"
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "variant": "A_baseline",
+   "round": 2,
+   "cfg": {
+    "p": 512,
+    "n": 128,
+    "t": 8,
+    "ub": 128,
+    "r": 2,
+    "tag": "pp512+tg128 t8"
+   },
+   "prefill": 4.965688,
+   "decode": 2.731008,
+   "raw_bench": "[\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 512,\n    \"n_gen\": 0,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:53:20Z\",\n    \"avg_ns\": 103107575486,\n    \"stddev_ns\": 13680774,\n    \"avg_ts\": 4.965688,\n    \"stddev_ts\": 0.000659,\n    \"samples_ns\": [ 103097907049, 103117243924 ],\n    \"samples_ts\": [ 4.96615, 4.96522 ]\n  },\n  {\n    \"build_commit\": \"unknown\",\n    \"build_number\": 0,\n    \"cpu_info\": \"Spacemit(R) X60\",\n    \"gpu_info\": \"\",\n    \"backends\": \"CPU\",\n    \"model_filename\": \"/home/bianbu/labdeploy/models/SpacemiT-Qwen3.5-2B-Q4_1-official.gguf\",\n    \"model_type\": \"qwen35 2B Q4_1\",\n    \"model_size\": 1277320448,\n    \"model_n_params\": 1881825088,\n    \"n_batch\": 2048,\n    \"n_ubatch\": 128,\n    \"n_threads\": 8,\n    \"cpu_mask\": \"0x0\",\n    \"cpu_strict\": false,\n    \"poll\": 50,\n    \"type_k\": \"f16\",\n    \"type_v\": \"f16\",\n    \"n_gpu_layers\": -1,\n    \"n_cpu_moe\": 0,\n    \"split_mode\": \"layer\",\n    \"main_gpu\": 0,\n    \"no_kv_offload\": false,\n    \"flash_attn\": -1,\n    \"devices\": \"auto\",\n    \"tensor_split\": \"0.00\",\n    \"tensor_buft_overrides\": \"none\",\n    \"load_mode\": \"auto\",\n    \"lazy_mode\": \"auto\",\n    \"embeddings\": false,\n    \"no_op_offload\": 0,\n    \"no_host\": false,\n    \"repack\": true,\n    \"fit_target\": 0,\n    \"fit_min_ctx\": 0,\n    \"n_prompt\": 0,\n    \"n_gen\": 128,\n    \"n_depth\": 0,\n    \"test_time\": \"2026-09-10T07:58:30Z\",\n    \"avg_ns\": 46869299293,\n    \"stddev_ns\": 122939704,\n    \"avg_ts\": 2.731008,\n    \"stddev_ts\": 0.007164,\n    \"samples_ns\": [ 46956230523, 46782368064 ],\n    \"samples_ts\": [ 2.72594, 2.73607 ]\n  }\n]"
+  }
+ ],
+ "builds": {
+  "A_baseline": {
+   "dir": "bin",
+   "libggml_cpu_sha256": "eb79a850972b25c20a7aefab22bf9a33f1e356332281a9d5514859d109d85682",
+   "has_q4_1_kernel": 0
+  },
+  "B_optimized": {
+   "dir": "bin-concat",
+   "libggml_cpu_sha256": "98a9357e31594ca39dc15d2bb84bbb261366448dde285b87d954c7c036ccb8af",
+   "has_q4_1_kernel": 2
+  }
+ },
+ "binaries_sha": {
+  "A_baseline": "eb79a850972b25c20a7aefab22bf9a33f1e356332281a9d5514859d109d85682",
+  "B_optimized": "98a9357e31594ca39dc15d2bb84bbb261366448dde285b87d954c7c036ccb8af"
+ },
+ "models": {
+  "2B-Q4_0": {
+   "file": "Qwen3.5-2B-Q4_0.gguf",
+   "sha256": "cd70221bebaee0503e0f6717e174250cd7825aa88438b3aabec9ad55731d9bb1",
+   "size": 1214873856
+  },
+  "官方-Q4_1-2B": {
+   "file": "SpacemiT-Qwen3.5-2B-Q4_1-official.gguf",
+   "sha256": "c3f64bcb608353fddf41f702190ed00e13afef60ec687df96bb45ab5808b846f",
+   "size": 1288281984
+  }
+ },
+ "summary": [
+  {
+   "model": "2B-Q4_0",
+   "cfg": "pp128+tg128 t4",
+   "metric": "prefill",
+   "a": 7.925,
+   "b": 9.122,
+   "ratio": 1.151
+  },
+  {
+   "model": "2B-Q4_0",
+   "cfg": "pp128+tg128 t4",
+   "metric": "decode",
+   "a": 2.995,
+   "b": 3.071,
+   "ratio": 1.026
+  },
+  {
+   "model": "2B-Q4_0",
+   "cfg": "pp512+tg128 t8",
+   "metric": "prefill",
+   "a": 12.509,
+   "b": 14.671,
+   "ratio": 1.173
+  },
+  {
+   "model": "2B-Q4_0",
+   "cfg": "pp512+tg128 t8",
+   "metric": "decode",
+   "a": 3.735,
+   "b": 3.462,
+   "ratio": 0.927
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "cfg": "pp128+tg128 t4",
+   "metric": "prefill",
+   "a": 2.795,
+   "b": 11.326,
+   "ratio": 4.053
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "cfg": "pp128+tg128 t4",
+   "metric": "decode",
+   "a": 1.92,
+   "b": 3.471,
+   "ratio": 1.808
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "cfg": "pp512+tg128 t8",
+   "metric": "prefill",
+   "a": 5.024,
+   "b": 18.608,
+   "ratio": 3.704
+  },
+  {
+   "model": "官方-Q4_1-2B",
+   "cfg": "pp512+tg128 t8",
+   "metric": "decode",
+   "a": 2.968,
+   "b": 3.668,
+   "ratio": 1.236
+  }
+ ]
+}

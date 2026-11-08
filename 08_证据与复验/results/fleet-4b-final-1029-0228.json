@@ -1,0 +1,247 @@
+{
+ "task": "fleet-final",
+ "generated": "2026-10-29T02:28:06",
+ "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+ "boards": [
+  "10.65.21.125"
+ ],
+ "build": {
+  "bin": "build-final",
+  "libggml_cpu_sha256": "717a8ad8..."
+ },
+ "protocol": [
+  "-p 512 -n 128 -t 8 -ub 128 -r 2 -fa 0",
+  "-p 0 -n 128 -t 7 -ub 128 -r 2 -fa 0"
+ ],
+ "wall_s": 547.2,
+ "aggregate": {
+  "t8_combined.prefill": {
+   "n": 1,
+   "median": 7.46,
+   "min": 7.46,
+   "max": 7.46,
+   "q1": null,
+   "q3": null,
+   "iqr": null,
+   "ci95": [
+    7.46,
+    7.46
+   ],
+   "raw": [
+    7.46
+   ]
+  },
+  "t8_combined.decode": {
+   "n": 1,
+   "median": 1.717,
+   "min": 1.717,
+   "max": 1.717,
+   "q1": null,
+   "q3": null,
+   "iqr": null,
+   "ci95": [
+    1.717,
+    1.717
+   ],
+   "raw": [
+    1.717
+   ]
+  },
+  "t7_gen.decode": {
+   "n": 1,
+   "median": 1.926,
+   "min": 1.926,
+   "max": 1.926,
+   "q1": null,
+   "q3": null,
+   "iqr": null,
+   "ci95": [
+    1.926,
+    1.926
+   ],
+   "raw": [
+    1.926
+   ]
+  }
+ },
+ "per_board": [
+  {
+   "host": "10.65.21.125",
+   "ok": true,
+   "cells": [
+    {
+     "label": "t8_combined",
+     "ok": true,
+     "prefill": 7.460172,
+     "decode": 1.717398,
+     "raw": [
+      {
+       "build_commit": "unknown",
+       "build_number": 0,
+       "cpu_info": "Spacemit(R) X60",
+       "gpu_info": "",
+       "backends": "CPU",
+       "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+       "model_type": "qwen35 4B Q4_0",
+       "model_size": 2532931584,
+       "model_n_params": 4205751296,
+       "n_batch": 2048,
+       "n_ubatch": 128,
+       "n_threads": 8,
+       "cpu_mask": "0x0",
+       "cpu_strict": false,
+       "poll": 50,
+       "type_k": "f16",
+       "type_v": "f16",
+       "n_gpu_layers": -1,
+       "n_cpu_moe": 0,
+       "split_mode": "layer",
+       "main_gpu": 0,
+       "no_kv_offload": false,
+       "flash_attn": 0,
+       "devices": "auto",
+       "tensor_split": "0.00",
+       "tensor_buft_overrides": "none",
+       "load_mode": "auto",
+       "lazy_mode": "auto",
+       "embeddings": false,
+       "no_op_offload": 0,
+       "no_host": false,
+       "repack": true,
+       "fit_target": 0,
+       "fit_min_ctx": 0,
+       "n_prompt": 512,
+       "n_gen": 0,
+       "n_depth": 0,
+       "test_time": "2025-09-23T14:49:18Z",
+       "avg_ns": 68631475408,
+       "stddev_ns": 218199658,
+       "avg_ts": 7.460172,
+       "stddev_ts": 0.023718,
+       "samples_ns": [
+        68785765866,
+        68477184950
+       ],
+       "samples_ts": [
+        7.4434,
+        7.47694
+       ]
+      },
+      {
+       "build_commit": "unknown",
+       "build_number": 0,
+       "cpu_info": "Spacemit(R) X60",
+       "gpu_info": "",
+       "backends": "CPU",
+       "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+       "model_type": "qwen35 4B Q4_0",
+       "model_size": 2532931584,
+       "model_n_params": 4205751296,
+       "n_batch": 2048,
+       "n_ubatch": 128,
+       "n_threads": 8,
+       "cpu_mask": "0x0",
+       "cpu_strict": false,
+       "poll": 50,
+       "type_k": "f16",
+       "type_v": "f16",
+       "n_gpu_layers": -1,
+       "n_cpu_moe": 0,
+       "split_mode": "layer",
+       "main_gpu": 0,
+       "no_kv_offload": false,
+       "flash_attn": 0,
+       "devices": "auto",
+       "tensor_split": "0.00",
+       "tensor_buft_overrides": "none",
+       "load_mode": "auto",
+       "lazy_mode": "auto",
+       "embeddings": false,
+       "no_op_offload": 0,
+       "no_host": false,
+       "repack": true,
+       "fit_target": 0,
+       "fit_min_ctx": 0,
+       "n_prompt": 0,
+       "n_gen": 128,
+       "n_depth": 0,
+       "test_time": "2025-09-23T14:52:43Z",
+       "avg_ns": 74531476952,
+       "stddev_ns": 143475795,
+       "avg_ts": 1.717398,
+       "stddev_ts": 0.003306,
+       "samples_ns": [
+        74632929660,
+        74430024244
+       ],
+       "samples_ts": [
+        1.71506,
+        1.71974
+       ]
+      }
+     ]
+    },
+    {
+     "label": "t7_gen",
+     "ok": true,
+     "prefill": null,
+     "decode": 1.925981,
+     "raw": [
+      {
+       "build_commit": "unknown",
+       "build_number": 0,
+       "cpu_info": "Spacemit(R) X60",
+       "gpu_info": "",
+       "backends": "CPU",
+       "model_filename": "/home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf",
+       "model_type": "qwen35 4B Q4_0",
+       "model_size": 2532931584,
+       "model_n_params": 4205751296,
+       "n_batch": 2048,
+       "n_ubatch": 128,
+       "n_threads": 7,
+       "cpu_mask": "0x0",
+       "cpu_strict": false,
+       "poll": 50,
+       "type_k": "f16",
+       "type_v": "f16",
+       "n_gpu_layers": -1,
+       "n_cpu_moe": 0,
+       "split_mode": "layer",
+       "main_gpu": 0,
+       "no_kv_offload": false,
+       "flash_attn": 0,
+       "devices": "auto",
+       "tensor_split": "0.00",
+       "tensor_buft_overrides": "none",
+       "load_mode": "auto",
+       "lazy_mode": "auto",
+       "embeddings": false,
+       "no_op_offload": 0,
+       "no_host": false,
+       "repack": true,
+       "fit_target": 0,
+       "fit_min_ctx": 0,
+       "n_prompt": 0,
+       "n_gen": 128,
+       "n_depth": 0,
+       "test_time": "2025-09-23T14:55:41Z",
+       "avg_ns": 66459629261,
+       "stddev_ns": 309212,
+       "avg_ts": 1.925981,
+       "stddev_ts": 9e-06,
+       "samples_ns": [
+        66459847907,
+        66459410615
+       ],
+       "samples_ts": [
+        1.92597,
+        1.92599
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,69 @@
+{
+ "task": "长上下文 decode 衰减：拆开 -t7/-t8 与 n=32/n=64 两个口径因素",
+ "date": "2026-11-01",
+ "host": "10.65.21.121",
+ "build": {
+  "bin": "~/c16/bin",
+  "lib16": "4436a9f45bcc298b"
+ },
+ "protocol": "llama-bench -p 0 -n <N> -d <depth> -t <T> -fa 0 -r 1",
+ "why": "材料长期引用「8K 2.37 / 零深度 3.83 = −38%」（-t8 口径），而交付配置 -t7 实测 3.276 / 4.369 = 75% 保留。差 13 个百分点，需查清是线程还是 n 造成。",
+ "cells": [
+  {
+   "tag": "t7",
+   "threads": 7,
+   "depth": 0,
+   "n_gen": 32,
+   "decode": 4.303
+  },
+  {
+   "tag": "t7",
+   "threads": 7,
+   "depth": 2048,
+   "n_gen": 32,
+   "decode": 4.286
+  },
+  {
+   "tag": "t7",
+   "threads": 7,
+   "depth": 4096,
+   "n_gen": 32,
+   "decode": 4.04
+  },
+  {
+   "tag": "t7",
+   "threads": 7,
+   "depth": 8192,
+   "n_gen": 32,
+   "decode": 3.663
+  },
+  {
+   "tag": "t8",
+   "threads": 8,
+   "depth": 0,
+   "n_gen": 32,
+   "decode": 4.109
+  },
+  {
+   "tag": "t8",
+   "threads": 8,
+   "depth": 8192,
+   "n_gen": 32,
+   "decode": 3.643
+  },
+  {
+   "tag": "t7n64",
+   "threads": 7,
+   "depth": 8192,
+   "n_gen": 64,
+   "decode": 3.652
+  }
+ ],
+ "summary": {
+  "t7_retention_pct": 85.1,
+  "t8_retention_pct": 88.7,
+  "t7_n64_at_8k": 3.652,
+  "thread_effect_at_8k_pct": 0.5,
+  "n_effect_at_8k_pct": 0.3
+ }
+}

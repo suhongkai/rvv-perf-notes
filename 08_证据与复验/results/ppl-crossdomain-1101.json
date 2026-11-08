@@ -1,0 +1,102 @@
+{
+ "task": "跨域 PPL（英文手册 + 代码 + 工业日志）",
+ "date": "2026-11-01",
+ "corpus": {
+  "file": "ppl-corpus-crossdomain-1101.txt",
+  "chars": 13820,
+  "bytes": 14608,
+  "sha256_16": "9887c8514d45031c",
+  "parts": "英文技术文档 1/3（llama.cpp docs：build-riscv64-spacemit.md / backend-OPENVINO.md / build.md / backend-SYCL.md，4442 B，去 Markdown 只留自然句） + C++ 源码 1/3（ggml/src/ggml-cpu/spacemit/spine_mem_pool.cpp + spacemit_spert_adapter.cpp，5261 B，仅缩进归一化、保留注释） + 合成工业告警日志 1/3（4901 B，K1 车间时间戳+设备号+告警码+数值+中英处置文本）",
+  "n_chunks_actual": 9,
+  "tokens_approx": 4608
+ },
+ "protocol": "llama-perplexity -c 512 --chunks 20 -t 8 -fa 0（与 C63 同口径、同交付构建 lib 4436a9f4）",
+ "build": {
+  "libggml_cpu_sha16": "4436a9f45bcc298b",
+  "bin": "/home/bianbu/chunk16-build/bin（111 由 06_素材库/bin/llama-bin-chunk16-4436a9f4.tar.gz 部署后校验）"
+ },
+ "corpus_on_boards": "两板同一份 /tmp/crossdomain.txt，sha256 前 16 位 9887c8514d45031c",
+ "runs": {
+  "2b": {
+   "host": "10.65.21.111",
+   "selfmade": {
+    "file": "Qwen3.5-2B-Q4_0-selfmade.gguf",
+    "sha16": "27a683603a6ae716",
+    "bytes": 1202487136,
+    "ppl": 8.4403,
+    "ppl_se": 0.53853,
+    "elapsed_s": 346.5
+   },
+   "unsloth": {
+    "file": "Qwen3.5-2B-Q4_0.gguf",
+    "sha16": "cd70221bebaee050",
+    "bytes": 1214873856,
+    "ppl": 8.5569,
+    "ppl_se": 0.54989,
+    "elapsed_s": 424.9
+   },
+   "delta_pct": -1.36,
+   "delta_abs": -0.1166
+  },
+  "4b": {
+   "host": "10.65.21.112",
+   "selfmade": {
+    "file": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+    "sha16": "36a685821380dd64",
+    "bytes": 2543899168,
+    "ppl": 9.4666,
+    "ppl_se": 0.63279,
+    "elapsed_s": 672.5
+   },
+   "unsloth": {
+    "file": "Qwen3.5-4B-Q4_0.gguf",
+    "sha16": "298fcb5fe7a77ccc",
+    "bytes": 2583221408,
+    "ppl": 8.7743,
+    "ppl_se": 0.57853,
+    "elapsed_s": 978.1
+   },
+   "delta_pct": 7.89,
+   "delta_abs": 0.6923
+  }
+ },
+ "se_analysis": {
+  "2b": {
+   "delta_abs": -0.1166,
+   "se_diff_conservative": 0.77,
+   "z": -0.15,
+   "significant_at_1se": false,
+   "cn_same_domain_pct": 4.06,
+   "vs_cn_pp": -5.42,
+   "larger_than_cn": false,
+   "n_chunks": 9
+  },
+  "4b": {
+   "delta_abs": 0.6923,
+   "se_diff_conservative": 0.857,
+   "z": 0.81,
+   "significant_at_1se": false,
+   "cn_same_domain_pct": 5.56,
+   "vs_cn_pp": 2.33,
+   "larger_than_cn": true,
+   "n_chunks": 9
+  }
+ },
+ "cn_same_domain_reference": {
+  "C63_big_corpus_pct": {
+   "2b": 4.06,
+   "4b": 5.56
+  },
+  "C26_C27_small_corpus_pct": {
+   "2b": 4.44,
+   "4b": 3.53
+  }
+ },
+ "verdict": "2B：跨域 delta = -1.36%（selfmade 8.4403 vs unsloth 8.5569），**比中文同域 +4.06% 更小，且方向相反**（交付模型在跨域语料上 PPL 反而低 0.117）。但 0.117 对应合并 SE 0.77（z=-0.15），远在噪声内——只能说「未测出跨域退化」，**不能说「交付模型跨域更好」**。 4B：跨域 delta = +7.89%（9.4666 vs 8.7743），**比中文同域 +5.56% 更大 2.3 个百分点，方向一致**（交付模型更差）。但差值 0.69 PPL 对应合并 SE 0.86（z=0.81，约 0.8 个标准误）——**未达统计显著**，不能写成「4B 跨域显著退化」。 合起来：跨域退化不是单向放大——2B 在英文/代码/日志上测不出差别，4B 的方向与中文同域一致、幅度略大但仍在 ±1 SE 量级内。另注：跨域语料绝对 PPL（8.4—9.5）远低于中文同域（16.9—20.2），因为英文与代码对 Qwen 更容易；**能横向比的是两模型的相对差，不是 PPL 绝对值**。",
+ "notes": [
+  "素材服务器 http://10.63.3.2:8899 从本地与两板均不可达（curl 超时），模型改由 06_素材库/models/ 经 SFTP 上传，已校验板上 sha256；111 原本没有 chunk16 构建目录，由 06_素材库/bin/llama-bin-chunk16-4436a9f4.tar.gz 部署到 ~/chunk16-build 并核对 lib 指纹。",
+  "语料 14,608 B ≈ 4.6 K token，--chunks 20 实际只跑到 9 个 chunk（C63 中文语料满载 20 个）；命令行完全一致，样本量小 55%，这是语料长度差异，不是口径差异——引用时须连带说明。",
+  "同一块板上两格串行执行，跑前跑后均 pkill -x llama-perplexity；两格之间无其它负载。"
+ ],
+ "failures": []
+}

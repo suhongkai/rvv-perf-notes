@@ -1,0 +1,43 @@
+{
+ "task": "4B/2B 预填稳态 vs 首跑（回应严格评委问题 2）",
+ "date": "2026-11-01",
+ "host": "10.65.21.114",
+ "why": "C75 显示 4B 首 rep 9.83—9.93、2—3 rep 掉到 8.4；claim 用了 8.936（6 rep 均值）。评委问 9.84 是不是首跑冷值、稳态到底多少。",
+ "build": {
+  "bin": "~/c16/bin",
+  "lib16": "4436a9f45bcc298b"
+ },
+ "protocol": "llama-bench -p 512 -n 0 -t 8 -ub 128 -r 8 -fa 0；单次调用内连续 8 轮，按 rep 分段统计（rep1 / rep2-3 / rep4-8 / 全部）",
+ "cells": [
+  {
+   "tag": "4b",
+   "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+   "model_bytes": 2543899168,
+   "raw": [
+    10.235,
+    10.226,
+    9.982,
+    9.928,
+    9.89,
+    9.863,
+    10.091,
+    10.224
+   ],
+   "rep1": 10.235,
+   "rep2_3_median": 10.104,
+   "rep4_8_median": 9.928,
+   "all_median": 10.037,
+   "llama_bench_avg_ts": 10.055
+  }
+ ],
+ "conclusion": {
+  "4b": {
+   "is_first_rep_outlier": false,
+   "first_rep_vs_steady_pct": 3.09,
+   "steady_median": 9.928,
+   "all_median": 10.037,
+   "vs_c61_9_84_pct": 2.03,
+   "verdict": "稳态与 9.84 一致（差 2.0%），9.84 不是首跑特例"
+  }
+ }
+}

@@ -1,0 +1,354 @@
+{
+ "task": "concurrency-4b-chunk16（4B 交付模型 / 8GB 板四路并发，补 C70 的 2B→4B 对照）",
+ "date": "2026-11-01",
+ "host": "10.65.21.118",
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "dir": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin",
+  "srv_argv_np4_48arm": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf -c 8192 -t 7 -tb 8 -np 4 --host 127.0.0.1 --port 8096",
+  "srv_argv_np1_48arm": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf -c 8192 -t 7 -tb 8 -np 1 --host 127.0.0.1 --port 8097",
+  "srv_argv_np4_128arm": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin/llama-server -m /home/bianbu/labdeploy/models/Qwen3.5-4B-Q4_0-selfmade.gguf -c 8192 -t 7 -tb 8 -np 4 --host 127.0.0.1 --port 8096",
+  "note": "chunk16 交付构建，libggml-cpu.so.0.26.0 sha16 = 4436a9f45bcc298b"
+ },
+ "model": {
+  "file": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+  "bytes": 2543899168,
+  "sha256": "36a685821380dd641907fe35d7bbf70dff624d2d86f61ddb9104108d0931c09c",
+  "sha16": "36a685821380dd64",
+  "delivery": "PC→118 raw socket 直传（11.4 MB/s）；板端 sha256sum 与本地一致"
+ },
+ "protocol": "llama-server -np 4 -c 8192 -t 7 -tb 8（串行臂同 argv 改 -np 1），nreq=4，cache_prompt=false，temperature 0 / top_k 1 / ignore_eos，每格 3 次；48-token 臂每路 prompt 64 / npred 48（= C70「与 C19 同 argv」臂）；128-token 臂每路 prompt 512 / npred 128（题面协议），server argv 不变。聚合 t/s = 组内总生成 token / 组墙钟（真并发取最慢请求，串行取 4 请求之和）；单路 t/s = server timings predicted_n/predicted_ms 中位；RSS = VmRSS 峰值（0.25 s 采样）。",
+ "arms": [
+  {
+   "name": "48-token",
+   "np": 4,
+   "npred": 48,
+   "prompt_tokens": 64,
+   "ctx": 8192,
+   "cells": [
+    {
+     "rep": 0,
+     "agg_tps": 2.016,
+     "per_client_tps": 0.726,
+     "rss_mb": 5161.4,
+     "ok": true,
+     "wall_s": 95.22,
+     "total_tokens": 192,
+     "min_memavail_mb": 4268.4,
+     "vmhwm_mb": 5161.4,
+     "majfault_delta": 0,
+     "soc_temp_c": 60.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    },
+    {
+     "rep": 1,
+     "agg_tps": 2.161,
+     "per_client_tps": 0.78,
+     "rss_mb": 5271.8,
+     "ok": true,
+     "wall_s": 88.84,
+     "total_tokens": 192,
+     "min_memavail_mb": 4150.2,
+     "vmhwm_mb": 5271.8,
+     "majfault_delta": 1,
+     "soc_temp_c": 56.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    },
+    {
+     "rep": 2,
+     "agg_tps": 2.027,
+     "per_client_tps": 0.712,
+     "rss_mb": 5272.0,
+     "ok": true,
+     "wall_s": 94.72,
+     "total_tokens": 192,
+     "min_memavail_mb": 4149.2,
+     "vmhwm_mb": 5272.0,
+     "majfault_delta": 0,
+     "soc_temp_c": 58.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    }
+   ],
+   "health": "ok"
+  },
+  {
+   "name": "48-token/serial",
+   "np": 1,
+   "npred": 48,
+   "prompt_tokens": 64,
+   "ctx": 8192,
+   "cells": [
+    {
+     "rep": 0,
+     "agg_tps": 1.541,
+     "per_client_tps": 1.982,
+     "rss_mb": 4825.5,
+     "ok": true,
+     "wall_s": 124.56,
+     "total_tokens": 192,
+     "min_memavail_mb": 4591.9,
+     "vmhwm_mb": 4825.5,
+     "majfault_delta": 4,
+     "soc_temp_c": 60.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    },
+    {
+     "rep": 1,
+     "agg_tps": 1.528,
+     "per_client_tps": 1.974,
+     "rss_mb": 4825.8,
+     "ok": true,
+     "wall_s": 125.67,
+     "total_tokens": 192,
+     "min_memavail_mb": 4592.5,
+     "vmhwm_mb": 4825.8,
+     "majfault_delta": 1,
+     "soc_temp_c": 59.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    },
+    {
+     "rep": 2,
+     "agg_tps": 1.552,
+     "per_client_tps": 1.983,
+     "rss_mb": 4825.9,
+     "ok": true,
+     "wall_s": 123.71,
+     "total_tokens": 192,
+     "min_memavail_mb": 4593.2,
+     "vmhwm_mb": 4825.9,
+     "majfault_delta": 0,
+     "soc_temp_c": 58.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    }
+   ]
+  },
+  {
+   "name": "128-token",
+   "np": 4,
+   "npred": 128,
+   "prompt_tokens": 512,
+   "ctx": 8192,
+   "cells": [
+    {
+     "rep": 0,
+     "agg_tps": 1.241,
+     "per_client_tps": 0.657,
+     "rss_mb": 5190.9,
+     "ok": true,
+     "wall_s": 412.69,
+     "total_tokens": 512,
+     "min_memavail_mb": 4220.4,
+     "vmhwm_mb": 5190.9,
+     "majfault_delta": 103,
+     "soc_temp_c": 56.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    },
+    {
+     "rep": 1,
+     "agg_tps": 1.268,
+     "per_client_tps": 0.657,
+     "rss_mb": 5432.2,
+     "ok": true,
+     "wall_s": 403.69,
+     "total_tokens": 512,
+     "min_memavail_mb": 3983.6,
+     "vmhwm_mb": 5432.2,
+     "majfault_delta": 0,
+     "soc_temp_c": 58.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    },
+    {
+     "rep": 2,
+     "agg_tps": 1.241,
+     "per_client_tps": 0.658,
+     "rss_mb": 5432.3,
+     "ok": true,
+     "wall_s": 412.73,
+     "total_tokens": 512,
+     "min_memavail_mb": 3974.9,
+     "vmhwm_mb": 5432.3,
+     "majfault_delta": 1,
+     "soc_temp_c": 59.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    }
+   ],
+   "health": "ok"
+  },
+  {
+   "name": "128-token/serial",
+   "np": 1,
+   "npred": 128,
+   "prompt_tokens": 512,
+   "ctx": 8192,
+   "cells": [
+    {
+     "rep": 0,
+     "agg_tps": 1.078,
+     "per_client_tps": 1.827,
+     "rss_mb": 4882.9,
+     "ok": true,
+     "wall_s": 474.75,
+     "total_tokens": 512,
+     "min_memavail_mb": 4527.9,
+     "vmhwm_mb": 4882.9,
+     "majfault_delta": 0,
+     "soc_temp_c": 59.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    },
+    {
+     "rep": 1,
+     "agg_tps": 1.084,
+     "per_client_tps": 1.87,
+     "rss_mb": 4883.1,
+     "ok": true,
+     "wall_s": 472.35,
+     "total_tokens": 512,
+     "min_memavail_mb": 4528.0,
+     "vmhwm_mb": 4883.1,
+     "majfault_delta": 0,
+     "soc_temp_c": 59.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    },
+    {
+     "rep": 2,
+     "agg_tps": 1.083,
+     "per_client_tps": 1.857,
+     "rss_mb": 4883.4,
+     "ok": true,
+     "wall_s": 472.87,
+     "total_tokens": 512,
+     "min_memavail_mb": 4534.9,
+     "vmhwm_mb": 4883.4,
+     "majfault_delta": 0,
+     "soc_temp_c": 59.0,
+     "srv_alive": true,
+     "ok_n": 4,
+     "err_n": 0
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "speedup_vs_serial": {
+   "48-token": {
+    "np4_agg_tps": 2.027,
+    "serial_agg_tps": 1.541,
+    "speedup_x": 1.315,
+    "speedup_pct": 31.5
+   },
+   "128-token": {
+    "np4_agg_tps": 1.241,
+    "serial_agg_tps": 1.083,
+    "speedup_x": 1.146,
+    "speedup_pct": 14.6
+   }
+  },
+  "per_client_tps": {
+   "48-token": {
+    "np4": 0.726,
+    "serial": 1.982
+   },
+   "128-token": {
+    "np4": 0.657,
+    "serial": 1.857
+   }
+  },
+  "agg_raw": {
+   "48-token_np4": [
+    2.016,
+    2.161,
+    2.027
+   ],
+   "48-token_np1": [
+    1.541,
+    1.528,
+    1.552
+   ],
+   "128-token_np4": [
+    1.241,
+    1.268,
+    1.241
+   ],
+   "128-token_np1": [
+    1.078,
+    1.084,
+    1.083
+   ]
+  },
+  "rss_peak_mb": 5432.3,
+  "rss_by_arm_np4_median": {
+   "48-token": 5271.8,
+   "128-token": 5432.2
+  },
+  "min_memavail_mb": 3974.9,
+  "oom": false,
+  "notes": "4B 权重 2.54 GB；板 8GB，MemAvailable 最低 3974.9 MB；RSS 峰值 5432.3 MB → 无 OOM；两臂均完成"
+ },
+ "vs_2b_c70": {
+  "source": "08_实验数据/concurrency-8gb-chunk16-1101.json（2B / 122 板 / 同 chunk16 构建）",
+  "2b_48arm": {
+   "np4_agg_tps": 4.307,
+   "serial_agg_tps": 3.472,
+   "speedup_pct": 24.0,
+   "rss_peak_mb": 2324.4
+  },
+  "2b_128arm": {
+   "np4_agg_tps": 5.396,
+   "serial_agg_tps": 3.877,
+   "speedup_pct": 39.2,
+   "rss_peak_mb": 2277.0
+  },
+  "4b_48arm": {
+   "np4_agg_tps": 2.027,
+   "serial_agg_tps": 1.541,
+   "speedup_pct": 31.5,
+   "rss_peak_mb": 5272.0
+  },
+  "4b_128arm": {
+   "np4_agg_tps": 1.241,
+   "serial_agg_tps": 1.083,
+   "speedup_pct": 14.6,
+   "rss_peak_mb": 5432.3
+  }
+ },
+ "cleanup": {
+  "before": "每臂启动前 pkill -x llama-server + sleep 2，pgrep 复核无残留",
+  "after": "驱动 finally terminate → pkill -x llama-server；收数后再 pkill 复核",
+  "board": "10.65.21.118",
+  "not_touched": [
+   "116",
+   "120",
+   "121",
+   "122",
+   "123",
+   "124",
+   "125",
+   "127"
+  ]
+ },
+ "verdict": "48-token 臂：np4 聚合 2.027 t/s vs 串行 1.541 t/s = 1.315×（+31.5%），每路 0.726 t/s；128-token 臂：np4 1.241 t/s vs 串行 1.083 t/s = 1.146×（+14.6%）；RSS 峰值 5432.3 MB，OOM=False",
+ "failures": [],
+ "elapsed_s": 2986.3
+}

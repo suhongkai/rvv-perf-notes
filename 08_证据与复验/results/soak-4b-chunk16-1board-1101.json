@@ -1,0 +1,147 @@
+{
+ "task": "chunk16 交付构建 7 板 × 100 min soak（2B selfmade）",
+ "date": "2026-11-01",
+ "build": {
+  "lib16": "4436a9f45bcc298b",
+  "dir": "/home/bianbu/labdeploy/build/spacemit-llama/chunk16-build/bin"
+ },
+ "model": "Qwen3.5-4B-Q4_0-selfmade.gguf",
+ "protocol": "llama-bench -p 512 -n 128 -t 8 -ub 128 -r 17 -fa 0 -o json（一次调用内部连续 17 轮）；板端每 10 s 采 RSS/温度/频率；本地每 60 s 轮询、连续 3 次 pgrep=0 才判结束",
+ "boards": [
+  {
+   "host": "10.65.21.114",
+   "ok": true,
+   "wall_s": 2287,
+   "lib16": "4436a9f45bcc298b",
+   "prefill": {
+    "median": 9.913,
+    "n_samples": 17,
+    "stddev": 0.153902,
+    "first_half": 9.809,
+    "second_half": 9.904,
+    "drift_pct": 0.97
+   },
+   "decode": {
+    "median": 1.658,
+    "n_samples": 17,
+    "stddev": 0.012745,
+    "first_half": 1.658,
+    "second_half": 1.656,
+    "drift_pct": -0.11
+   },
+   "rss": {
+    "n": 222,
+    "min_mb": 16.1,
+    "max_mb": 4516.8,
+    "range_mb": 4500.7,
+    "warmup_median_mb": 4516.8,
+    "plateau_median_mb": 4489.2,
+    "growth_vs_warmup_mb": -27.6,
+    "series_sampled": [
+     16.1,
+     4510.8,
+     4511.4,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4516.8,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2,
+     4489.2
+    ],
+    "plateau_min_mb": 4489.2,
+    "plateau_max_mb": 4516.8,
+    "plateau_range_mb": 27.6,
+    "note": "raw min 含模型加载前瞬时值；稳态看 plateau_range_mb"
+   },
+   "temp_c": {
+    "max": 54.0,
+    "median": 46.0,
+    "n": 222
+   },
+   "freq_khz": {
+    "min": 1600000,
+    "max": 1600000,
+    "n": 222,
+    "all_at_max": true
+   }
+  }
+ ],
+ "aggregate": {
+  "boards_ok": 1,
+  "boards_planned": 1,
+  "prefill_median_of_boards": 9.913,
+  "prefill_drift_pct": {
+   "min": 0.97,
+   "max": 0.97,
+   "median": 0.97
+  },
+  "decode_median_of_boards": 1.658,
+  "decode_drift_pct": {
+   "min": -0.11,
+   "max": -0.11,
+   "median": -0.11
+  },
+  "rss_range_mb_max": 27.6,
+  "rss_growth_mb_max": 27.6,
+  "swap_nonzero_boards": 0,
+  "freq_all_max": true,
+  "temp_max_c": 54.0,
+  "rss_plateau_range_mb": {
+   "min": 27.6,
+   "max": 27.6,
+   "median": 27.6
+  }
+ },
+ "failures": []
+}

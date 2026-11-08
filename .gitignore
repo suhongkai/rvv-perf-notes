@@ -1,0 +1,5 @@
+*.gguf
+05_模型与测试集/models/*.gguf
+90_内部材料/
+__pycache__/
+*.pyc
