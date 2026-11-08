@@ -78,7 +78,7 @@ python tools/verify_claims.py    # 97 条 claim 逐条重算并校验证据 SHA2
 | 项目 | 说明 | 提交方式 |
 |---|---|---|
 | 模型权重（2B 1.20 GB / 4B 2.54 GB） | 体积超出提交包限制 | 百度网盘 `模型_网盘交付_2026-11-08.7z`：`https://pan.baidu.com/s/1ya0FF80mw-qsCm6SydcUgA?pwd=qcnw` 提取码 `qcnw`；SHA256 见 `05_模型与测试集/05_模型与测试集.md` |
-| GitHub 仓库（可选） | https://github.com/suhongkai/rvv-perf-notes | 内容为提交包的文档/脚本/证据子集（129 文件；不含模型、源码二进制 tar 与内部材料）；公开可浏览，评审可选参考，不依赖仓库 |
+| GitHub 仓库（可选） | https://github.com/suhongkai/rvv-perf-notes | 内容为提交包的文档/脚本/证据子集（不含模型、源码二进制 tar、内部材料与答辩材料）；公开可浏览，评审可选参考，不依赖仓库 |
 
 > 模型权重不随包，从上述网盘链接下载后先核 SHA256（详见 `05_模型与测试集/05_模型与测试集.md` §2）。
 
